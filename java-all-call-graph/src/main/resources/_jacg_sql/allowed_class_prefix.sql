@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_allowed_class_prefix_{appName} (
+CREATE TABLE if not exists allowed_class_prefix_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   class_prefix varchar(500) NOT NULL COMMENT '类名或包名前缀',
   PRIMARY KEY (record_id),

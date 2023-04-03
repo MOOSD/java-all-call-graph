@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_mybatis_ms_write_table_{appName} (
+CREATE TABLE if not exists mybatis_ms_write_table_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   mapper_simple_class_name varchar(500) NOT NULL COMMENT 'MyBatis Mapper唯一类名',
   mapper_method_name varchar(300) NOT NULL COMMENT 'MyBatis Mapper方法名',

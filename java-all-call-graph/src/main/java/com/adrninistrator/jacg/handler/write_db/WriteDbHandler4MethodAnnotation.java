@@ -46,13 +46,9 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     // feign Controller相关信息
     private final List<WriteDbData4FeignClientData> writeDbData4FeignClientList = new ArrayList<>(batchSize);
 
-    // 对应的方法HASH+长度
-    private final Set<String> springControllerMethodHashSet = new HashSet<>();
     // 暂存feign的方法hash
     private final Set<String> feignClientHashSet = new HashSet<>();
 
-    // 有注解的方法HASH+长度
-    private final Set<String> withAnnotationMethodHashSet = new HashSet<>();
 
     @Override
     protected WriteDbData4MethodAnnotation genData(String line) {
@@ -97,7 +93,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         writeDbData4MethodAnnotation.setFullMethod(fullMethod);
         writeDbData4MethodAnnotation.setSimpleClassName(simpleClassName);
         writeDbData4MethodAnnotation.setSpringMappingAnnotation(JavaCGYesNoEnum.parseIntValue(isSpringMappingAnnotation));
-        writeDbData4MethodAnnotation.setIsFeignClient(isFeignClient ? JACGConstants.YES_1 : JACGConstants.NO_0);
+        writeDbData4MethodAnnotation.setIsFeignClient(JavaCGYesNoEnum.parseIntValue(isFeignClient));
         return writeDbData4MethodAnnotation;
     }
 
