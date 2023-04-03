@@ -38,6 +38,7 @@ public class DC {
     public static final String MA_FULL_METHOD = COMMON_FULL_METHOD;
     public static final String MA_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
     public static final String MA_SPRING_MAPPING_ANNOTATION = "spring_mapping_annotation";
+    public static final String MA_IS_FEIGN_CLIENT = "is_feign_client";
 
     public static final String MC_CALL_ID = COMMON_CALL_ID;
     public static final String MC_CALL_TYPE = "call_type";
@@ -168,6 +169,17 @@ public class DC {
     public static final String MAGT_TYPE_SEQ = "type_seq";
     public static final String MAGT_GENERICS_TYPE = "generics_type";
     public static final String MAGT_FULL_METHOD = "full_method";
+
+    public static final String FC_METHOD_HASH = COMMON_METHOD_HASH;
+    public static final String FC_SEQ = "seq";
+    public static final String FC_SHOW_URI = "show_uri";
+    public static final String FC_CLASS_PATH = "class_path";
+    public static final String FC_METHOD_PATH = "method_path";
+    public static final String FC_SERVICE_NAME ="service_name";
+    public static final String FC_CONTEXT_ID ="context_id";
+    public static final String FC_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
+    public static final String FC_CLASS_NAME =COMMON_CLASS_NAME;
+    public static final String FC_FULL_METHOD = COMMON_FULL_METHOD;
 
     private DC() {
         throw new IllegalStateException("illegal");

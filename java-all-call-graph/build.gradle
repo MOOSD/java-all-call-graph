@@ -19,6 +19,10 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
 clean {
     delete 'build'
     delete 'output_dir'
@@ -89,7 +93,7 @@ List spring_test = [
 
 dependencies {
     compile apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom
-    testImplementation log4j, junit, spring, spring_test
+    testImplementation log4j, junit, spring, spring_test , 'javax.annotation:javax.annotation-api:1.3.2'
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"

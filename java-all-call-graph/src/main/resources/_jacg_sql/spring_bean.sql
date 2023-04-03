@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_spring_bean_{appName} (
+CREATE TABLE if not exists spring_bean_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   spring_bean_name varchar(500) NOT NULL COMMENT 'Spring Bean的名称',
   seq int NOT NULL COMMENT '序号，从0开始，大于0代表有多种可能',

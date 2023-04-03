@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_method_call_info_{appName} (
+CREATE TABLE if not exists method_call_info_{appName} (
   call_id int NOT NULL COMMENT '调用序号',
   obj_args_seq int NOT NULL COMMENT '被调用对象或参数序号，0代表被调用对象，1开始为参数',
   seq int NOT NULL COMMENT '序号，从0开始，大于0代表有多种可能',

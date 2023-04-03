@@ -1,8 +1,10 @@
 package com.adrninistrator.jacg.handler.write_db;
 
 import com.adrninistrator.jacg.annotation.util.AnnotationAttributesParseUtil;
+import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4FeignClientData;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
@@ -12,12 +14,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author adrninistrator
@@ -28,6 +25,11 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4MethodAnnotation.class);
 
     private Map<String, List<String>> classRequestMappingMap;
+
+    //feignclient的相关信息
+    private Map<String, Map<String, String>> feignClientClassMap;
+
+    private WriteDbHandler4FeignClient writeDbHandler4FeignClient;
 
     // 将Spring Controller信息写入数据库的类
     private WriteDbHandler4SpringController writeDbHandler4SpringController;
@@ -40,6 +42,17 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
 
     // Spring Controller相关信息
     private final List<WriteDbData4SpringController> writeDbData4SpringControllerList = new ArrayList<>(batchSize);
+
+    // feign Controller相关信息
+    private final List<WriteDbData4FeignClientData> writeDbData4FeignClientList = new ArrayList<>(batchSize);
+
+    // 对应的方法HASH+长度
+    private final Set<String> springControllerMethodHashSet = new HashSet<>();
+    // 暂存feign的方法hash
+    private final Set<String> feignClientHashSet = new HashSet<>();
+
+    // 有注解的方法HASH+长度
+    private final Set<String> withAnnotationMethodHashSet = new HashSet<>();
 
     @Override
     protected WriteDbData4MethodAnnotation genData(String line) {
@@ -72,6 +85,8 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
 
         // 处理Spring Controller相关注解
         boolean isSpringMappingAnnotation = handleSpringControllerAnnotation(methodHash, fullMethod, simpleClassName, annotationName, attributeName, attributeValue);
+        // 处理FeignClient相关注解
+        boolean isFeignClient = handleFeignClientAnnotation(methodHash, fullMethod, className,simpleClassName, annotationName, attributeName, attributeValue);
 
         WriteDbData4MethodAnnotation writeDbData4MethodAnnotation = new WriteDbData4MethodAnnotation();
         writeDbData4MethodAnnotation.setMethodHash(methodHash);
@@ -82,6 +97,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         writeDbData4MethodAnnotation.setFullMethod(fullMethod);
         writeDbData4MethodAnnotation.setSimpleClassName(simpleClassName);
         writeDbData4MethodAnnotation.setSpringMappingAnnotation(JavaCGYesNoEnum.parseIntValue(isSpringMappingAnnotation));
+        writeDbData4MethodAnnotation.setIsFeignClient(isFeignClient ? JACGConstants.YES_1 : JACGConstants.NO_0);
         return writeDbData4MethodAnnotation;
     }
 
@@ -101,7 +117,8 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 data.getAttributeValue(),
                 data.getFullMethod(),
                 data.getSimpleClassName(),
-                data.getSpringMappingAnnotation()
+                data.getSpringMappingAnnotation(),
+                data.getIsFeignClient()
         };
     }
 
@@ -172,10 +189,64 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         return true;
     }
 
+
+    //处理openfeign相关注解
+    private boolean handleFeignClientAnnotation(String methodHash, String fullMethod, String className,String simpleClassName, String annotationName, String attributeName,
+                                                String attributeValue){
+
+        //此方法对应类不为FeignClient
+        if (!feignClientClassMap.containsKey(simpleClassName)) {
+            return false;
+        }
+        if (!attributeName.isEmpty() && !SpringMvcRequestMappingUtil.isRequestMappingPathAttribute(attributeName)) {
+            // 注解属性名称非空，且不是@RequestMapping注解的path属性
+            return false;
+        }
+
+        feignClientHashSet.add(methodHash);
+        Map<String, String> classAttrMap = feignClientClassMap.get(simpleClassName);
+        //获取FeignClient属性名
+        String classAttrName = Objects.isNull(classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_VALUE))
+                ? classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_NAME)
+                : classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_VALUE);
+        String classAttrContextId = classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_CONTEXTID);
+        String classAttrPath = classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_PATH);
+
+        List<String> methodPathList = Collections.emptyList();
+        if (attributeValue != null) {
+            methodPathList = AnnotationAttributesParseUtil.parseListStringAttribute(attributeValue);
+        }
+
+        //可能会有一个接口多个路径的情况
+        int seq = 0;
+        for (String methodPath : methodPathList) {
+            //实例化DO
+            WriteDbData4FeignClientData writeDbData4FeignClientData = new WriteDbData4FeignClientData();
+            writeDbData4FeignClientData.setContextId(classAttrContextId);
+            writeDbData4FeignClientData.setServiceName(classAttrName);
+            writeDbData4FeignClientData.setClassPath(classAttrPath);
+
+            writeDbData4FeignClientData.setSeq(seq);
+            writeDbData4FeignClientData.setClassName(className);
+            writeDbData4FeignClientData.setSimpleClassName(simpleClassName);
+            writeDbData4FeignClientData.setFullMethod(fullMethod);
+            writeDbData4FeignClientData.setMethodPath(methodPath);
+            writeDbData4FeignClientData.setShowUri(SpringMvcRequestMappingUtil.genShowUri(classAttrPath, methodPath));
+            writeDbData4FeignClientData.setMethodHash(methodHash);
+            //新增记录添加到对应List
+            writeDbData4FeignClientList.add(writeDbData4FeignClientData);
+            writeDbHandler4FeignClient.tryInsertDb(writeDbData4FeignClientList);
+            seq++;
+        }
+
+        return true;
+    }
     @Override
     protected void beforeDone() {
         // 写入Spring Controller剩余信息
         writeDbHandler4SpringController.insertDb(writeDbData4SpringControllerList);
+        // 处理feigncliet相关信息
+        writeDbHandler4FeignClient.insertDb(writeDbData4FeignClientList);
     }
 
     //
@@ -193,5 +264,13 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
 
     public void setWithAnnotationMethodHashSet(Set<String> withAnnotationMethodHashSet) {
         this.withAnnotationMethodHashSet = withAnnotationMethodHashSet;
+    }
+
+    public void setFeignClientClassMap(Map<String, Map<String, String>> feignClientClassMap) {
+        this.feignClientClassMap = feignClientClassMap;
+    }
+
+    public void setWriteDbHandler4FeignClient(WriteDbHandler4FeignClient writeDbHandler4FeignClient) {
+        this.writeDbHandler4FeignClient = writeDbHandler4FeignClient;
     }
 }

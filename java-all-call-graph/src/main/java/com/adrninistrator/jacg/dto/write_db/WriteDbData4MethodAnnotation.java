@@ -22,6 +22,8 @@ public class WriteDbData4MethodAnnotation extends AbstractWriteDbData {
 
     private int springMappingAnnotation;
 
+    private int isFeignClient;
+
     //
     public String getMethodHash() {
         return methodHash;
@@ -85,5 +87,13 @@ public class WriteDbData4MethodAnnotation extends AbstractWriteDbData {
 
     public void setSpringMappingAnnotation(int springMappingAnnotation) {
         this.springMappingAnnotation = springMappingAnnotation;
+    }
+
+    public int getIsFeignClient() {
+        return isFeignClient;
+    }
+
+    public void setIsFeignClient(int isFeignClient) {
+        this.isFeignClient = isFeignClient;
     }
 }

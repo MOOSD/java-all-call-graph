@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_class_annotation_{appName} (
+CREATE TABLE if not exists class_annotation_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   simple_class_name varchar(500) NOT NULL COMMENT '唯一类名',
   annotation_name varchar(500) NOT NULL COMMENT '注解类名',

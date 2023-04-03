@@ -32,7 +32,8 @@ public enum DbTableInfoEnum {
             DC.MA_ATTRIBUTE_VALUE,
             DC.MA_FULL_METHOD,
             DC.MA_SIMPLE_CLASS_NAME,
-            DC.MA_SPRING_MAPPING_ANNOTATION
+            DC.MA_SPRING_MAPPING_ANNOTATION,
+            DC.MA_IS_FEIGN_CLIENT
     }),
     DTIE_METHOD_CALL("method_call", new String[]{
             DC.MC_CALL_ID,
@@ -133,6 +134,18 @@ public enum DbTableInfoEnum {
             DC.SC_SIMPLE_CLASS_NAME,
             DC.SC_FULL_METHOD
     }),
+    DTIE_FEIGN_CLIENT("feign_client", new String[]{
+            DC.FC_METHOD_HASH,
+            DC.FC_SEQ,
+            DC.FC_SERVICE_NAME,
+            DC.FC_CONTEXT_ID,
+            DC.FC_SHOW_URI,
+            DC.FC_CLASS_PATH,
+            DC.FC_METHOD_PATH,
+            DC.FC_SIMPLE_CLASS_NAME,
+            DC.FC_CLASS_NAME,
+            DC.FC_FULL_METHOD
+    }),
     DTIE_SPRING_TASK("spring_task", new String[]{
             DC.ST_RECORD_ID,
             DC.ST_SPRING_BEAN_NAME,
@@ -215,7 +228,7 @@ public enum DbTableInfoEnum {
      * @return
      */
     public String getTableName(String appName) {
-        return "jacg_" + tableNameKeyword + "_" + appName;
+        return tableNameKeyword + "_" + appName;
     }
 
     /**

@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_spring_task_{appName} (
+CREATE TABLE if not exists spring_task_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   spring_bean_name varchar(500) NOT NULL COMMENT 'Spring Bean的名称',
   class_name varchar(500) NOT NULL COMMENT '完整类名',

@@ -4,7 +4,9 @@ import com.adrninistrator.jacg.annotation.util.AnnotationAttributesParseUtil;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassAnnotation;
+import com.adrninistrator.jacg.util.feign.OpenFeignUtil;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
+import org.h2.util.StringUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +27,8 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
             @RequestMapping注解属性值列表
      */
     private final Map<String, List<String>> classRequestMappingMap = new HashMap<>();
+
+    private final Map<String, Map<String,String>> feignClientClassMap = new HashMap<>();
 
     @Override
     protected WriteDbData4ClassAnnotation genData(String line) {
@@ -55,11 +59,23 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
         if (SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName)) {
             if (attributeName.isEmpty()) {
                 // 类上的Spring MVC对应的@RequestMapping注解的path属性值为空
+                //todo 这里可能会出现隐患，即不同包下的controller类同名的情况会出现覆盖。
                 classRequestMappingMap.put(simpleClassName, Collections.emptyList());
             } else if (SpringMvcRequestMappingUtil.isRequestMappingPathAttribute(attributeName)) {
                 // 处理类上的Spring MVC对应的@RequestMapping注解的path属性值
                 classRequestMappingMap.put(simpleClassName, AnnotationAttributesParseUtil.parseListStringAttribute(attributeValue));
             }
+        }
+        //处理Openfeign客户端信息
+        if(OpenFeignUtil.isFeignClient(annotationName)){
+            if(!feignClientClassMap.containsKey(simpleClassName)){
+                feignClientClassMap.put(simpleClassName,new HashMap<>());
+            }
+            if(!StringUtils.isNullOrEmpty(attributeName)){
+                //attributeName若为不为空，则表示其一定不是属性值为空的@FeignClient注解
+                feignClientClassMap.get(simpleClassName).put(attributeName,attributeValue);
+            }
+
         }
 
         return new WriteDbData4ClassAnnotation(simpleClassName, annotationName, attributeName, attributeType, attributeValue, className);
@@ -73,7 +89,7 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassAnnotation data) {
         return new Object[]{
-                genNextRecordId(),
+                genNextRecordId(),  
                 data.getSimpleClassName(),
                 data.getAnnotationName(),
                 data.getAttributeName(),
@@ -86,4 +102,9 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
     public Map<String, List<String>> getClassRequestMappingMap() {
         return classRequestMappingMap;
     }
+
+    public Map<String, Map<String, String>> getFeignClientClassMap() {
+        return feignClientClassMap;
+    }
+
 }

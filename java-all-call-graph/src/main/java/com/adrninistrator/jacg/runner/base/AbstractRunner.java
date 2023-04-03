@@ -115,6 +115,7 @@ public abstract class AbstractRunner {
             }
 
             this.configureWrapper = configureWrapper;
+            //
             confInfo = ConfManager.getConfInfo(configureWrapper, true);
             if (confInfo == null) {
                 return false;
@@ -235,6 +236,7 @@ public abstract class AbstractRunner {
                 return false;
             }
 
+            //预检查
             if (!preCheck()) {
                 logger.error("{} 预检查失败", currentSimpleClassName);
                 return false;

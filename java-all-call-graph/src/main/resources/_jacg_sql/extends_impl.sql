@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_extends_impl_{appName} (
+CREATE TABLE if not exists extends_impl_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   simple_class_name varchar(500) NOT NULL COMMENT '唯一类名',
   class_name varchar(500) NOT NULL COMMENT '完整类名',

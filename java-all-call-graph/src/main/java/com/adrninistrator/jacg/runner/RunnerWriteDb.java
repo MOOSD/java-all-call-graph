@@ -39,12 +39,11 @@ import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringBean;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringController;
 import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringTask;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
+import com.adrninistrator.jacg.handler.write_db.*;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGConfigKeyEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseListEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGOtherConfigFileUseSetEnum;
 import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
@@ -644,16 +643,24 @@ public class RunnerWriteDb extends AbstractRunner {
             return false;
         }
 
+        //将Controller类上的注解信息拿出来
         Map<String, List<String>> classRequestMappingMap = writeDbHandler4ClassAnnotation.getClassRequestMappingMap();
+        //将FeignClient类上的注解信息拿出来
+        Map<String, Map<String, String>> feignClientClassMap = writeDbHandler4ClassAnnotation.getFeignClientClassMap();
 
         // 创建用于Spring Controller信息的类
         WriteDbHandler4SpringController writeDbHandler4SpringController = new WriteDbHandler4SpringController();
         initWriteDbHandler(writeDbHandler4SpringController);
+        //FeignClient的处理类
+        WriteDbHandler4FeignClient writeDbHandler4FeignClient = new WriteDbHandler4FeignClient();
+        initWriteDbHandler(writeDbHandler4FeignClient);
 
         // 处理方法注解信息，需要在类注解之后处理
         initWriteDbHandler(writeDbHandler4MethodAnnotation);
+        writeDbHandler4MethodAnnotation.setFeignClientClassMap(feignClientClassMap);
         writeDbHandler4MethodAnnotation.setClassRequestMappingMap(classRequestMappingMap);
         writeDbHandler4MethodAnnotation.setWriteDbHandler4SpringController(writeDbHandler4SpringController);
+        writeDbHandler4MethodAnnotation.setWriteDbHandler4FeignClient(writeDbHandler4FeignClient);
         writeDbHandler4MethodAnnotation.setSpringControllerMethodHashSet(springControllerMethodHashSet);
         writeDbHandler4MethodAnnotation.setWithAnnotationMethodHashSet(withAnnotationMethodHashSet);
         return writeDbHandler4MethodAnnotation.handle(handleOutputInfo.getMethodAnnotationOutputFilePath());

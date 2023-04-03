@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_class_signature_ei1_{appName} (
+CREATE TABLE if not exists class_signature_ei1_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   simple_class_name varchar(500) NOT NULL COMMENT '唯一类名',
   type char(1) NOT NULL COMMENT '类型，e:继承，i:实现',

@@ -520,6 +520,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             String callType = (String) callerMethodMap.get(DC.MC_CALL_TYPE);
 
             // 处理父类方法调用子类方法的相关信息
+            // 这里应该是和数据结构强相关的代码，暂时无法解读
             MethodAndHash callerMethodAndHash = handleSuperCallChildInfo(superCallChildInfoStack, callGraphNode4CalleeStack.getHead(), calleeFullMethod, callerFullMethod,
                     callType, origCallerMethodHash);
             if (callerMethodAndHash == null) {
@@ -541,6 +542,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
             int callFlags = (int) callerMethodMap.get(DC.MC_CALL_FLAGS);
             int callerLineNum = (int) callerMethodMap.get(DC.MC_CALLER_LINE_NUMBER);
             // 记录调用方法信息
+            // 修改这里
             Pair<String, Boolean> pair = recordCallerInfo(callerFullMethod, methodCallId, callFlags, callType, callerLineNum, callGraphNode4CalleeStack.getHead(),
                     callerMethodHash, back2Level);
             entryCallerMethodList.add(pair);
@@ -883,6 +885,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
 
+        //罪魁祸首
         StringBuilder callerInfo = new StringBuilder();
         callerInfo.append(JACGCallGraphFileUtil.genOutputPrefix(currentNodeLevel + 1));
 

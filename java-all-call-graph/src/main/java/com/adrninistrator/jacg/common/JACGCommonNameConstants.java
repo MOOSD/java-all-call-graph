@@ -19,7 +19,13 @@ public class JACGCommonNameConstants {
             "org.springframework.web.bind.annotation.PostMapping",
             "org.springframework.web.bind.annotation.PutMapping"
     };
-
+    //Feign注解完全限定名
+    public static final String FEIGN_CLIENT_ANNOTATIONS = "org.springframework.cloud.openfeign.FeignClient";
+    //FeignClient属性名
+    public static final String FEIGN_CLIENT_ATTR_NAME_VALUE = "value";
+    public static final String FEIGN_CLIENT_ATTR_NAME_NAME = "name";
+    public static final String FEIGN_CLIENT_ATTR_NAME_CONTEXTID = "contextId";
+    public static final String FEIGN_CLIENT_ATTR_NAME_PATH = "path";
     public static final String[] SPRING_MVC_MAPPING_ATTRIBUTE_NAMES = new String[]{
             "value",
             "path"
