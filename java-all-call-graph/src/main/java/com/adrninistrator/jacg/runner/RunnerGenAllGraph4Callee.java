@@ -57,7 +57,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     @Override
     public boolean preHandle() {
-        // 公共预处理
+        // 抽象类中的公共预处理
         if (!commonPreHandle()) {
             return false;
         }
@@ -102,7 +102,9 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
 
     // 执行实际处理
     private boolean operate() {
-        // 生成需要处理的任务信息
+        // 将要向上查询调用链路的任务信息拿到
+        //key:SimpleClassName
+        //value:info对象，主要也是一个map 用来存储原始任务与要处理的方法行的映射
         Map<String, CalleeTaskInfo> calleeTaskInfoMap = genCalleeTaskInfo();
         if (JACGUtil.isMapEmpty(calleeTaskInfoMap)) {
             logger.error("执行失败，请检查配置文件 {} 的内容", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE);
@@ -139,6 +141,7 @@ public class RunnerGenAllGraph4Callee extends AbstractRunnerGenCallGraph {
         // 生成需要处理的类名Set
         for (String task : taskSet) {
             String[] taskArray = StringUtils.splitPreserveAllTokens(task, JavaCGConstants.FLAG_COLON);
+            //这里校验可以去掉。
             if (taskArray.length != 1 && taskArray.length != 2) {
                 logger.error("配置文件 {} 中指定的任务信息非法\n{}\n格式应为以下之一:\n" +
                                 "1. [类名] （代表生成指定类所有方法向上的调用链）\n" +

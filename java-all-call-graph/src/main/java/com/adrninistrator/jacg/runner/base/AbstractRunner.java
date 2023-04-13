@@ -230,13 +230,13 @@ public abstract class AbstractRunner {
 
             long startTime = System.currentTimeMillis();
             someTaskFail = false;
-
+            //初始化配置文件，初始化dao操作者，创建数据库连接
             if (!init(configureWrapper)) {
                 logger.error("{} 初始化失败", currentSimpleClassName);
                 return false;
             }
 
-            //预检查
+            //预检查，检查连接是否关闭
             if (!preCheck()) {
                 logger.error("{} 预检查失败", currentSimpleClassName);
                 return false;
