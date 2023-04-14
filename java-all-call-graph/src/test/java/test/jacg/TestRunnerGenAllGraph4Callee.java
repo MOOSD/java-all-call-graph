@@ -24,13 +24,13 @@ public class TestRunnerGenAllGraph4Callee {
         RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee();
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
 
-        configureWrapper.setConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH,"");
-        configureWrapper.setConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH,"");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
         //config_db.properties
-        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
-        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
-        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
-        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
         //allow_class_prefix.properties
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
 
