@@ -1,9 +1,7 @@
 package com.adrninistrator.jacg.util;
 
-import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
-import com.adrninistrator.javacg.common.enums.JavaCGConfigKeyEnum;
-import com.adrninistrator.javacg.conf.JavaCGConfigureWrapper;
+import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -29,16 +27,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class JACGUtil {
     private static final Logger logger = LoggerFactory.getLogger(JACGUtil.class);
-
-    public static boolean isNumStr(String str) {
-        char[] charArray = str.toCharArray();
-        for (char ch : charArray) {
-            if (ch < '0' || ch > '9') {
-                return false;
-            }
-        }
-        return true;
-    }
 
     public static String genHashWithLen(String data) {
         byte[] md5 = DigestUtils.md5(data);
@@ -83,25 +71,6 @@ public class JACGUtil {
             logger.error("根据指定类名 {} 获得 {} 类的实例异常 ", className, classType.getName(), e);
             return null;
         }
-    }
-
-    /**
-     * 判断字符串是否为数字
-     *
-     * @param str
-     * @return
-     */
-    public static boolean isValidNum(String str) {
-        if (str == null || str.isEmpty()) {
-            return false;
-        }
-
-        for (char ch : str.toCharArray()) {
-            if (ch > '9' || ch < '0') {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -229,36 +198,6 @@ public class JACGUtil {
     }
 
     /**
-     * 根据不定长数组生成HashSet
-     *
-     * @param a
-     * @param <T>
-     * @return
-     */
-    @SafeVarargs
-    public static <T> Set<T> genSetFromArray(T... a) {
-        if (ArrayUtils.isEmpty(a)) {
-            return new HashSet<>();
-        }
-        return new HashSet<>(Arrays.asList(a));
-    }
-
-    /**
-     * 根据不定长数组生成List
-     *
-     * @param a
-     * @param <T>
-     * @return
-     */
-    @SafeVarargs
-    public static <T> List<T> genListFromArray(T... a) {
-        if (ArrayUtils.isEmpty(a)) {
-            return new ArrayList<>();
-        }
-        return Arrays.asList(a);
-    }
-
-    /**
      * 获取变长参数中指定下标的参数，相关的参数都要使用包装类型，避免拆箱时产生空指针异常
      *
      * @param index
@@ -276,18 +215,12 @@ public class JACGUtil {
     }
 
     /**
-     * 生成java-callgraph2的配置
+     * 获取配置文件的根目录
      *
      * @return
      */
-    public static JavaCGConfigureWrapper genJavaCGConfigureWrapper() {
-        JavaCGConfigureWrapper javaCGConfigureWrapper = new JavaCGConfigureWrapper();
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_PARSE_METHOD_CALL_TYPE_VALUE, Boolean.TRUE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_FIRST_PARSE_INIT_METHOD_TYPE, Boolean.TRUE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_CONTINUE_WHEN_ERROR, Boolean.FALSE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_DEBUG_PRINT, Boolean.FALSE.toString());
-        javaCGConfigureWrapper.setConfig(JavaCGConfigKeyEnum.CKE_OUTPUT_FILE_EXT, JACGConstants.EXT_MD);
-        return javaCGConfigureWrapper;
+    public static String getInputRootPath() {
+        return JavaCGUtil.getDirPathInJvmOptions(JavaCGConstants.PROPERTY_INPUT_ROOT_PATH);
     }
 
     private JACGUtil() {
