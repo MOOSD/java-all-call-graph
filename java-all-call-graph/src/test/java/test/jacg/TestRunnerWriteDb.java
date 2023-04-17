@@ -28,6 +28,8 @@ public class TestRunnerWriteDb {
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
         //config_db.propertis
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");

@@ -23,8 +23,7 @@ public class TestRunnerGenAllGraph4Callee {
     public void getAllGraph4Callee(){
         RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee();
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
-
-        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH,"");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
         //config_db.properties
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");

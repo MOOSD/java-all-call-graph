@@ -6,6 +6,7 @@ import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
                   */
                 methodInfoMap.put(task, methodInfo);
 
-                if (!JACGUtil.isNumStr(methodInfo)) {
+                if (!JavaCGUtil.isNumStr(methodInfo)) {
                     // 当有指定通过方法名而不是代码行号获取方法时，设置对应标志
                     calleeTaskInfo.setFindMethodByName(true);
                 }

@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_inner_class_{appName} (
+CREATE TABLE if not exists inner_class_{appName} (
   simple_inner_class_name varchar(500) NOT NULL COMMENT '内部类唯一类名',
   inner_class_name varchar(500) NOT NULL COMMENT '内部类完整类名',
   simple_outer_class_name varchar(500) NOT NULL COMMENT '外部类唯一类名',

@@ -59,7 +59,7 @@ public class JACGUtil {
     public static <T> T getClassObject(String className, Class<T> classType) {
         try {
             Class<?> clazz = Class.forName(className);
-            Object obj = clazz.newInstance();
+            Object obj =  clazz.getDeclaredConstructor().newInstance();
 
             if (!classType.isAssignableFrom(clazz)) {
                 logger.error("指定的类 {} 不是 {} 的实现类", className, classType.getName());
