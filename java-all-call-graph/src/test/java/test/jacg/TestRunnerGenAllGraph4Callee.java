@@ -2,6 +2,7 @@ package test.jacg;
 
 import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
+import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
@@ -34,6 +35,10 @@ public class TestRunnerGenAllGraph4Callee {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,"cn.newgrand.mspco.boq.IBoqFeign:getBoqDListByDic(java.lang.String)");
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+                "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
         runnerGenAllGraph4Callee.run(configureWrapper);
     }

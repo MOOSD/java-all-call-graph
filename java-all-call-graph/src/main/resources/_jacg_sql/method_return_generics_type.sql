@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_method_return_generics_type_{appName} (
+CREATE TABLE if not exists method_return_generics_type_{appName} (
   record_id int NOT NULL COMMENT '记录id',
   method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
   simple_class_name varchar(500) NOT NULL COMMENT '唯一类名',

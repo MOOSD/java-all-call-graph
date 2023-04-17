@@ -1,4 +1,4 @@
-CREATE TABLE if not exists jacg_method_arg_type_{appName} (
+CREATE TABLE if not exists method_arg_type_{appName} (
   method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
   arg_seq tinyint NOT NULL COMMENT '参数序号，从0开始',
   simple_arg_type varchar(500) NOT NULL COMMENT '参数类型唯一类名',
