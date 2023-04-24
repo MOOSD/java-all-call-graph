@@ -13,7 +13,7 @@ import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
-import com.adrninistrator.jacg.runner.base.AbstractRunnerGenCallGraph;
+import com.adrninistrator.jacg.runner.base.AbstractRunnerGenApiCallGraph;
 import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
@@ -34,7 +34,7 @@ import java.util.*;
 /**
  * 生成java对象的向上调用链的runner
  */
-public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
+public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Callee.class);
 
     private CalleeTrees calleeTrees;
@@ -252,8 +252,6 @@ public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
                                           String entryCalleeFullMethod,
                                           int callFlags
                                           ){
-        StringBuilder calleeInfo = new StringBuilder();
-
         // 构建调用树
         CalleeNode root = createTree(entryCalleeSimpleClassName, entryCalleeFullMethod);
 
@@ -267,10 +265,9 @@ public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
             }
         }
 
-        //todo 当前行添加泛型信息。
         if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
             // 显示方法参数泛型类型
-            if (!addMethodArgGenericsTypeInfo(true, callFlags, entryCalleeMethodHash, calleeInfo)) {
+            if (!addMethodArgGenericsTypeInfo(true, callFlags, entryCalleeMethodHash, root)) {
                 return false;
             }
         }
@@ -300,7 +297,7 @@ public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
         root.setClassName(calleeSimpleClassName);
         root.setFqcn(JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod));
         root.setMethodName(JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod));
-        root.setMethodArguments(JACGClassMethodUtil.genMethodArgTypeList(calleeFullMethod));
+        root.setMethodArguments(MethodUtil.genMethodArgTypeList(calleeFullMethod));
         root.setDepth(JACGConstants.CALL_GRAPH_METHOD_LEVEL_START);
 
         calleeTrees.addTree(calleeFullMethod,root);
@@ -425,25 +422,8 @@ public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
         caller.setDepth(currentNodeLevel + 1);
         caller.setFqcn(JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod));
         caller.setMethodName(JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod));
-        caller.setMethodArguments(JACGClassMethodUtil.genMethodArgTypeList(callerFullMethod));
-//        StringBuilder callerInfo = new StringBuilder();
-//        callerInfo.append(JACGCallGraphFileUtil.genOutputPrefix(currentNodeLevel + 1));
-//        if (OutputDetailEnum.ODE_1 == outputDetailEnum) {
-//            // # 1: 展示 完整类名+方法名+方法参数
-//            callerInfo.append(callerFullMethod);
-//        } else if (OutputDetailEnum.ODE_2 == outputDetailEnum) {
-//            // # 2: 展示 完整类名+方法名
-//            String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod);
-//            callerInfo.append(callerClassName)
-//                    .append(JavaCGConstants.FLAG_COLON)
-//                    .append(callerMethodName);
-//        } else {
-//            // # 3: 展示 简单类名（对于同名类展示完整类名）+方法名
-//            String callerMethodName = JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod);
-//            callerInfo.append(callerSimpleClassName)
-//                    .append(JavaCGConstants.FLAG_COLON)
-//                    .append(callerMethodName);
-//        }
+        caller.setMethodArguments((MethodUtil.genMethodArgTypeList(callerFullMethod)));
+
         // 判断调用方法上是否有注解
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
         if (MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(callFlags)) {
@@ -451,31 +431,23 @@ public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
             // 添加方法注解信息
             methodAnnotationMap = getMethodAnnotationInfo(callerFullMethod, callerMethodHash, methodAnnotations);
             if (methodAnnotations.length() > 0) {
-//                callerInfo.append(methodAnnotations);
                 caller.setAnnotation(methodAnnotations.toString());
             }
         }
 
         caller.setClassName(callerSimpleClassName);
         caller.getCalleeInfo().setRow(callerLineNum);
-//        // 显示调用者代码行号
-//        callerInfo.append(JACGConstants.FLAG_TAB)
-//                .append(JavaCGConstants.FLAG_LEFT_BRACKET)
-//                .append(callerSimpleClassName)
-//                .append(JavaCGConstants.FLAG_COLON)
-//                .append(callerLineNum)
-//                .append(JavaCGConstants.FLAG_RIGHT_BRACKET);
 
         // 添加方法调用业务功能数据
-//        if (!addBusinessData(methodCallId, callFlags, callerMethodHash, caller)) {
-//            return null;
-//        }
+        if (!addBusinessData(methodCallId, callFlags, callerMethodHash, caller)) {
+            return null;
+        }
 
         // 为方法调用信息增加是否在其他线程执行标志
-//        addRunInOtherThread(caller, methodCallId, callType, methodAnnotationMap);
+        addRunInOtherThread(methodCallId, callType, methodAnnotationMap, caller);
 
         // 为方法调用信息增加是否在事务中执行标志
-//        addRunInTransaction(caller, methodCallId, callType, methodAnnotationMap);
+        addRunInTransaction(methodCallId, callType, methodAnnotationMap, caller);
 
         // 添加循环调用标志
         if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
@@ -630,13 +602,11 @@ public class RunnerGenApiGraph4Callee extends AbstractRunnerGenCallGraph {
     }
 
 
-
-    // 将调用方法列表中最后一条记录设置为入口方法
+    /**
+     * 若此节点无子节点，则将此节点方法标记为入口
+     * @param calleeNode 方法节点
+     */
     private void markMethodAsEntry(CalleeNode calleeNode) {
-//        if (!JavaCGUtil.isCollectionEmpty(callerMethodList)) {
-//            Pair<String, Boolean> pair = callerMethodList.get(callerMethodList.size() - 1);
-//            pair.setValue(Boolean.TRUE);
-//        }
         if(calleeNode.hasNext()){
             return;
         }

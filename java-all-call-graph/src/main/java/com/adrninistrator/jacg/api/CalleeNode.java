@@ -13,22 +13,26 @@ import java.util.Objects;
  */
 public class CalleeNode {
 
-    //是否方法入口
-    private boolean isEntrance;
     //当前节点深度
     private int depth;
-    //当前方法所在类的完全限定类名
-    private String fqcn;
-    //当前方法所在类的类名
-    private String className;
-    //方法参数
-    private List<String> methodArguments;
     //方法名
     private String methodName;
+    //当前方法所在类的类名
+    private String className;
+    //是否方法入口
+    private boolean isEntrance;
+    //当前方法所在类的完全限定类名
+    private String fqcn;
+    //方法参数
+    private List<MethodArgument> methodArguments;
     //方法注解
     private String annotation;
+    //业务数据信息
+    private List<BusinessData> businessData;
+    //是否运行在声明式方法中 todo:默认值不序列化
+    private boolean inTransaction;
     //泛型信息
-    private GenericsInfo genericsInfo;
+    private List<GenericsInfo> genericsInfo;
     //被调用信息
     private CalleeInfo calleeInfo;
     //此方法的被调用者
@@ -47,7 +51,6 @@ public class CalleeNode {
         calleeNode.callers = new ArrayList<>();
         //实例化调用信息
         calleeNode.calleeInfo = new CalleeInfo();
-        calleeNode.genericsInfo = new GenericsInfo();
         return calleeNode;
     }
 
@@ -56,7 +59,6 @@ public class CalleeNode {
         calleeNode.callees = new ArrayList<>();
         //实例化调用信息
         calleeNode.calleeInfo = new CalleeInfo();
-        calleeNode.genericsInfo = new GenericsInfo();
         return calleeNode;
     }
 
@@ -65,10 +67,8 @@ public class CalleeNode {
      * @param calleeNode 调用此方法的方法节点
      */
     public void addCallee(CalleeNode calleeNode){
-        assert Objects.nonNull(callees);
-        assert Objects.nonNull(calleeNode);
-        // todo 按照调用行的前后
-        callees.add(calleeNode);
+        Objects.requireNonNull(callees).add(Objects.requireNonNull(calleeNode));
+
     }
 
     /**
@@ -76,9 +76,7 @@ public class CalleeNode {
      * @param calleeNode
      */
     public void addCaller(CalleeNode calleeNode){
-        assert Objects.nonNull(callers);
-        assert Objects.nonNull(calleeNode);
-        callers.add(calleeNode);
+        Objects.requireNonNull(callers).add(Objects.requireNonNull(calleeNode));
     }
 
     /**
@@ -90,7 +88,15 @@ public class CalleeNode {
     }
 
 
-    public GenericsInfo getGenericsInfo() {
+
+    /**
+     * 此方法运行在声明式事务中
+     */
+    public void runInTransaction(){
+        this.inTransaction = true;
+    }
+
+    public List<GenericsInfo> getGenericsInfo() {
         return genericsInfo;
     }
 
@@ -110,11 +116,11 @@ public class CalleeNode {
         this.fqcn = fqcn;
     }
 
-    public List<String> getMethodArguments() {
+    public List<MethodArgument> getMethodArguments() {
         return methodArguments;
     }
 
-    public void setMethodArguments(List<String> methodArguments) {
+    public void setMethodArguments(List<MethodArgument> methodArguments) {
         this.methodArguments = methodArguments;
     }
 
@@ -162,5 +168,21 @@ public class CalleeNode {
         this.className = className;
     }
 
+
+    public void setGenericsInfo(List<GenericsInfo> genericsInfo) {
+        this.genericsInfo = genericsInfo;
+    }
+
+    public List<BusinessData> getBusinessData() {
+        return businessData;
+    }
+
+    public void setBusinessData(List<BusinessData> businessData) {
+        this.businessData = businessData;
+    }
+
+    public boolean isInTransaction() {
+        return inTransaction;
+    }
 
 }

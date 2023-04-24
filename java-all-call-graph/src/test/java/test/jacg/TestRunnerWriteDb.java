@@ -24,7 +24,7 @@ public class TestRunnerWriteDb {
     }
 
     @Test
-    public void writeDBbyApi(){
+    public void writeDBbyApiFori8(){
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
@@ -44,6 +44,30 @@ public class TestRunnerWriteDb {
         //allow
         HashSet<String>  otherConfigSet= new HashSet<>();
         otherConfigSet.add("cn.newgrand");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,otherConfigSet);
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb();
+        runnerWriteDb.run(configureWrapper);
+    }
+
+    @Test
+    public void writeDBbyApiForJacg(){
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        //config.properties
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"jacg");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
+        //config_db.propertis
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+        //jar_dir.properties
+        ArrayList<String> otherConfigList = new ArrayList<>();
+        otherConfigList.add("C:\\Users\\77064\\Desktop\\microservice\\java-all-call-graph-1.0.6.jar");
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
+        //allow
+        HashSet<String>  otherConfigSet= new HashSet<>();
+        otherConfigSet.add("com.adrninistrator");
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,otherConfigSet);
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb();
         runnerWriteDb.run(configureWrapper);

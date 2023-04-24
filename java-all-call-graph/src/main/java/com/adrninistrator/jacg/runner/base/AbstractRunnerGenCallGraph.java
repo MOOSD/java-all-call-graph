@@ -4,14 +4,7 @@ import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
-import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
-import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
-import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
@@ -26,13 +19,9 @@ import com.adrninistrator.jacg.handler.mybatis.MyBatisMapperHandler;
 import com.adrninistrator.jacg.markdown.enums.MDCodeBlockTypeEnum;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
+import com.adrninistrator.jacg.runner.RunnerGenGraph4ApiCallee;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
-import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
-import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.jacg.util.JACGFileUtil;
-import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
@@ -44,14 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -64,7 +46,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenCallGraph.class);
 
     // 当前生成的完整方法调用链方向是否为向上
-    protected final boolean order4ee = this instanceof RunnerGenAllGraph4Callee;
+    protected final boolean order4ee = this instanceof RunnerGenAllGraph4Callee || this instanceof RunnerGenGraph4ApiCallee;
 
     // 配置文件中指定的需要处理的任务
     protected Set<String> taskSet;
@@ -94,13 +76,13 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
     protected List<String> businessDataTypeList;
 
     // 方法调用信息处理类
-    private MethodCallInfoHandler methodCallInfoHandler;
+    protected MethodCallInfoHandler methodCallInfoHandler;
 
     // 对MyBatis Mapper的处理类
     protected MyBatisMapperHandler myBatisMapperHandler;
 
     // 方法参数泛型类型处理类
-    private MethodArgGenericsTypeHandler methodArgGenericsTypeHandler;
+    protected MethodArgGenericsTypeHandler methodArgGenericsTypeHandler;
 
     /*
         接口调用对应实现类的方法调用

@@ -8,15 +8,17 @@ public class GenericsInfo {
         return genType;
     }
 
-    public void setGenType(String genType) {
+    public GenericsInfo setGenType(String genType) {
         this.genType = genType;
+        return this;
     }
 
     public String getGenValue() {
         return genValue;
     }
 
-    public void setGenValue(String genValue) {
+    public GenericsInfo setGenValue(String genValue) {
         this.genValue = genValue;
+        return this;
     }
 }
