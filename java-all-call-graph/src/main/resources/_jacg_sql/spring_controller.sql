@@ -2,6 +2,7 @@ CREATE TABLE if not exists spring_controller_{appName} (
   method_hash varchar(30) NOT NULL COMMENT '方法hash+字节数',
   seq int NOT NULL COMMENT '序号，从0开始，大于0代表有多种可能',
   show_uri varchar(500) NOT NULL COMMENT '用于显示的URI',
+  request_method varchar(100) COMMENT '此controller支持的请求方式',
   class_path varchar(300) NOT NULL COMMENT '类上的注解path属性原始值',
   method_path varchar(300) NOT NULL COMMENT '方法上的注解path属性原始值',
   annotation_name varchar(500) NOT NULL COMMENT '注解类名',

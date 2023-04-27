@@ -15,6 +15,8 @@ public class WriteDbData4FeignClientData extends AbstractWriteDbData {
 
     private String showUri;
 
+    private String requestMethod;
+
     private String classPath;
 
     private String methodPath;
@@ -24,6 +26,8 @@ public class WriteDbData4FeignClientData extends AbstractWriteDbData {
     private String className;
 
     private String fullMethod;
+
+    private String annotationName;
 
     public String getMethodHash() {
         return methodHash;
@@ -119,5 +123,21 @@ public class WriteDbData4FeignClientData extends AbstractWriteDbData {
                 ", className='" + className + '\'' +
                 ", fullMethod='" + fullMethod + '\'' +
                 '}';
+    }
+
+    public String getAnnotationName() {
+        return annotationName;
+    }
+
+    public void setAnnotationName(String annotationName) {
+        this.annotationName = annotationName;
+    }
+
+    public String getRequestMethod() {
+        return requestMethod;
+    }
+
+    public void setRequestMethod(String requestMethod) {
+        this.requestMethod = requestMethod;
     }
 }

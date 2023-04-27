@@ -15,6 +15,7 @@ import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenApiCallGraph;
 import com.adrninistrator.jacg.util.*;
+import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
@@ -42,12 +43,17 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
     public CalleeTrees getLink(ConfigureWrapper config){
         //运行方法，结果收集到指定对象中。
         run(config);
+        //错误处理记录抛出
+        if (someTaskFail){
+            calleeTrees.setFailTaskList(failTaskList);
+        }
         return calleeTrees;
     }
-//     1.初始化
-//     2.预检查
+
 
     /**
+     * 1.初始化
+     * 2.预检查
      * 3.预处理
      */
     @Override
@@ -61,11 +67,7 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         }
 
         // 读取配置文件中指定的需要处理的任务
-        if (!readTaskInfo(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE)) {
-            return false;
-        }
-
-        return true;
+        return readTaskInfo(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE);
     }
 
     /**
@@ -73,26 +75,21 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
      */
     @Override
     protected void handle() {
-        operate();
-    }
-
-    private boolean operate() {
         //处理需要生成链路的方法
         Map<String, CalleeTaskInfo> calleeTaskInfoMap = genCalleeTaskInfo();
         //实例化线程池
         createThreadPoolExecutor(null);
         //线程池中批量添加任务
         for (Map.Entry<String, CalleeTaskInfo> entry : Objects.requireNonNull(calleeTaskInfoMap, "方法/类信息错误").entrySet()) {
+            //处理一个类中指定方法的调用链路
             if (!handleOneCalleeClass(entry.getKey(), entry.getValue())) {
-                // 等待直到任务执行完毕
+                //任务处理失败，结束任务
                 wait4TPEDone();
-                return false;
+                return;
             }
         }
         wait4TPEDone();
-        return true;
     }
-
 
 
     private boolean handleOneCalleeClass(String className, CalleeTaskInfo taskInfo){
@@ -212,8 +209,6 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
                                        String entryCalleeFullMethod,
                                        int callFlags,
                                        String origTaskText) {
-        // 等待直到允许任务执行
-        JACGUtil.wait4TPEExecute(threadPoolExecutor, taskQueueMaxSize);
 
         threadPoolExecutor.execute(() -> {
             try {
@@ -230,6 +225,9 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         });
     }
 
+    /**
+     * 异步处理一个调用方法，关注公共资源的使用
+     */
     // 执行处理一个被调用方法
     private boolean doHandleOneCalleeMethod(String entryCalleeSimpleClassName,
                                             String entryCalleeMethodHash,
@@ -257,11 +255,11 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
         // 判断被调用方法上是否有注解
         if (MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
-            StringBuilder methodAnnotations = new StringBuilder();
             // 添加方法注解信息
-            getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash, methodAnnotations);
-            if (methodAnnotations.length() > 0) {
-                root.setAnnotation(methodAnnotations.toString());
+            List<String> methodAnnotationInfo = new ArrayList<>();
+            getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash,methodAnnotationInfo);
+            if (methodAnnotationInfo.size() > 0) {
+                root.setAnnotation(methodAnnotationInfo);
             }
         }
 
@@ -336,13 +334,20 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             }
 
             if (callerMethodMap.isEmpty()) {
-                // 查询到调用方法为空时的处理
-                if (handleCallerEmptyResult(callGraphNode4CalleeStack, superCallChildInfoStack ,callee)) {
-                    return true;
+                //如果开启跨微服务生成,且当前为方法是一个controller
+                if(configureWrapper.<Boolean>getMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN) &&
+                        callee.getAnnotation().stream().anyMatch(SpringMvcRequestMappingUtil::isRequestMappingAnnotation)){
+                    //找到此controller对应的openfeign,将feignClient作为此Controller的调用者继续生成调用链路,对其重新赋值。
+                    callerMethodMap = getControllerCaller4FeignClient(callGraphNode4Callee.getCalleeMethodHash());
+                }else{
+                    // 查询到调用方法为空时的处理
+                    if (handleCallerEmptyResult(callGraphNode4CalleeStack, superCallChildInfoStack ,callee)) {
+                        return true;
+                    }
+                    //若未遍历到初始节点，则节点向上遍历,回到上一层回到上一层时，只可能是单个节点，因此取第一个元素，即当前方法的调用者。
+                    callee = callee.getCallers().get(0);
+                    continue;
                 }
-                //若未遍历到初始节点，则节点向上遍历,回到上一层回到上一层时，只可能是单个节点，因此取第一个元素，即当前方法的调用者。
-                callee = callee.getCallers().get(0);
-                continue;
             }
 
             // 查询到记录
@@ -405,6 +410,26 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             callee = caller;
         }
     }
+
+    /**
+     * 获取作为controller的调用者的FeignClient
+     * @param controllerHash controller方法的hash值
+     * @return 查询结果对象
+     */
+    private Map<String, Object> getControllerCaller4FeignClient(String controllerHash){
+        Map<String, Object> callerMethodMap = getFeignInfoBySpringMethodHash(controllerHash);
+
+
+        callerMethodMap.put(DC.MC_CALLER_FULL_METHOD,null);
+        callerMethodMap.put(DC.MC_CALLER_METHOD_HASH,null);
+        callerMethodMap.put(DC.MC_CALL_ID,null);
+        callerMethodMap.put(DC.MC_ENABLED,null);
+        callerMethodMap.put(DC.MC_CALL_TYPE,null);
+        callerMethodMap.put(DC.MC_CALL_FLAGS,null);
+        callerMethodMap.put(DC.MC_CALLER_LINE_NUMBER,null);
+
+        return callerMethodMap;
+    }
     // 记录调用方法信息
     protected CalleeNode recordCallerInfo(String callerFullMethod,
                                                      int methodCallId,
@@ -427,11 +452,11 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         // 判断调用方法上是否有注解
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
         if (MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(callFlags)) {
-            StringBuilder methodAnnotations = new StringBuilder();
+            List<String> methodAnnotations = new ArrayList<>();
             // 添加方法注解信息
             methodAnnotationMap = getMethodAnnotationInfo(callerFullMethod, callerMethodHash, methodAnnotations);
-            if (methodAnnotations.length() > 0) {
-                caller.setAnnotation(methodAnnotations.toString());
+            if (methodAnnotations.size() > 0) {
+                caller.setAnnotation(methodAnnotations);
             }
         }
 
@@ -611,6 +636,19 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             return;
         }
         calleeNode.setEntrance(Boolean.TRUE);
+    }
+
+    private Map<String,Object> getFeignInfoBySpringMethodHash(String ControllerHash){
+        // 第一次查询
+        // 确定查询被调用关系时所需字段
+        String sql = "select " + "f."+DC.FC_FULL_METHOD+",f."+DC.FC_METHOD_HASH +
+                " from " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName() + "as f " +
+                " inner join " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableName() + "as s " +
+                " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI +
+                " where " + "s." + DC.SPC_METHOD_HASH + " = ?";
+        List<Map<String, Object>> maps = dbOperator.queryList(sql, new Object[]{ControllerHash});
+
+        return null;
     }
 
     /**

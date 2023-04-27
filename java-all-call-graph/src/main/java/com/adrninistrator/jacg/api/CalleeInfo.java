@@ -2,6 +2,9 @@ package com.adrninistrator.jacg.api;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 
+/**
+ * 保存调用者调用被调用者时候的调用信息。
+ */
 public class CalleeInfo {
 
 
@@ -13,6 +16,10 @@ public class CalleeInfo {
 
     //是否运行在其他线程 todo:默认值不序列化
     private boolean isAsync;
+
+    //是否是rpc调用
+    private boolean isRpcCall;
+
 
     /**
      * 此方法运行在其他线程
@@ -41,5 +48,13 @@ public class CalleeInfo {
 
     public boolean isAsync() {
         return isAsync;
+    }
+
+    public boolean isRpcCall() {
+        return isRpcCall;
+    }
+
+    public void setRpcCall(boolean rpcCall) {
+        isRpcCall = rpcCall;
     }
 }

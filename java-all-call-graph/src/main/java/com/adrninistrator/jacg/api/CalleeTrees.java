@@ -1,6 +1,9 @@
 package com.adrninistrator.jacg.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,8 +15,12 @@ public class CalleeTrees {
     //查询方法的被调用的树的列表(仅存储根节点)
     //key:方法的完全限定名
     //value:以此方法为根节点的向上的调用树
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Map<String,CalleeNode> trees;
 
+    //失败执行的方法
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> failTaskList;
     //实例化
     public static CalleeTrees instantiate(){
         HashMap<String,CalleeNode> trees = new HashMap<>();
@@ -21,7 +28,8 @@ public class CalleeTrees {
         calleeTrees.trees = trees;
         return calleeTrees;
     }
-    //json打印
+
+
 
 
     public CalleeNode addTree(String fullMethod,CalleeNode calleeNode){
@@ -39,5 +47,14 @@ public class CalleeTrees {
     public void setTrees(Map<String, CalleeNode> trees) {
         this.trees = trees;
     }
+
+    public List<String> getFailTaskList() {
+        return failTaskList;
+    }
+
+    public void setFailTaskList(List<String> failTaskList) {
+        this.failTaskList = failTaskList;
+    }
+
 
 }

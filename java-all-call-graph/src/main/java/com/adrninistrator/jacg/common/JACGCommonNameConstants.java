@@ -11,13 +11,21 @@ import java.util.stream.Stream;
  * @description: 常用类常量
  */
 public class JACGCommonNameConstants {
+
+    public static final String SPRING_MVC_REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
+    public static final String SPRING_MVC_DELETE_MAPPING = "org.springframework.web.bind.annotation.DeleteMapping";
+    public static final String SPRING_MVC_GET_MAPPING = "org.springframework.web.bind.annotation.GetMapping";
+    public static final String SPRING_MVC_PATCH_MAPPING = "org.springframework.web.bind.annotation.PatchMapping";
+    public static final String SPRING_MVC_POST_MAPPING = "org.springframework.web.bind.annotation.PostMapping";
+    public static final String SPRING_MVC_PUT_MAPPING = "org.springframework.web.bind.annotation.PutMapping";
+
     public static final String[] SPRING_MVC_MAPPING_ANNOTATIONS = new String[]{
-            "org.springframework.web.bind.annotation.RequestMapping",
-            "org.springframework.web.bind.annotation.DeleteMapping",
-            "org.springframework.web.bind.annotation.GetMapping",
-            "org.springframework.web.bind.annotation.PatchMapping",
-            "org.springframework.web.bind.annotation.PostMapping",
-            "org.springframework.web.bind.annotation.PutMapping"
+            SPRING_MVC_REQUEST_MAPPING,
+            SPRING_MVC_DELETE_MAPPING,
+            SPRING_MVC_GET_MAPPING,
+            SPRING_MVC_PATCH_MAPPING,
+            SPRING_MVC_POST_MAPPING,
+            SPRING_MVC_PUT_MAPPING
     };
     //Feign注解完全限定名
     public static final String FEIGN_CLIENT_ANNOTATIONS = "org.springframework.cloud.openfeign.FeignClient";
@@ -30,6 +38,13 @@ public class JACGCommonNameConstants {
             "value",
             "path"
     };
+    public static final String[] SPRING_MVC_MAPPING_SPECIAL_ATTRIBUTE_NAMES = new String[]{
+            "value",
+            "path",
+            "method"
+    };
+    //RequestMapping中的method属性
+    public static final String SPRING_MVC_MAPPING_ATTRIBUTE_METHOD = "method";
 
     public static final String[] CLASS_NAMES_STREAM = {
             Stream.class.getName(),

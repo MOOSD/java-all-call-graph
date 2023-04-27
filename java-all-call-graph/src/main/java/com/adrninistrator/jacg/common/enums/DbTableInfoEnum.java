@@ -159,10 +159,12 @@ public enum DbTableInfoEnum {
             DC.FC_SERVICE_NAME,
             DC.FC_CONTEXT_ID,
             DC.FC_SHOW_URI,
+            DC.FC_REQUEST_METHOD,
             DC.FC_CLASS_PATH,
             DC.FC_METHOD_PATH,
             DC.FC_SIMPLE_CLASS_NAME,
             DC.FC_CLASS_NAME,
+            DC.FC_ANNOTATION_NAME,
             DC.FC_FULL_METHOD
     }),
 
@@ -210,6 +212,7 @@ public enum DbTableInfoEnum {
             DC.SPC_METHOD_HASH,
             DC.SPC_SEQ,
             DC.SPC_SHOW_URI,
+            DC.SPC_REQUEST_METHOD,
             DC.SPC_CLASS_PATH,
             DC.SPC_METHOD_PATH,
             DC.SPC_ANNOTATION_ANNOTATION_NAME,

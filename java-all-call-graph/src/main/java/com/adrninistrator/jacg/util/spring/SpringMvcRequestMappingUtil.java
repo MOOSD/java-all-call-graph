@@ -1,7 +1,10 @@
 package com.adrninistrator.jacg.util.spring;
 
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Locale;
 
 /**
  * @author adrninistrator
@@ -20,6 +23,39 @@ public class SpringMvcRequestMappingUtil {
     }
 
     /**
+     * 从组合注解（GetMapping）名称中获取请求方式
+     * @param annotationName
+     * @return
+     */
+    public static String getRequestMethodFromAnnoName(String annotationName){
+        //检查是否合法
+        for (int i = 1; i < JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS.length; i++) {
+            if(annotationName.equals(JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS[i])){
+                //简单的获取到类名
+                String simpleClassName = JACGClassMethodUtil.getSimpleClassNameFromFull(annotationName);
+                //去掉后7位
+                return simpleClassName.substring(0, simpleClassName.length() - 7).toUpperCase(Locale.ENGLISH);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 从注解属性中获取请求方式，主要是用来处理@RequestMapping中的method属性的属性值,注解属性值默认大写
+     * @return 以逗号分割的请求方法
+     */
+    public static String getRequestMethodFromAnnoAttribute(String annoAttributeValue){
+        return annoAttributeValue.substring(1, annoAttributeValue.length() - 1).replace("\"", "");
+    }
+    public static MappingType getMappingType(String annotationName) {
+        for (int i = 0; i < JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS.length; i++) {
+            if (annotationName.equals(JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS[i])){
+                return i >= 1 ? MappingType.COMPOSED_MAPPING : MappingType.MAPPING;
+            }
+        }
+        return MappingType.NOMAPPING;
+    }
+    /**
      * 判断是否为Spring MVC的RequestMapping注解的path属性
      *
      * @param attributeName
@@ -27,6 +63,13 @@ public class SpringMvcRequestMappingUtil {
      */
     public static boolean isRequestMappingPathAttribute(String attributeName) {
         return StringUtils.equalsAny(attributeName, JACGCommonNameConstants.SPRING_MVC_MAPPING_ATTRIBUTE_NAMES);
+    }
+
+    /**
+     * 判断是否为Spring MVC的RequestMapping的属性
+     */
+    public static boolean isRequestMappingAttribute(String attributeName) {
+        return StringUtils.equalsAny(attributeName, JACGCommonNameConstants.SPRING_MVC_MAPPING_SPECIAL_ATTRIBUTE_NAMES);
     }
 
     /**
@@ -43,8 +86,12 @@ public class SpringMvcRequestMappingUtil {
             if (!classPath.startsWith("/")) {
                 stringBuilder.append("/");
             }
+            if(classPath.endsWith("/")){
+                classPath = classPath.substring(0,classPath.length()-1);
+            }
             stringBuilder.append(classPath);
         }
+
 
         if (StringUtils.isNotBlank(methodPath)) {
             if (!methodPath.startsWith("/")) {
@@ -53,6 +100,10 @@ public class SpringMvcRequestMappingUtil {
             stringBuilder.append(methodPath);
         }
         return stringBuilder.toString();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(genShowUri("/PMS/PCO/BOQEQ/BoqBill/", "/PostBoqSaveIn"));
     }
 
     private SpringMvcRequestMappingUtil() {

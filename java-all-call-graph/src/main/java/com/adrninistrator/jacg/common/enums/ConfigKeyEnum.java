@@ -15,6 +15,7 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_OUTPUT_ROOT_PATH("output.root.path", "生成文件的根目录，以\"/\"或\"\\\\\"作为分隔符，末尾是否为分隔符不影响（默认为当前目录）", String.class),
     CKE_DB_INSERT_BATCH_SIZE("db.insert.batch.size", "批量写入数据库时每次插入的数量", Integer.class),
     CKE_CHECK_JAR_FILE_UPDATED("check.jar.file.updated", "检查jar包文件是否有更新", Boolean.class),
+    CROSS_SERVICE_BY_OPENFEIGN("call.graph.cs.openfeign", "基于OpenFeign的RPC框架是否跨微服务生成调用链路", Boolean.class)
     ;
 
     // 参数key

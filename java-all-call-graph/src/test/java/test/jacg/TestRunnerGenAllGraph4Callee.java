@@ -44,11 +44,7 @@ public class TestRunnerGenAllGraph4Callee {
         runnerGenAllGraph4Callee.run(configureWrapper);
     }
 
-    /**
-     * 有bug。父级的父级的调用无法识别
-     * lambda调用的文本显示问题
-     * 泛型参数问题
-     */
+
     @Test
     public void getAllGraph4CalleeForJacg(){
         RunnerGenAllGraph4Callee runnerGenAllGraph4Callee = new RunnerGenAllGraph4Callee();

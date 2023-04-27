@@ -23,6 +23,13 @@ public class TestRunnerWriteDb {
         new RunnerWriteDb().run();
     }
 
+    /**
+     * sql: [insert into spring_controller_i8(method_hash, seq, show_uri, class_path, method_path, annotation_name, simple_class_name, full_method) values (?, ?, ?, ?, ?, ?, ?, ?)]
+     * java.sql.BatchUpdateException: Duplicate entry 'R5bWsNDiQqfp38HkZoirdg==#052-0' for key 'PRIMARY'
+     *
+     * sql: [insert into method_annotation_i8(record_id, method_hash, annotation_name, attribute_name, attribute_type, attribute_value, full_method, simple_class_name, spring_mapping_annotation, is_feign_client) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+     * java.sql.BatchUpdateException: Incorrect string value: '\xF0\x9F\xA7\xB5st...' for column 'attribute_value' at row 1
+     */
     @Test
     public void writeDBbyApiFori8(){
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
@@ -37,9 +44,8 @@ public class TestRunnerWriteDb {
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("C:\\Users\\77064\\Desktop\\microservice\\pm-pco-boq-6.0.0-SNAPSHOT.jar");
-        otherConfigList.add("C:\\Users\\77064\\Desktop\\microservice\\pm-pms-cz-6.0.0-SNAPSHOT.jar");
-        otherConfigList.add("C:\\Users\\77064\\Desktop\\microservice\\mspco-boq-6.0.0-SNAPSHOT.jar");
+        otherConfigList.add("D:\\Data\\TestData\\microservice\\i8");
+
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow
         HashSet<String>  otherConfigSet= new HashSet<>();

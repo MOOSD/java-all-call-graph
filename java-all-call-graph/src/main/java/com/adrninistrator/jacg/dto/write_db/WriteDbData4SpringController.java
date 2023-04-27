@@ -9,6 +9,7 @@ public class WriteDbData4SpringController extends AbstractWriteDbData {
     private String methodHash;
     private int seq;
     private String showUri;
+    private String requestMethod;
     private String classPath;
     private String methodPath;
     private String annotationName;
@@ -91,5 +92,13 @@ public class WriteDbData4SpringController extends AbstractWriteDbData {
                 ", simpleClassName='" + simpleClassName + '\'' +
                 ", fullMethod='" + fullMethod + '\'' +
                 '}';
+    }
+
+    public String getRequestMethod() {
+        return requestMethod;
+    }
+
+    public void setRequestMethod(String requestMethod) {
+        this.requestMethod = requestMethod;
     }
 }

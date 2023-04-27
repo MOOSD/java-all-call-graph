@@ -1,10 +1,12 @@
 package com.adrninistrator.jacg.runner.base;
 
+import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.api.BusinessData;
 import com.adrninistrator.jacg.api.CalleeNode;
 import com.adrninistrator.jacg.api.MethodArgument;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
+import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
@@ -13,24 +15,76 @@ import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
-import com.adrninistrator.jacg.util.JACGJsonUtil;
-import com.adrninistrator.jacg.util.JACGSqlUtil;
-import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 
 public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenApiCallGraph.class);
 
+    // 保存各个方法已处理过的所有注解信息
+    protected Map<String, Map<String, Map<String, BaseAnnotationAttribute>>> methodAllAnnotationInfoMap = new HashMap<>();
+
+    /**
+     * 获取方法对应的注解信息
+     *
+     * @param fullMethod              完整方法
+     * @param methodHash              完整方法HASH+长度
+     * @return 当前方法上的注解信息
+     */
+    protected  Map<String, Map<String, BaseAnnotationAttribute>> getMethodAnnotationInfo(String fullMethod, String methodHash ,List<String> annotationList) {
+        //注解缓存
+        Map<String, Map<String, BaseAnnotationAttribute>> existedAnnotationInfo = methodAllAnnotationInfoMap.get(methodHash);
+        if (existedAnnotationInfo != null) {
+            // 当前方法对应的注解信息已查询过，直接使用
+            return existedAnnotationInfo;
+        }
+
+        // 根据完整方法HASH+长度获取对应的注解信息
+        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = annotationHandler.queryAnnotationMap4FullMethod(fullMethod);
+        if (methodAnnotationMap == null) {
+            // 当前方法上没有注解
+            return null;
+        }
+        methodAllAnnotationInfoMap.putIfAbsent(methodHash, methodAnnotationMap);
+
+        // 当前方法上有注解
+        // 当前方法对应的注解信息未查询过
+
+        // 遍历当前方法上的所有注解进行处理
+        for (Map.Entry<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMapEntry : methodAnnotationMap.entrySet()) {
+            String annotationName = methodAnnotationMapEntry.getKey();
+            // 遍历用于对方法上的注解进行处理的类
+            for (AbstractAnnotationFormatter annotationFormatter : annotationFormatterList) {
+                //过滤掉带有特定注解的方法
+                if (!annotationFormatter.checkHandleAnnotation(annotationName)) {
+                    continue;
+                }
+
+                String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
+                // 找到能够处理的类进行处理
+                String annotationInfo = annotationFormatter.handleAnnotation(fullMethod, className, annotationName, methodAnnotationMapEntry.getValue());
+                if (annotationInfo != null) {
+                    // 替换TAB、回车、换行等字符，再将半角的@替换为全角，避免影响通过@对注解进行分隔
+                    String finalAnnotationInfo = JACGCallGraphFileUtil.replaceSplitChars(annotationInfo)
+                            .replace(JACGConstants.FLAG_AT, JACGConstants.FLAG_AT_FULL_WIDTH);
+
+                    // 注解信息以@开头，在以上方法中不需要返回以@开头
+                    annotationList.add(JACGConstants.FLAG_AT+finalAnnotationInfo);
+                }
+                //这里是否要终止
+                break;
+            }
+        }
+
+        return methodAnnotationMap;
+    }
 
     /**
      * 添加事务标识

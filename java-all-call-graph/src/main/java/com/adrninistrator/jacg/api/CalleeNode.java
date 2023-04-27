@@ -23,10 +23,12 @@ public class CalleeNode {
     private boolean isEntrance;
     //当前方法所在类的完全限定类名
     private String fqcn;
+    //当前方法所在服务的服务名
+    private String serviceName;
     //方法参数
     private List<MethodArgument> methodArguments;
     //方法注解
-    private String annotation;
+    private List<String> annotation;
     //业务数据信息
     private List<BusinessData> businessData;
     //是否运行在声明式方法中 todo:默认值不序列化
@@ -132,11 +134,11 @@ public class CalleeNode {
         this.methodName = methodName;
     }
 
-    public String getAnnotation() {
+    public List<String> getAnnotation() {
         return annotation;
     }
 
-    public void setAnnotation(String annotation) {
+    public void setAnnotation(List<String> annotation) {
         this.annotation = annotation;
     }
 
@@ -185,4 +187,11 @@ public class CalleeNode {
         return inTransaction;
     }
 
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
 }

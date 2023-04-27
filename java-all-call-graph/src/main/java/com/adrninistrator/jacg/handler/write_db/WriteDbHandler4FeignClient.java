@@ -5,9 +5,7 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4FeignClientData;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 
 /**
- * @author adrninistrator
- * @date 2022/11/17
- * @description: 写入数据库，Spring Controller信息
+ * feignClient数据写入数据库
  */
 public class WriteDbHandler4FeignClient extends AbstractWriteDbHandler<WriteDbData4FeignClientData> {
     @Override
@@ -28,10 +26,12 @@ public class WriteDbHandler4FeignClient extends AbstractWriteDbHandler<WriteDbDa
                 data.getServiceName(),
                 data.getContextId(),
                 data.getShowUri(),
+                data.getRequestMethod(),
                 data.getClassPath(),
                 data.getMethodPath(),
                 data.getSimpleClassName(),
                 data.getClassName(),
+                data.getAnnotationName(),
                 data.getFullMethod()
         };
     }

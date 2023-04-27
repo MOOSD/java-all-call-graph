@@ -26,6 +26,7 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
                 data.getMethodHash(),
                 data.getSeq(),
                 data.getShowUri(),
+                data.getRequestMethod(),
                 data.getClassPath(),
                 data.getMethodPath(),
                 data.getAnnotationName(),

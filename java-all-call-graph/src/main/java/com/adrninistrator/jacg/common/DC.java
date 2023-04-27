@@ -132,6 +132,7 @@ public class DC {
     public static final String SPC_ANNOTATION_ANNOTATION_NAME = COMMON_ANNOTATION_ANNOTATION_NAME;
     public static final String SPC_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
     public static final String SPC_FULL_METHOD = COMMON_FULL_METHOD;
+    public static final String SPC_REQUEST_METHOD = "request_method";
 
     public static final String SPT_RECORD_ID = "record_id";
     public static final String SPT_SPRING_BEAN_NAME = "spring_bean_name";
@@ -206,6 +207,9 @@ public class DC {
     public static final String FC_SIMPLE_CLASS_NAME = COMMON_SIMPLE_CLASS_NAME;
     public static final String FC_CLASS_NAME =COMMON_CLASS_NAME;
     public static final String FC_FULL_METHOD = COMMON_FULL_METHOD;
+    public static final String FC_ANNOTATION_NAME = COMMON_ANNOTATION_ANNOTATION_NAME;
+    public static final String FC_REQUEST_METHOD = "request_method";
+
 
     private DC() {
         throw new IllegalStateException("illegal");

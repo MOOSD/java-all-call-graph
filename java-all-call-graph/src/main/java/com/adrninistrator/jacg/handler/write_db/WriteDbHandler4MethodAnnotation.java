@@ -9,12 +9,15 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
+import com.adrninistrator.jacg.util.spring.MappingType;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author adrninistrator
@@ -34,7 +37,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     // 将Spring Controller信息写入数据库的类
     private WriteDbHandler4SpringController writeDbHandler4SpringController;
 
-    // Spring Controller对应的方法HASH+长度
+    // Spring Controller对应的方法HASH+长度(供生成方法调用信息使用)
     private Set<String> springControllerMethodHashSet = new HashSet<>();
 
     // 有注解的方法HASH+长度
@@ -43,11 +46,19 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     // Spring Controller相关信息
     private final List<WriteDbData4SpringController> writeDbData4SpringControllerList = new ArrayList<>(batchSize);
 
-    // feign Controller相关信息
+    // feign Client相关信息
     private final List<WriteDbData4FeignClientData> writeDbData4FeignClientList = new ArrayList<>(batchSize);
 
-    // 暂存feign的方法hash
+    // 暂存feign的方法hash todo (供生成方法调用信息使用)
     private final Set<String> feignClientHashSet = new HashSet<>();
+
+    // 用于存储接口请求方式的map
+    private final Map<String,String> controllerReqMethodMap = new HashMap<>();
+    private final Map<String,List<WriteDbData4SpringController>> incompleteController = new HashMap<>();
+
+    // 用于存储Feign请求方式的map
+    private final Map<String,String> feignClientReqMethodMap = new HashMap<>();
+    private final Map<String,List<WriteDbData4FeignClientData>> incompleteFeignClient = new HashMap<>();
 
 
     @Override
@@ -133,12 +144,13 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                                                      String attributeValue) {
         // 判断对应的类是否与Spring Controller相关
         List<String> classRequestMappingPathList = classRequestMappingMap.get(simpleClassName);
-        if (classRequestMappingPathList == null || !SpringMvcRequestMappingUtil.isRequestMappingAnnotation(annotationName)) {
+        // 获取注解上的requestMapping的类型
+        MappingType mappingType = SpringMvcRequestMappingUtil.getMappingType(annotationName);
+        if (classRequestMappingPathList == null || mappingType.equals(MappingType.NOMAPPING)) {
             // 当前类与Spring Controller相关，或当前方法的注解不是@RequestMapping
             return false;
         }
-
-        if (!attributeName.isEmpty() && !SpringMvcRequestMappingUtil.isRequestMappingPathAttribute(attributeName)) {
+        if (!attributeName.isEmpty() && !SpringMvcRequestMappingUtil.isRequestMappingAttribute(attributeName)) {
             // 注解属性名称非空，且不是@RequestMapping注解的path属性
             return false;
         }
@@ -151,97 +163,177 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
             classRequestMappingPathList = Collections.singletonList("");
         }
 
-        List<String> methodPathList = null;
-        if (attributeValue != null) {
-            methodPathList = AnnotationAttributesParseUtil.parseListStringAttribute(attributeValue);
-        }
-        if (methodPathList == null || methodPathList.isEmpty()) {
-            // 假如方法的path列表为空，则创建为只有一个空字符串的列表
-            methodPathList = Collections.singletonList("");
-        }
+        //对@RequestMapping的attributeName = method的情况进行处理
+        if(MappingType.MAPPING.equals(mappingType) && JACGCommonNameConstants.SPRING_MVC_MAPPING_ATTRIBUTE_METHOD.equals(attributeName)){
+            controllerReqMethodMap.put(methodHash,SpringMvcRequestMappingUtil.getRequestMethodFromAnnoAttribute(attributeValue));
+        }else{
+            //@RequestMapping的attributeName是path 或者是@GetMapping在这里处理
+            //尝试从注解中获取请求方法,若无法获取则尝试记录的map中获取
+            String requestMethod = ObjectUtils.firstNonNull(SpringMvcRequestMappingUtil.getRequestMethodFromAnnoName(annotationName),
+                    controllerReqMethodMap.get(methodHash));
+            List<String> methodPathList = null;
+            if (attributeValue != null) {
+                methodPathList = AnnotationAttributesParseUtil.parseListStringAttribute(attributeValue);
+            }
+            if (methodPathList == null || methodPathList.isEmpty()) {
+                // 假如方法的path列表为空，则创建为只有一个空字符串的列表
+                methodPathList = Collections.singletonList("");
+            }
 
-        int seq = 0;
-        for (String classRequestMappingPath : classRequestMappingPathList) {
-            for (String methodPath : methodPathList) {
-                String showUri = SpringMvcRequestMappingUtil.genShowUri(classRequestMappingPath, methodPath);
+            int seq = 0;
+            List<WriteDbData4SpringController> controllerList = new ArrayList<>();
+            for (String classRequestMappingPath : classRequestMappingPathList) {
+                for (String methodPath : methodPathList) {
+                    String showUri = SpringMvcRequestMappingUtil.genShowUri(classRequestMappingPath, methodPath);
 
-                WriteDbData4SpringController writeDbData4SpringController = new WriteDbData4SpringController();
-                writeDbData4SpringController.setMethodHash(methodHash);
-                writeDbData4SpringController.setSeq(seq);
-                writeDbData4SpringController.setShowUri(showUri);
-                writeDbData4SpringController.setClassPath(classRequestMappingPath);
-                writeDbData4SpringController.setMethodPath(methodPath);
-                writeDbData4SpringController.setAnnotationName(annotationName);
-                writeDbData4SpringController.setSimpleClassName(simpleClassName);
-                writeDbData4SpringController.setFullMethod(fullMethod);
-
-                logger.debug("找到Spring Controller信息 {}", writeDbData4SpringController);
-                writeDbData4SpringControllerList.add(writeDbData4SpringController);
+                    WriteDbData4SpringController writeDbData4SpringController = new WriteDbData4SpringController();
+                    writeDbData4SpringController.setMethodHash(methodHash);
+                    writeDbData4SpringController.setSeq(seq);
+                    writeDbData4SpringController.setShowUri(showUri);
+                    writeDbData4SpringController.setClassPath(classRequestMappingPath);
+                    writeDbData4SpringController.setMethodPath(methodPath);
+                    writeDbData4SpringController.setAnnotationName(annotationName);
+                    writeDbData4SpringController.setSimpleClassName(simpleClassName);
+                    writeDbData4SpringController.setFullMethod(fullMethod);
+                    writeDbData4SpringController.setRequestMethod(requestMethod);
+                    controllerList.add(writeDbData4SpringController);
+                    logger.debug("找到Spring Controller信息 {}", writeDbData4SpringController);
+                    seq++;
+                }
+            }
+            //如果请求方法是空，则表示此纪录并不完整,暂存
+            if(Objects.isNull(requestMethod)){
+                incompleteController.put(methodHash,controllerList);
+            }else{
+                //直接存储
+                writeDbData4SpringControllerList.addAll(controllerList);
                 // 尝试写入Spring Controller信息
                 writeDbHandler4SpringController.tryInsertDb(writeDbData4SpringControllerList);
-                seq++;
+                return true;
             }
         }
+        //检查不完整的记录，查看是否可以组装出完整记录
+        if (incompleteController.containsKey(methodHash) && controllerReqMethodMap.containsKey(methodHash)) {
+            String reqMethod = controllerReqMethodMap.get(methodHash);
+            List<WriteDbData4SpringController> controllerList = incompleteController.get(methodHash);
+            controllerList.forEach(record-> record.setRequestMethod(reqMethod));
+            //记录组装完成，添加到记录新增列表
+            writeDbData4SpringControllerList.addAll(controllerList);
+            //释放记录
+            controllerReqMethodMap.remove(methodHash);
+            incompleteController.remove(methodHash);
+        }
+
+        // 尝试写入Spring Controller信息
+        writeDbHandler4SpringController.tryInsertDb(writeDbData4SpringControllerList);
         return true;
+
     }
 
 
     //处理openfeign相关注解
     private boolean handleFeignClientAnnotation(String methodHash, String fullMethod, String className,String simpleClassName, String annotationName, String attributeName,
                                                 String attributeValue){
-
+        MappingType mappingType = SpringMvcRequestMappingUtil.getMappingType(annotationName);
         //此方法对应类不为FeignClient
-        if (!feignClientClassMap.containsKey(simpleClassName)) {
+        if (!feignClientClassMap.containsKey(simpleClassName) || mappingType.equals(MappingType.NOMAPPING)) {
             return false;
         }
-        if (!attributeName.isEmpty() && !SpringMvcRequestMappingUtil.isRequestMappingPathAttribute(attributeName)) {
+        if (!attributeName.isEmpty() && !SpringMvcRequestMappingUtil.isRequestMappingAttribute(attributeName)) {
             // 注解属性名称非空，且不是@RequestMapping注解的path属性
             return false;
         }
 
         feignClientHashSet.add(methodHash);
-        Map<String, String> classAttrMap = feignClientClassMap.get(simpleClassName);
-        //获取FeignClient属性名
-        String classAttrName = Objects.isNull(classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_VALUE))
-                ? classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_NAME)
-                : classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_VALUE);
-        String classAttrContextId = classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_CONTEXTID);
-        String classAttrPath = classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_PATH);
+        //对@RequestMapping的attributeName = method的情况进行处理
+        if(MappingType.MAPPING.equals(mappingType) && JACGCommonNameConstants.SPRING_MVC_MAPPING_ATTRIBUTE_METHOD.equals(attributeName)){
+            feignClientReqMethodMap.put(methodHash,SpringMvcRequestMappingUtil.getRequestMethodFromAnnoAttribute(attributeValue));
 
-        List<String> methodPathList = Collections.emptyList();
-        if (attributeValue != null) {
-            methodPathList = AnnotationAttributesParseUtil.parseListStringAttribute(attributeValue);
+        }else{
+
+            //尝试从注解中获取请求方法,若无法获取则尝试记录的map中获取
+            String requestMethod = ObjectUtils.firstNonNull(SpringMvcRequestMappingUtil.getRequestMethodFromAnnoName(annotationName),
+                    feignClientReqMethodMap.get(methodHash));
+            Map<String, String> classAttrMap = feignClientClassMap.get(simpleClassName);
+            //获取FeignClient属性名
+            String classAttrName = Objects.isNull(classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_VALUE))
+                    ? classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_NAME)
+                    : classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_VALUE);
+            String classAttrContextId = classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_CONTEXTID);
+            //feignClient的path属性是String类型，不是List<String>
+            String classAttrPath = classAttrMap.get(JACGCommonNameConstants.FEIGN_CLIENT_ATTR_NAME_PATH);
+
+            List<String> methodPathList = Collections.emptyList();
+            if (attributeValue != null) {
+                methodPathList = AnnotationAttributesParseUtil.parseListStringAttribute(attributeValue);
+            }
+
+            //可能会有一个接口多个路径的情况
+            int seq = 0;
+            List<WriteDbData4FeignClientData> feignClientDataList = new ArrayList<>();
+            for (String methodPath : methodPathList) {
+                //实例化DO
+                WriteDbData4FeignClientData writeDbData4FeignClientData = new WriteDbData4FeignClientData();
+                writeDbData4FeignClientData.setContextId(classAttrContextId);
+                writeDbData4FeignClientData.setServiceName(classAttrName);
+                writeDbData4FeignClientData.setClassPath(classAttrPath);
+
+                writeDbData4FeignClientData.setSeq(seq);
+                writeDbData4FeignClientData.setClassName(className); //todo:className目测多余，simpleClassName已经是唯一的了
+                writeDbData4FeignClientData.setAnnotationName(annotationName);
+                writeDbData4FeignClientData.setSimpleClassName(simpleClassName);
+                writeDbData4FeignClientData.setFullMethod(fullMethod);
+                writeDbData4FeignClientData.setMethodPath(methodPath);
+                writeDbData4FeignClientData.setShowUri(SpringMvcRequestMappingUtil.genShowUri(classAttrPath, methodPath));
+                writeDbData4FeignClientData.setMethodHash(methodHash);
+                writeDbData4FeignClientData.setRequestMethod(requestMethod);
+                //新增记录添加到对应List
+                feignClientDataList.add(writeDbData4FeignClientData);
+                seq++;
+            }
+            //如果请求方法是空，则表示此纪录并不完整,暂存
+            if(Objects.isNull(requestMethod)){
+                incompleteFeignClient.put(methodHash,feignClientDataList);
+            }else{
+                //直接存储
+                writeDbData4FeignClientList.addAll(feignClientDataList);
+                // 尝试写入Spring Controller信息
+                writeDbHandler4FeignClient.tryInsertDb(writeDbData4FeignClientList);
+                return true;
+            }
         }
 
-        //可能会有一个接口多个路径的情况
-        int seq = 0;
-        for (String methodPath : methodPathList) {
-            //实例化DO
-            WriteDbData4FeignClientData writeDbData4FeignClientData = new WriteDbData4FeignClientData();
-            writeDbData4FeignClientData.setContextId(classAttrContextId);
-            writeDbData4FeignClientData.setServiceName(classAttrName);
-            writeDbData4FeignClientData.setClassPath(classAttrPath);
-
-            writeDbData4FeignClientData.setSeq(seq);
-            writeDbData4FeignClientData.setClassName(className);
-            writeDbData4FeignClientData.setSimpleClassName(simpleClassName);
-            writeDbData4FeignClientData.setFullMethod(fullMethod);
-            writeDbData4FeignClientData.setMethodPath(methodPath);
-            writeDbData4FeignClientData.setShowUri(SpringMvcRequestMappingUtil.genShowUri(classAttrPath, methodPath));
-            writeDbData4FeignClientData.setMethodHash(methodHash);
-            //新增记录添加到对应List
-            writeDbData4FeignClientList.add(writeDbData4FeignClientData);
-            writeDbHandler4FeignClient.tryInsertDb(writeDbData4FeignClientList);
-            seq++;
+        //检查不完整的记录，查看是否可以组装出完整记录
+        if (incompleteFeignClient.containsKey(methodHash) && feignClientReqMethodMap.containsKey(methodHash)) {
+            String reqMethod = feignClientReqMethodMap.get(methodHash);
+            List<WriteDbData4FeignClientData> feignClientList = incompleteFeignClient.get(methodHash);
+            feignClientList.forEach(record-> record.setRequestMethod(reqMethod));
+            //记录组装完成，添加到记录新增列表
+            writeDbData4FeignClientList.addAll(feignClientList);
+            //释放记录
+            feignClientReqMethodMap.remove(methodHash);
+            incompleteFeignClient.remove(methodHash);
         }
 
+        // 尝试写入feignClient的信息
+        writeDbHandler4FeignClient.tryInsertDb(writeDbData4FeignClientList);
         return true;
     }
     @Override
     protected void beforeDone() {
+        //将剩余没有请求方式的controller信息写入到数据库
+        List<WriteDbData4SpringController> noReqMethodControllerList = incompleteController
+                .values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        writeDbData4SpringControllerList.addAll(noReqMethodControllerList);
+        //将剩余没有表示请求方式的feignclient信息写入数据库
+        List<WriteDbData4FeignClientData> noReqMethodFeignClient = incompleteFeignClient
+                .values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        writeDbData4FeignClientList.addAll(noReqMethodFeignClient);
+
+
         // 写入Spring Controller剩余信息
         writeDbHandler4SpringController.insertDb(writeDbData4SpringControllerList);
-        // 处理feigncliet相关信息
+        // 写入feignClient的剩余信息
         writeDbHandler4FeignClient.insertDb(writeDbData4FeignClientList);
     }
 
