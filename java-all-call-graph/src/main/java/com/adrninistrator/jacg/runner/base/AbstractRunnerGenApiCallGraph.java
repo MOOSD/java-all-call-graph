@@ -7,10 +7,7 @@ import com.adrninistrator.jacg.api.MethodArgument;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.common.enums.DefaultBusinessDataTypeEnum;
-import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
-import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
+import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
@@ -28,8 +25,20 @@ import java.util.*;
 public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCallGraph {
     private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenApiCallGraph.class);
 
+    //是否跨基于OpenFeign的服务生成调用链路
+    protected boolean crossServiceByOpenFeign;
+
     // 保存各个方法已处理过的所有注解信息
     protected Map<String, Map<String, Map<String, BaseAnnotationAttribute>>> methodAllAnnotationInfoMap = new HashMap<>();
+
+    //复写公共预处理方法
+
+
+    @Override
+    protected boolean commonPreHandle() {
+        crossServiceByOpenFeign = configureWrapper.<Boolean>getMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN);
+        return super.commonPreHandle();
+    }
 
     /**
      * 获取方法对应的注解信息

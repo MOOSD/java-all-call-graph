@@ -335,11 +335,13 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
             if (callerMethodMap.isEmpty()) {
                 //如果开启跨微服务生成,且当前为方法是一个controller
-                if(configureWrapper.<Boolean>getMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN) &&
-                        callee.getAnnotation().stream().anyMatch(SpringMvcRequestMappingUtil::isRequestMappingAnnotation)){
+                if(crossServiceByOpenFeign && Objects.nonNull(callee.getAnnotation()) &&
+                        callee.getAnnotation().stream().anyMatch(SpringMvcRequestMappingUtil::isControllerHandlerMethod)){
                     //找到此controller对应的openfeign,将feignClient作为此Controller的调用者继续生成调用链路,对其重新赋值。
-                    callerMethodMap = getControllerCaller4FeignClient(callGraphNode4Callee.getCalleeMethodHash());
-                }else{
+                    callerMethodMap = getControllerCaller4FeignClient(callGraphNode4Callee);
+                }
+                // 再次判空，为空则表示
+                if (callerMethodMap.isEmpty()) {
                     // 查询到调用方法为空时的处理
                     if (handleCallerEmptyResult(callGraphNode4CalleeStack, superCallChildInfoStack ,callee)) {
                         return true;
@@ -413,20 +415,30 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
     /**
      * 获取作为controller的调用者的FeignClient
-     * @param controllerHash controller方法的hash值
-     * @return 查询结果对象
+     * @param callGraphNode4Callee controller方法的hash值
+     * @return 组装成的一个条调用记录
      */
-    private Map<String, Object> getControllerCaller4FeignClient(String controllerHash){
-        Map<String, Object> callerMethodMap = getFeignInfoBySpringMethodHash(controllerHash);
+    private Map<String, Object> getControllerCaller4FeignClient(CallGraphNode4Callee callGraphNode4Callee){
+        // 一个feignClient接口，只可能对应一个controller接口,因此当不是第一次查询此controller被哪个feign调用的时候，直接返回即可。
+        if(Objects.nonNull(callGraphNode4Callee.getCallerMethodHash())){
+            return new HashMap<>(0);
+        }
+        Map<String, Object> callerMethodMap = getFeignInfoBySpringMethodHash(callGraphNode4Callee.getCalleeMethodHash());
 
+        if (callerMethodMap.isEmpty()){
+            return callerMethodMap;
+        }
+        //给与一个不存在的调用id
+        callerMethodMap.put(DC.MC_CALL_ID,-(int)(Math.random()*100000));
 
-        callerMethodMap.put(DC.MC_CALLER_FULL_METHOD,null);
-        callerMethodMap.put(DC.MC_CALLER_METHOD_HASH,null);
-        callerMethodMap.put(DC.MC_CALL_ID,null);
-        callerMethodMap.put(DC.MC_ENABLED,null);
-        callerMethodMap.put(DC.MC_CALL_TYPE,null);
-        callerMethodMap.put(DC.MC_CALL_FLAGS,null);
-        callerMethodMap.put(DC.MC_CALLER_LINE_NUMBER,null);
+        callerMethodMap.put(DC.MC_ENABLED,1);
+        //设置调用方式为rpc调用
+        callerMethodMap.put(DC.MC_CALL_TYPE,"RPC");
+        //设置调用标识为调用者带有注解
+        // todo setflag(0) 等价于 MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.getFlag();
+        callerMethodMap.put(DC.MC_CALL_FLAGS,MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.setFlag(0));
+        //调用行设置为0
+        callerMethodMap.put(DC.MC_CALLER_LINE_NUMBER,0);
 
         return callerMethodMap;
     }
@@ -638,17 +650,34 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         calleeNode.setEntrance(Boolean.TRUE);
     }
 
+    /**
+     * 根据controller的methodhash 获取feign相关信息
+     * @param ControllerHash
+     * @return
+     */
     private Map<String,Object> getFeignInfoBySpringMethodHash(String ControllerHash){
         // 第一次查询
         // 确定查询被调用关系时所需字段
-        String sql = "select " + "f."+DC.FC_FULL_METHOD+",f."+DC.FC_METHOD_HASH +
-                " from " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName() + "as f " +
-                " inner join " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableName() + "as s " +
-                " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI +
-                " where " + "s." + DC.SPC_METHOD_HASH + " = ?";
-        List<Map<String, Object>> maps = dbOperator.queryList(sql, new Object[]{ControllerHash});
-
-        return null;
+        // todo 应该新增按照服务名过滤
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_RPC1;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if(sql == null){
+            sql = "select " + "f."+DC.FC_FULL_METHOD +" as "+DC.MC_CALLER_FULL_METHOD +",f."+DC.FC_METHOD_HASH + " as " + DC.MC_CALLER_METHOD_HASH +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName() + " as s " +
+                    " inner join " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableName() + " as f " +
+                    " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI +
+                    " and ( s." + DC.SPC_REQUEST_METHOD +" = f."+ DC.FC_REQUEST_METHOD +" or s."+DC.SPC_REQUEST_METHOD +" is null)" +
+                    " where " + " s." + DC.SPC_METHOD_HASH + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        List<Map<String, Object>> resultList = dbOperator.queryList(sql, new Object[]{ControllerHash});
+        //假设一个feignClient对应多个接口的情况不存在。
+        logger.info("sql:"+sql +"入参:"+ControllerHash);
+        logger.info("根据controller查询对应feign结果:"+resultList);
+        if(Objects.nonNull(resultList) && resultList.size() == 0){
+            return new HashMap<>(0);
+        }
+        return resultList.get(0);
     }
 
     /**

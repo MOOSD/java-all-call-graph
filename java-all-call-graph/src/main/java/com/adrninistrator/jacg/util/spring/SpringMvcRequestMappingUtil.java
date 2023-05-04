@@ -23,6 +23,20 @@ public class SpringMvcRequestMappingUtil {
     }
 
     /**
+     * 判断是否为Controller的控制器方法
+     * @param annotationName 注解名称
+     * @return
+     */
+    public static boolean isControllerHandlerMethod(String annotationName) {
+        for (String springMvcMappingAnnotation : JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS) {
+            if (annotationName.startsWith(springMvcMappingAnnotation,1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 从组合注解（GetMapping）名称中获取请求方式
      * @param annotationName
      * @return
