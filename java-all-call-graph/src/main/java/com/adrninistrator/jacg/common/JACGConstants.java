@@ -136,6 +136,9 @@ public class JACGConstants {
 
     public static final String THREAD_NAME_PREFIX_WORKER = "jacg_worker";
 
+    //此次调用是否为rpc
+    public static final String IS_RPC = "isRpc";
+
     private JACGConstants() {
         throw new IllegalStateException("illegal");
     }

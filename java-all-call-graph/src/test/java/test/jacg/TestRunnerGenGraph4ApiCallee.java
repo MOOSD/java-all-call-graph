@@ -57,7 +57,7 @@ public class TestRunnerGenGraph4ApiCallee {
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
     }/**
-     * i8项目，向上调用链路的生成，通过方法行判断
+     * 通过方法行获取调用链路
      *
      */
     @Test

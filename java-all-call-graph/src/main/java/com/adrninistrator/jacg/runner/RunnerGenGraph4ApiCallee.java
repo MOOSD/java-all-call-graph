@@ -250,9 +250,7 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
         // 判断被调用方法上是否有注解，假如被调用方法没有调用者，即没有记录，那么调用标识就不存在
         // 增加调用标识不为空的标识
-        if(callFlags == 0){
-            //todo 新增没有调用记录的注解信息添加
-        } else if (MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
+        if (callFlags == 0 || MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
             // 添加方法注解信息
             List<String> methodAnnotationInfo = new ArrayList<>();
             getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash,methodAnnotationInfo);
@@ -383,8 +381,10 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
             int callFlags = (int) callerMethodMap.get(DC.MC_CALL_FLAGS);
             int callerLineNum = (int) callerMethodMap.get(DC.MC_CALLER_LINE_NUMBER);
+            // 检查是否为远程过程调用
+            boolean isRpc = !Objects.isNull(callerMethodMap.get(JACGConstants.IS_RPC)) && (boolean) callerMethodMap.get(JACGConstants.IS_RPC);
             // 获取方法调用方信息
-            caller = recordCallerInfo(callerFullMethod, methodCallId, callFlags, callType, callerLineNum, callGraphNode4CalleeStack.getHead(),
+            caller = recordCallerInfo(callerFullMethod, isRpc, methodCallId, callFlags, callType, callerLineNum, callGraphNode4CalleeStack.getHead(),
                     callerMethodHash, back2Level);
             //调用方更新调用列表
             caller.addCaller(callee);
@@ -437,11 +437,14 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         callerMethodMap.put(DC.MC_CALL_FLAGS,MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.setFlag(0));
         //调用行设置为0
         callerMethodMap.put(DC.MC_CALLER_LINE_NUMBER,0);
+        //此次调用为一次远程过程调用
+        callerMethodMap.put(JACGConstants.IS_RPC,true);
 
         return callerMethodMap;
     }
     // 记录调用方法信息
     protected CalleeNode recordCallerInfo(String callerFullMethod,
+                                                     Boolean isRpc,
                                                      int methodCallId,
                                                      int callFlags,
                                                      String callType,
@@ -458,6 +461,8 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         caller.setFqcn(JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod));
         caller.setMethodName(JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod));
         caller.setMethodArguments((MethodUtil.genMethodArgTypeList(callerFullMethod)));
+        //设置此次调用为一次远程过程调用
+        caller.getCalleeInfo().setRpc(isRpc);
 
         // 判断调用方法上是否有注解
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;

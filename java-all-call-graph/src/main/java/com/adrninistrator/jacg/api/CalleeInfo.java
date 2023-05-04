@@ -18,7 +18,7 @@ public class CalleeInfo {
     private boolean isAsync;
 
     //是否是rpc调用
-    private boolean isRpcCall;
+    private boolean isRpc;
 
 
     /**
@@ -50,11 +50,11 @@ public class CalleeInfo {
         return isAsync;
     }
 
-    public boolean isRpcCall() {
-        return isRpcCall;
+    public boolean isRpc() {
+        return isRpc;
     }
 
-    public void setRpcCall(boolean rpcCall) {
-        isRpcCall = rpcCall;
+    public void setRpc(boolean rpc) {
+        isRpc = rpc;
     }
 }
