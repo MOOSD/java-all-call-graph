@@ -12,4 +12,4 @@ CREATE TABLE if not exists lambda_method_info_{appName} (
   PRIMARY KEY (call_id),
   INDEX idx_lmi_ecn_{appName}(lambda_callee_class_name(255)),
   INDEX idx_lmi_ncn_{appName}(lambda_next_class_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Lambda表达式方法信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='Lambda表达式方法信息表';

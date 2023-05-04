@@ -6,4 +6,4 @@ CREATE TABLE if not exists spring_bean_{appName} (
   PRIMARY KEY (record_id),
   INDEX inx_spb_sbn_{appName}(spring_bean_name(255)),
   INDEX inx_spb_cn_{appName}(class_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Spring Bean信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='Spring Bean信息表';

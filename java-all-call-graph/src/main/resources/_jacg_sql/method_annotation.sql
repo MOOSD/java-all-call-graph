@@ -13,4 +13,4 @@ CREATE TABLE if not exists method_annotation_{appName} (
   INDEX idx_ma_1_{appName}(method_hash, annotation_name(255)),
   INDEX idx_ma_an_{appName}(annotation_name(255)),
   INDEX idx_ma_scn_{appName}(simple_class_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法上的注解信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法上的注解信息表';

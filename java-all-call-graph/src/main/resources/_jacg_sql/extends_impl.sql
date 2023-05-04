@@ -11,4 +11,4 @@ CREATE TABLE if not exists extends_impl_{appName} (
   PRIMARY KEY (record_id),
   INDEX idx_ei_scn_{appName}(simple_class_name(255)),
   INDEX idx_ei_uscn_{appName}(upward_simple_class_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='继承与实现相关信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='继承与实现相关信息表';

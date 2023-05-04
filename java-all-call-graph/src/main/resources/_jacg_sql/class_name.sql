@@ -7,4 +7,4 @@ CREATE TABLE if not exists class_name_{appName} (
   INDEX idx_cn_cn_{appName}(class_name(255)),
   INDEX idx_cn_scn_{appName}(simple_class_name(255)),
   INDEX idx_cn_dc_{appName}(duplicate_class)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='类名信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='类名信息表';

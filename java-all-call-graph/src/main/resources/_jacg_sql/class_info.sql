@@ -5,4 +5,4 @@ CREATE TABLE if not exists class_info_{appName} (
   class_name varchar(500) NOT NULL COMMENT '完整类名',
   PRIMARY KEY (record_id),
   INDEX idx_ci_scn_{appName} (simple_class_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='类的信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='类的信息表';

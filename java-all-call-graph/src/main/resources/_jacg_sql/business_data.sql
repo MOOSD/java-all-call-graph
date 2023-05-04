@@ -4,4 +4,4 @@ CREATE TABLE if not exists business_data_{appName} (
   data_value text COLLATE utf8mb4_bin NOT NULL COMMENT '数据内容，JSON字符串格式',
   PRIMARY KEY (call_id, data_type),
   INDEX idx_bd_dt_{appName} (data_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用业务功能数据表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法调用业务功能数据表';

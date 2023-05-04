@@ -6,4 +6,4 @@ CREATE TABLE if not exists method_call_info_{appName} (
   array_flag int NOT NULL COMMENT '是否为数组格式，1:是，0:否',
   the_value text COLLATE utf8mb4_bin NOT NULL COMMENT '对应的值',
   PRIMARY KEY (call_id, obj_args_seq, seq, type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法调用信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法调用信息表';

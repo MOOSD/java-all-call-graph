@@ -9,4 +9,4 @@ CREATE TABLE if not exists method_info_{appName} (
   PRIMARY KEY (method_hash),
   INDEX idx_mi_cm_{appName}(simple_class_name(255), method_name(255)),
   INDEX idx_mi_srt_{appName}(simple_return_type(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法的信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法的信息表';

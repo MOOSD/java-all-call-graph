@@ -161,7 +161,7 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         }
 
         if (calleeFullMethodList.isEmpty()) {
-            // 未查找到匹配的方法，生成空文件
+            // 未查找到匹配的方法
             logger.error("未查询到类{}存在的方法:{}被调用过",calleeSimpleClassName,methodInfoInTask);
             return false;
         }
@@ -188,11 +188,6 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         if (findMethodTaskInfo.isError()) {
             // 返回处理失败
             return false;
-        }
-
-        if (findMethodTaskInfo.isGenEmptyFile()) {
-            // 需要生成空文件
-            return genEmptyFile(calleeSimpleClassName, methodInfoInTask);
         }
 
         // 处理一个被调用方法
@@ -253,8 +248,11 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         // 构建调用树
         CalleeNode root = createTree(entryCalleeSimpleClassName, entryCalleeFullMethod);
 
-        // 判断被调用方法上是否有注解
-        if (MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
+        // 判断被调用方法上是否有注解，假如被调用方法没有调用者，即没有记录，那么调用标识就不存在
+        // 增加调用标识不为空的标识
+        if(callFlags == 0){
+            //todo 新增没有调用记录的注解信息添加
+        } else if (MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
             // 添加方法注解信息
             List<String> methodAnnotationInfo = new ArrayList<>();
             getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash,methodAnnotationInfo);

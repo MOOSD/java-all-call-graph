@@ -9,4 +9,4 @@ CREATE TABLE if not exists class_annotation_{appName} (
   PRIMARY KEY (record_id),
   INDEX idx_ca_1_{appName}(simple_class_name(255), annotation_name(255)),
   INDEX idx_ca_an_{appName}(annotation_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='类上的注解信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='类上的注解信息表';

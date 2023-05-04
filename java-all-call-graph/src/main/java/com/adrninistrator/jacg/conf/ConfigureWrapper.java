@@ -4,11 +4,7 @@ import com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter;
 import com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter;
 import com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter;
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
-import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
+import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.common.enums.interfaces.ConfigInterface;
 import com.adrninistrator.jacg.common.enums.interfaces.MainConfigInterface;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
@@ -27,14 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**

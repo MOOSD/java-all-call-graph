@@ -12,4 +12,4 @@ CREATE TABLE if not exists method_arg_generics_type_{appName} (
   UNIQUE INDEX uni_magt_mh_{appName}(method_hash, arg_seq, type, type_seq),
   INDEX idx_magt_scn_{appName}(simple_class_name(255)),
   INDEX idx_magt_sgt_{appName}(simple_generics_type(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法参数泛型类型';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法参数泛型类型';

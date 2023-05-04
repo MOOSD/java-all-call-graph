@@ -8,4 +8,4 @@ CREATE TABLE if not exists class_signature_ei1_{appName} (
   class_name varchar(500) NOT NULL COMMENT '完整类名',
   PRIMARY KEY (record_id),
   INDEX inx_csei1_scn_{appName}(simple_class_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='类的签名中涉及继承与实现的信息表1';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='类的签名中涉及继承与实现的信息表1';

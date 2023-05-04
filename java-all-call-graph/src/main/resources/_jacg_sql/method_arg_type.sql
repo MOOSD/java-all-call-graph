@@ -8,4 +8,4 @@ CREATE TABLE if not exists method_arg_type_{appName} (
   PRIMARY KEY (method_hash, arg_seq),
   INDEX idx_mat_sat_{appName}(simple_arg_type(255)),
   INDEX idx_mat_scn_{appName}(simple_class_name(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法参数类型';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法参数类型';

@@ -8,4 +8,4 @@ CREATE TABLE if not exists mybatis_ms_table_{appName} (
   mapper_class_name varchar(500) NOT NULL COMMENT 'MyBatis Mapper完整类名',
   PRIMARY KEY (record_id),
   INDEX idx_mmt_scm_{appName}(mapper_simple_class_name(255), mapper_method_name(255), sql_statement, table_seq)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='MyBatis数据库表信息（使用MySQL）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='MyBatis数据库表信息（使用MySQL）';

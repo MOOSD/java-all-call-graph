@@ -56,6 +56,44 @@ public class TestRunnerGenGraph4ApiCallee {
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
+    }/**
+     * i8项目，向上调用链路的生成，通过方法行判断
+     *
+     */
+    @Test
+    public void getAllGraph4CalleeForI8ByMethodLine(){
+        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        RunConfig runConfig = new RunConfig();
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
+        runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
+        //config_db.properties
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+        //allow_class_prefix.properties
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
+
+        //这里的输入方法是getBoqDListByDic方法对应的controller。
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,"BoqApiController:270");
+
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
+        );
+
+
+        runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+                "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
+
+
+        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+
+        System.out.println(JACGJsonUtil.getJsonStr(tree));
+
     }
 
     /**
@@ -97,6 +135,7 @@ public class TestRunnerGenGraph4ApiCallee {
     }
 
     /**
+     * jacg项目的链路生成测试
      * 有bug。父级的父级的调用无法识别
      * lambda调用的文本显示问题
      * jacg项目的测试
@@ -136,6 +175,10 @@ public class TestRunnerGenGraph4ApiCallee {
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
     }
+
+    /**
+     * 通过类名进行测试
+     */
     @Test
     public void getAllGraph4CalleeForJacgByClass(){
         RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();

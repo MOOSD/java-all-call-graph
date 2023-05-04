@@ -14,4 +14,4 @@ CREATE TABLE if not exists feign_client_{appName} (
     PRIMARY KEY (method_hash, seq),
     INDEX inx_sc_su_{appName}(show_uri(255)),
     INDEX inx_sc_scn_{appName}(simple_class_name(255))
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='FeignClient信息表';
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='FeignClient信息表';

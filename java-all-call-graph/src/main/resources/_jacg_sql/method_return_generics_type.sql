@@ -11,4 +11,4 @@ CREATE TABLE if not exists method_return_generics_type_{appName} (
   UNIQUE INDEX uni_mrgt_mh_{appName}(method_hash, type, type_seq),
   INDEX idx_mrgt_scn_{appName}(simple_class_name(255)),
   INDEX idx_mrgt_sgt_{appName}(simple_generics_type(255))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='方法返回泛型类型';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='方法返回泛型类型';
