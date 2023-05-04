@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.common.enums.OutputDetailEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
+import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public abstract class TestRunByCodeBase {
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USE_H2, Boolean.FALSE.toString());
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME, com.mysql.cj.jdbc.Driver.class.getName());
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_URL,
-//                "jdbc:mysql://1.1.1.1:3306/test_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true");
+//                "jdbc:mysql://x.x.x.x:3306/database?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true");
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME, "username");
 //        configureWrapper.setConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD, "password");
 
@@ -70,9 +71,6 @@ public abstract class TestRunByCodeBase {
                 "test.call_graph.",
                 "java."
         );
-
-        // 添加所有预置的扩展类
-        configureWrapper.addAllPreBuildExtensions();
 
         try {
             Class<?> testRunLocalConfigClass = Class.forName("test.run_local.TestRunLocalConfig");
@@ -130,7 +128,8 @@ public abstract class TestRunByCodeBase {
     }
 
     protected void printListContent(List<?> objectList) {
-        if (objectList == null) {
+        if (JavaCGUtil.isCollectionEmpty(objectList)) {
+            logger.info("list为空");
             return;
         }
         for (Object object : objectList) {
