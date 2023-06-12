@@ -24,6 +24,8 @@ public class JACGJsonUtil {
 
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        // 序列化前Map按Key排序，使不同情况下对Map序列化后的顺序是一致的
+        objectMapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
         objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
         objectWriterPretty = objectMapper.writerWithDefaultPrettyPrinter();
@@ -39,6 +41,10 @@ public class JACGJsonUtil {
     }
 
     public static String getJsonStrPretty(Object obj) {
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+
         try {
             return objectWriterPretty.writeValueAsString(obj);
         } catch (Exception e) {

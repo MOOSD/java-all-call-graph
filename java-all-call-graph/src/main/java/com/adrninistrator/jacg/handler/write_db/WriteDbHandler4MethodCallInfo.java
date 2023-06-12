@@ -1,8 +1,10 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCallInfo;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 
 import java.util.Set;
@@ -12,14 +14,20 @@ import java.util.Set;
  * @date 2022/11/16
  * @description: 写入数据库，方法调用信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL_INFO,
+        minColumnNum = 6,
+        maxColumnNum = 6,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL_INFO
+)
 public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteDbData4MethodCallInfo> {
     // 被调用对象及参数存在信息的call_id
     private Set<Integer> withInfoCallIdSet;
 
     @Override
-    protected WriteDbData4MethodCallInfo genData(String line) {
-        String[] array = splitEquals(line, 6);
-
+    protected WriteDbData4MethodCallInfo genData(String[] array) {
         int callId = Integer.parseInt(array[0]);
         String objArgsSeq = array[1];
         String seq = array[2];
@@ -44,11 +52,6 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
     }
 
     @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_METHOD_CALL_INFO;
-    }
-
-    @Override
     protected Object[] genObjectArray(WriteDbData4MethodCallInfo data) {
         return new Object[]{
                 data.getCallId(),
@@ -57,6 +60,25 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
                 data.getType(),
                 data.getArrayFlag(),
                 data.getTheValue()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "方法调用序号",
+                "被调用对象或参数序号，0代表被调用对象，1开始为参数",
+                "序号，从0开始，大于0代表有多种可能",
+                "类型，t:类型，v:值，bv:BASE64编码后的值，sf:静态字段，sfm:静态字段的方法",
+                "是否为数组格式，1:是，0:否",
+                "对应的值"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法调用信息，包括方法调用中被调用对象与参数可能的类型以及值"
         };
     }
 

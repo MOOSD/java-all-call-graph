@@ -4,15 +4,16 @@ import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.DbInsertMode;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
+import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
+import com.adrninistrator.jacg.handler.method.MethodCallHandler;
 import com.adrninistrator.jacg.handler.method.MethodCallInfoHandler;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -25,13 +26,15 @@ import java.util.List;
 /**
  * @author adrninistrator
  * @date 2023/4/7
- * @description: 根据被调用方法处理业务功能数据的抽象父类
+ * @description: 根据被调用方法处理业务功能数据的抽象父类，callee business data
  */
 public abstract class AbstractEEBDHandler extends BaseHandler {
     private static final Logger logger = LoggerFactory.getLogger(AbstractEEBDHandler.class);
 
     // 记录需要处理的被调用方法列表
     private final List<ClassAndMethodName> calleeMethodList = new ArrayList<>();
+
+    private MethodCallHandler methodCallHandler;
 
     private MethodCallInfoHandler methodCallInfoHandler;
 
@@ -101,7 +104,7 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
 
             String businessDataType = chooseBusinessDataType();
             while (true) {
-                Integer row = dbOperator.update(sql, new Object[]{businessDataType, JACGConstants.DB_PAGE_HANDLE_SIZE});
+                Integer row = dbOperator.update(sql, businessDataType, JACGConstants.DB_PAGE_HANDLE_SIZE);
                 if (row == null) {
                     return false;
                 }
@@ -115,7 +118,7 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
             String insertSql = dbOperWrapper.genAndCacheInsertSql(DbTableInfoEnum.DTIE_BUSINESS_DATA, DbInsertMode.DIME_INSERT);
             for (ClassAndMethodName classAndMethodName : calleeMethodList) {
                 // 根据指定的被调用方法查询方法调用
-                if (!queryMethodCallByCalleeMethod(classAndMethodName.getClassName(), classAndMethodName.getMethodName(), insertSql)) {
+                if (!handleMethodCallByCalleeMethod(classAndMethodName.getClassName(), classAndMethodName.getMethodName(), insertSql)) {
                     return false;
                 }
             }
@@ -141,6 +144,7 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
             }
         }
 
+        methodCallHandler = new MethodCallHandler(dbOperWrapper);
         methodCallInfoHandler = new MethodCallInfoHandler(dbOperWrapper);
     }
 
@@ -158,22 +162,15 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{calleeSimpleClassName, startCallId, JACGConstants.DB_PAGE_HANDLE_SIZE - 1});
-        if (list == null) {
-            // 查询失败
-            logger.debug("查询失败 {}", startCallId);
-            return JACGConstants.PAGE_QUERY_FAIL;
-        }
-
-        if (list.isEmpty()) {
+        Integer endCallId = dbOperator.queryObjectOneColumn(sql, Integer.class, calleeSimpleClassName, startCallId, JACGConstants.DB_PAGE_HANDLE_SIZE - 1);
+        if (endCallId == null) {
             // 最后一次分页查询
             logger.debug("最后一次分页查询 {}", startCallId);
             return JACGConstants.PAGE_QUERY_LAST;
         }
 
         // 不是最后一次分页查询
-        int endCallId = (int) list.get(0);
-        logger.debug("查询到endCallId {}", endCallId);
+        logger.debug("查询到endCallId {} {}", startCallId, endCallId);
         return endCallId;
     }
 
@@ -199,19 +196,18 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
         if (!lastQuery) {
             argList.add(endCallId);
         }
-        List<Object> list = dbOperator.queryListOneColumn(sql, argList.toArray());
-        return JACGSqlUtil.genIntegerList(list);
+        return dbOperator.queryListOneColumn(sql, Integer.class, argList.toArray());
     }
 
     /**
-     * 根据指定的被调用方法查询方法调用
+     * 根据指定的被调用方法查询方法调用并处理
      *
      * @param calleeClassName
      * @param calleeMethodName
      * @param insertSql
      * @return
      */
-    private boolean queryMethodCallByCalleeMethod(String calleeClassName, String calleeMethodName, String insertSql) {
+    private boolean handleMethodCallByCalleeMethod(String calleeClassName, String calleeMethodName, String insertSql) {
         String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
         // 第一次分页查询时，从call_id最小值开始查询
         int startCallId = JavaCGConstants.METHOD_CALL_ID_START;
@@ -249,10 +245,16 @@ public abstract class AbstractEEBDHandler extends BaseHandler {
                     ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(methodCallId);
                     // 处理方法调用
                     String businessData = handleMethodCall(methodCallId, calleeClassName, calleeMethodName, objArgsInfoInMethodCall, currentCalleeMethodArgTypeList);
-                    // 向业务功能数据表写入数据
-                    if (businessData != null &&
-                            !dbOperator.insert(insertSql, new Object[]{methodCallId, chooseBusinessDataType(), businessData})) {
-                        return false;
+                    if (businessData != null) {
+                        /*
+                            返回数据非空时进行处理：
+                            向业务功能数据表写入数据
+                            更新方法调用表对应记录的方法调用标志，设置被调用方法存在自定义的业务功能数据
+                         */
+                        if (!dbOperator.insert(insertSql, methodCallId, chooseBusinessDataType(), businessData)
+                                || !methodCallHandler.updateMethodCallAddFlags(methodCallId, MethodCallFlagsEnum.MCFE_EE_BUSINESS_DATA)) {
+                            return false;
+                        }
                     }
                     handleTime++;
                 }

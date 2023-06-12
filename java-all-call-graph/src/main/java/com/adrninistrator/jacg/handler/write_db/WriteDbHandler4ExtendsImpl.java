@@ -1,8 +1,10 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 
 import java.util.HashSet;
@@ -13,6 +15,14 @@ import java.util.Set;
  * @date 2022/11/16
  * @description: 写入数据库，继承与实现相关信息
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_EXTENDS_IMPL,
+        minColumnNum = 4,
+        maxColumnNum = 4,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_EXTENDS_IMPL
+)
 public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbData4ExtendsImpl> {
     // 父类或接口类名
     private Set<String> superClassOrInterfaceNameSet = new HashSet<>();
@@ -22,9 +32,7 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
     }
 
     @Override
-    protected WriteDbData4ExtendsImpl genData(String line) {
-        String[] array = splitEquals(line, 4);
-
+    protected WriteDbData4ExtendsImpl genData(String[] array) {
         String className = array[0];
         int accessFlags = Integer.parseInt(array[1]);
         String type = array[2];
@@ -53,11 +61,6 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
     }
 
     @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_EXTENDS_IMPL;
-    }
-
-    @Override
     protected Object[] genObjectArray(WriteDbData4ExtendsImpl data) {
         return new Object[]{
                 genNextRecordId(),
@@ -69,6 +72,23 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
                 data.getExistsDownwardClasses(),
                 data.getUpwardSimpleClassName(),
                 data.getUpwardClassName()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整类名",
+                "类的access_flags",
+                "类型，e:继承，i:实现",
+                "父类或接口的完整类名"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "类继承类，或类实现接口相关的信息"
         };
     }
 

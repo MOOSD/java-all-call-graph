@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.annotation.util.AnnotationAttributesParseUtil;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4FeignClientData;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodAnnotation;
@@ -11,6 +12,7 @@ import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.jacg.util.spring.MappingType;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -24,6 +26,14 @@ import java.util.stream.Collectors;
  * @date 2022/11/15
  * @description: 写入数据库，方法的注解
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_ANNOTATION,
+        minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE,
+        maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_ANNOTATION
+)
 public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<WriteDbData4MethodAnnotation> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4MethodAnnotation.class);
 
@@ -62,9 +72,8 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
 
 
     @Override
-    protected WriteDbData4MethodAnnotation genData(String line) {
+    protected WriteDbData4MethodAnnotation genData(String[] array) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
-        String[] array = splitBetween(line, JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE, JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE);
         String fullMethod = array[0];
         // 根据完整方法前缀判断是否需要处理
         if (!isAllowedClassPrefix(fullMethod)) {
@@ -109,11 +118,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     }
 
     @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_METHOD_ANNOTATION;
-    }
-
-    @Override
     protected Object[] genObjectArray(WriteDbData4MethodAnnotation data) {
         return new Object[]{
                 genNextRecordId(),
@@ -126,6 +130,26 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 data.getSimpleClassName(),
                 data.getSpringMappingAnnotation(),
                 data.getIsFeignClient()
+        };
+    }
+
+    @Override
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "完整方法（类名+方法名+参数）",
+                "注解类名",
+                "注解属性名称，空字符串代表无注解属性",
+                "注解属性类型，s:字符串；bs:包含回车换行的字符串；m:JSON字符串，Map；ls:JSON字符串，List+String；lm:JSON字符串，List+Map",
+                "注解属性值"
+        };
+    }
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法上指定的注解信息",
+                "若注解没有属性值，则相关字段为空",
+                "若注解有属性值，则每个属性值占一行"
         };
     }
 

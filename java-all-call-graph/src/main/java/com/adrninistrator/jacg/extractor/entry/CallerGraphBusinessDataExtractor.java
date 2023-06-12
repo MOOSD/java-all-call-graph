@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,8 +54,8 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
         try {
             // 生成向下的方法完整调用链文件，并根据关键字生成调用堆栈文件
             List<String> stackFilePathList = genStackFiles(configureWrapper);
-            if (stackFilePathList == null) {
-                return null;
+            if (JavaCGUtil.isCollectionEmpty(stackFilePathList)) {
+                return Collections.emptyList();
             }
 
             List<CallerExtractedFile> callerExtractedFileList = new ArrayList<>(stackFilePathList.size());
@@ -62,7 +63,7 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
                 // 处理文件中的方法调用业务功能数据
                 CallerExtractedFile callerExtractedFile = handleStackFile(stackFilePath);
                 if (callerExtractedFile == null) {
-                    return null;
+                    return Collections.emptyList();
                 }
                 if (!JavaCGUtil.isCollectionEmpty(callerExtractedFile.getCallerExtractedLineList())) {
                     // 文件中存在指定类型的方法调用业务功能数据时才添加
@@ -103,11 +104,13 @@ public class CallerGraphBusinessDataExtractor extends CallerGraphBaseExtractor {
                 continue;
             }
 
-            String lastLine = i > 0 ? lineList.get(i - 1) : null;
             // 当前行包含方法调用业务功能数据，且类型需要处理，进行处理
+            String lastLine = i > 0 ? lineList.get(i - 1) : null;
             // 生成向下的调用堆栈文件处理后对应行的信息
             CallerExtractedLine callerExtractedLine = genCallerExtractedLine(line, lastLine, dataSeq, lineNumberList.get(i), callGraphLineParsed, false, false);
             callerExtractedLineList.add(callerExtractedLine);
+            // 当前的调用堆栈处理了需要类型的业务功能数据后，不再处理后续行的数据
+            break;
         }
     }
 }

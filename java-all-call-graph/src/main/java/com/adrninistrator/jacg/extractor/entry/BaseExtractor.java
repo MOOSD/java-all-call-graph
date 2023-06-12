@@ -88,17 +88,15 @@ public abstract class BaseExtractor {
      * 创建数据库相关对象
      *
      * @param configureWrapper
-     * @return true: 创建成功 false: 创建失败
      */
-    protected boolean genDbObject(ConfigureWrapper configureWrapper) {
+    protected void genDbObject(ConfigureWrapper configureWrapper) {
         if (dbOperator != null) {
-            return true;
+            return;
         }
 
         // 对需要使用的基础配置进行初始化
         dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);
         dbOperator = dbOperWrapper.getDbOperator();
-        return true;
     }
 
     /**
@@ -173,6 +171,7 @@ public abstract class BaseExtractor {
         }
 
         if (!runningFlag.compareAndSet(false, true)) {
+            // handleCallStackData()方法中会对类的字段进行修改，因此不能并发调用
             logger.error("当前类不允许并发调用，请创建新的实例");
             return false;
         }
@@ -208,7 +207,7 @@ public abstract class BaseExtractor {
                 }
 
                 if (!handleCallStack) {
-                    // 还未处理过数据，不执行后续处理
+                    // 不处理数据，不执行后续处理
                     continue;
                 }
 

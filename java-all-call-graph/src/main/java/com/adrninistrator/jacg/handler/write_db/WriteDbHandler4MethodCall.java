@@ -1,11 +1,14 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.MethodCallFlagsEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
+import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +19,14 @@ import java.util.Set;
  * @date 2022/11/18
  * @description: 写入数据库，方法调用关系
  */
+@JACGWriteDbHandler(
+        readFile = true,
+        mainFile = true,
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL,
+        minColumnNum = 9,
+        maxColumnNum = 9,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_CALL
+)
 public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbData4MethodCall> {
     private static final Logger logger = LoggerFactory.getLogger(WriteDbHandler4MethodCall.class);
 
@@ -38,9 +49,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     private Set<String> myBatisMapperMethodWriteSet;
 
     @Override
-    protected WriteDbData4MethodCall genData(String line) {
-        String[] array = splitEquals(line, 9);
-
+    protected WriteDbData4MethodCall genData(String[] array) {
         int callId = Integer.parseInt(array[0]);
         String callerFullMethod = array[1];
         String tmpCalleeFullMethod = array[2];
@@ -84,7 +93,9 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
 
         if (writeDbData4MethodCall.getCallerMethodHash().equals(writeDbData4MethodCall.getCalleeMethodHash())) {
             // 对于递归调用，不写入数据库，防止查询时出现死循环
-            logger.debug("递归调用不写入数据库 {}", line);
+            if (logger.isDebugEnabled()) {
+                logger.debug("递归调用不写入数据库 {}", StringUtils.join(array, "\t"));
+            }
             return null;
         }
 
@@ -94,13 +105,31 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
     }
 
     @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_METHOD_CALL;
+    protected Object[] genObjectArray(WriteDbData4MethodCall data) {
+        return JACGUtil.genMethodCallObjectArray(data);
     }
 
     @Override
-    protected Object[] genObjectArray(WriteDbData4MethodCall data) {
-        return JACGUtil.genMethodCallObjectArray(data);
+    public String[] chooseFileColumnDesc() {
+        return new String[]{
+                "方法调用序号",
+                "调用方，完整方法（类名+方法名+参数）",
+                "被调用方，完整方法（类名+方法名+参数）",
+                "调用方，源代码行号",
+                "被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法",
+                "方法原始的返回类型",
+                "方法实际的返回类型",
+                "调用方，Jar包序号",
+                "被调用方，Jar包序号"
+        };
+    }
+
+
+    @Override
+    public String[] chooseOtherFileDetailInfo() {
+        return new String[]{
+                "方法调用信息，每个方法调用占一行，包括调用者方法与被调用者方法"
+        };
     }
 
     /**
