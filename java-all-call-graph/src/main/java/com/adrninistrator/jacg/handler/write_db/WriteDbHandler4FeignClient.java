@@ -1,22 +1,18 @@
 package com.adrninistrator.jacg.handler.write_db;
 
+import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4FeignClientData;
-import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 
 /**
  * feignClient数据写入数据库
  */
+@JACGWriteDbHandler(
+        readFile = false,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_FEIGN_CLIENT
+)
 public class WriteDbHandler4FeignClient extends AbstractWriteDbHandler<WriteDbData4FeignClientData> {
-    @Override
-    protected WriteDbData4FeignClientData genData(String line) {
-        throw new JavaCGRuntimeException("不会调用当前方法");
-    }
 
-    @Override
-    protected DbTableInfoEnum chooseDbTableInfo() {
-        return DbTableInfoEnum.DTIE_FEIGN_CLIENT;
-    }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4FeignClientData data) {

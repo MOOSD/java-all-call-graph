@@ -13,6 +13,7 @@ import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenApiCallGraph;
 import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
@@ -323,21 +324,17 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.peek();
 
             // 查询当前节点的一个上层调用方法
-            Map<String, Object> callerMethodMap = queryOneByCalleeMethod(callGraphNode4Callee);
-            if (callerMethodMap == null) {
-                // 查询失败
-                return false;
-            }
+            WriteDbData4MethodCall callerMethod = queryOneByCalleeMethod(callGraphNode4Callee);
 
-            if (callerMethodMap.isEmpty()) {
+            if (Objects.isNull(callerMethod)) {
                 //如果开启跨微服务生成,且当前为方法是一个controller
                 if(crossServiceByOpenFeign && Objects.nonNull(callee.getAnnotation()) &&
                         callee.getAnnotation().stream().anyMatch(SpringMvcRequestMappingUtil::isControllerHandlerMethod)){
                     //找到此controller对应的openfeign,将feignClient作为此Controller的调用者继续生成调用链路,对其重新赋值。
-                    callerMethodMap = getControllerCaller4FeignClient(callGraphNode4Callee);
+                    callerMethod = getControllerCaller4FeignClient(callGraphNode4Callee);
                 }
-                // 再次判空，为空则表示
-                if (callerMethodMap.isEmpty()) {
+                // 再次判空，为空则表示此方法没有对应的feignClient，表示无远程调用。
+                if (Objects.isNull(callerMethod)) {
                     // 查询到调用方法为空时的处理
                     if (handleCallerEmptyResult(callGraphNode4CalleeStack, superCallChildInfoStack ,callee)) {
                         return true;
@@ -354,11 +351,11 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             }
 
             String calleeFullMethod = callGraphNode4Callee.getCalleeFullMethod();
-            String callerFullMethod = (String) callerMethodMap.get(DC.MC_CALLER_FULL_METHOD);
-            String origCallerMethodHash = (String) callerMethodMap.get(DC.MC_CALLER_METHOD_HASH);
-            int methodCallId = (int) callerMethodMap.get(DC.MC_CALL_ID);
-            int enabled = (int) callerMethodMap.get(DC.MC_ENABLED);
-            String callType = (String) callerMethodMap.get(DC.MC_CALL_TYPE);
+            String callerFullMethod = callerMethod.getCallerFullMethod();
+            String origCallerMethodHash = callerMethod.getCallerMethodHash();
+            int methodCallId = callerMethod.getCallId();
+            int enabled =  callerMethod.getEnabled();
+            String callType =  callerMethod.getCallType();
 
             // 处理父类方法调用子类方法的相关信息，更新调用者
             MethodAndHash callerMethodAndHash = handleSuperCallChildInfo(superCallChildInfoStack, callGraphNode4CalleeStack.getHead(), calleeFullMethod, callerFullMethod,
@@ -379,13 +376,11 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             // 检查是否出现循环调用
             int back2Level = checkCycleCall(callGraphNode4CalleeStack, callerMethodHash, callerFullMethod);
 
-            int callFlags = (int) callerMethodMap.get(DC.MC_CALL_FLAGS);
-            int callerLineNum = (int) callerMethodMap.get(DC.MC_CALLER_LINE_NUMBER);
             // 检查是否为远程过程调用
-            boolean isRpc = !Objects.isNull(callerMethodMap.get(JACGConstants.IS_RPC)) && (boolean) callerMethodMap.get(JACGConstants.IS_RPC);
+            boolean isRpc = ExtendCallTypeEnum.RPC.getType().equals(callerMethod.getCallType());
             // 获取方法调用方信息
-            caller = recordCallerInfo(callerFullMethod, isRpc, methodCallId, callFlags, callType, callerLineNum, callGraphNode4CalleeStack.getHead(),
-                    callerMethodHash, back2Level);
+            caller = recordCallerInfo(callerFullMethod, isRpc, methodCallId, callerMethod.getCallFlags(), callType,
+                    callerMethod.getCallerLineNumber(), callGraphNode4CalleeStack.getHead(), callerMethodHash, back2Level);
             //调用方更新调用列表
             caller.addCaller(callee);
             //被调用方更新被调用列表
@@ -416,29 +411,27 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
      * @param callGraphNode4Callee controller方法的hash值
      * @return 组装成的一个条调用记录
      */
-    private Map<String, Object> getControllerCaller4FeignClient(CallGraphNode4Callee callGraphNode4Callee){
+    private WriteDbData4MethodCall getControllerCaller4FeignClient(CallGraphNode4Callee callGraphNode4Callee){
         // 一个feignClient接口，只可能对应一个controller接口,因此当不是第一次查询此controller被哪个feign调用的时候，直接返回即可。
         if(Objects.nonNull(callGraphNode4Callee.getCallerMethodHash())){
-            return new HashMap<>(0);
+            return null;
         }
-        Map<String, Object> callerMethodMap = getFeignInfoBySpringMethodHash(callGraphNode4Callee.getCalleeMethodHash());
+        WriteDbData4MethodCall callerMethodMap = getFeignInfoBySpringMethodHash(callGraphNode4Callee.getCalleeMethodHash());
 
-        if (callerMethodMap.isEmpty()){
-            return callerMethodMap;
+        if (Objects.isNull(callerMethodMap)){
+            return null;
         }
         //给与一个不存在的调用id
-        callerMethodMap.put(DC.MC_CALL_ID,-(int)(Math.random()*100000));
+        callerMethodMap.setCallId(-(int)(Math.random()*100000));
 
-        callerMethodMap.put(DC.MC_ENABLED,1);
+        callerMethodMap.setEnabled(1);
         //设置调用方式为rpc调用
-        callerMethodMap.put(DC.MC_CALL_TYPE,"RPC");
+        callerMethodMap.setCallType(ExtendCallTypeEnum.RPC.getType());
         //设置调用标识为调用者带有注解
         // todo setflag(0) 等价于 MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.getFlag();
-        callerMethodMap.put(DC.MC_CALL_FLAGS,MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.setFlag(0));
+        callerMethodMap.setCallFlags(MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.setFlag(0));
         //调用行设置为0
-        callerMethodMap.put(DC.MC_CALLER_LINE_NUMBER,0);
-        //此次调用为一次远程过程调用
-        callerMethodMap.put(JACGConstants.IS_RPC,true);
+        callerMethodMap.setCallerLineNumber(0);
 
         return callerMethodMap;
     }
@@ -617,28 +610,16 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
 
     // 查询当前节点的一个上层调用方法
-    private Map<String, Object> queryOneByCalleeMethod(CallGraphNode4Callee callGraphNode4Callee) {
+    private WriteDbData4MethodCall queryOneByCalleeMethod(CallGraphNode4Callee callGraphNode4Callee) {
         // 确定通过调用方法进行查询使用的SQL语句
         String sql = chooseQueryByCalleeMethodSql(callGraphNode4Callee.getCallerMethodHash());
 
-        List<Map<String, Object>> list;
         if (callGraphNode4Callee.getCallerMethodHash() == null) {
-            list = dbOperator.queryList(sql, new Object[]{callGraphNode4Callee.getCalleeMethodHash()});
-        } else {
-            list = dbOperator.queryList(sql, new Object[]{callGraphNode4Callee.getCalleeMethodHash(), callGraphNode4Callee.getCallerMethodHash()});
+            // 第一次查询
+            return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, callGraphNode4Callee.getCalleeMethodHash());
         }
-
-        if (list == null) {
-            // 查询失败
-            return null;
-        }
-
-        if (list.isEmpty()) {
-            // 查询不到结果时，返回空Map
-            return new HashMap<>(0);
-        }
-
-        return list.get(0);
+        // 不是第一次查询
+        return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, callGraphNode4Callee.getCalleeMethodHash(), callGraphNode4Callee.getCallerMethodHash());
     }
 
 
@@ -658,7 +639,7 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
      * @param ControllerHash
      * @return
      */
-    private Map<String,Object> getFeignInfoBySpringMethodHash(String ControllerHash){
+    private WriteDbData4MethodCall getFeignInfoBySpringMethodHash(String ControllerHash){
         // 第一次查询
         // 确定查询被调用关系时所需字段
         // todo 应该新增按照服务名过滤
@@ -673,12 +654,12 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
                     " where " + " s." + DC.SPC_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<Map<String, Object>> resultList = dbOperator.queryList(sql, new Object[]{ControllerHash});
+        List<WriteDbData4MethodCall> resultList = dbOperator.queryList(sql, WriteDbData4MethodCall.class, ControllerHash);
         //假设一个feignClient对应多个接口的情况不存在。
         logger.info("sql:"+sql +"入参:"+ControllerHash);
         logger.info("根据controller查询对应feign结果:"+resultList);
-        if(Objects.nonNull(resultList) && resultList.size() == 0){
-            return new HashMap<>(0);
+        if(Objects.isNull(resultList) || resultList.size() == 0){
+            return null;
         }
         return resultList.get(0);
     }
@@ -743,14 +724,8 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
                         " limit 1";
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
             }
-
-            List<Object> list = dbOperator.queryListOneColumn(sql, new Object[]{childCalleeSimpleClassName, tmpSccChildFullMethod});
-            if (list == null) {
-                // 查询失败
-                return null;
-            }
-
-            if (!list.isEmpty()) {
+            String simpleClassName = dbOperator.queryObjectOneColumn(sql, String.class, childCalleeSimpleClassName, tmpSccChildFullMethod);
+            if (simpleClassName != null) {
                 // 子类方法存在，需要继续使用栈中的数据进行处理
                 continue;
             }
@@ -935,29 +910,25 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        List<Map<String, Object>> calleeMethodList = dbOperator.queryList(sql, new Object[]{calleeSimpleClassName});
-        if (calleeMethodList == null) {
-            return null;
+        List<WriteDbData4MethodCall> calleeMethodList = dbOperator.queryList(sql, WriteDbData4MethodCall.class, calleeSimpleClassName);
+        if (JavaCGUtil.isCollectionEmpty(calleeMethodList)) {
+            logger.warn("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeSimpleClassName);
+            return Collections.emptyList();
         }
 
-        if (calleeMethodList.isEmpty()) {
-            logger.warn("从方法调用关系表未找到被调用类对应方法 [{}] [{}]", sql, calleeSimpleClassName);
-            return calleeEntryMethodTaskInfoList;
-        }
 
         // 记录已被处理过的方法HASH+长度，因为以上查询时返回字段增加了call_flags，因此相同的方法可能会出现多条
         Set<String> handledCalleeMethodHashSet = new HashSet<>();
-        for (Map<String, Object> map : calleeMethodList) {
-            String calleeMethodHash = (String) map.get(DC.MC_CALLEE_METHOD_HASH);
+        for (WriteDbData4MethodCall methodCall : calleeMethodList) {
+            String calleeMethodHash = methodCall.getCalleeMethodHash();
             if (!handledCalleeMethodHashSet.add(calleeMethodHash)) {
                 // 已处理过的方法跳过
                 continue;
             }
 
-            String calleeFullMethod = (String) map.get(DC.MC_CALLEE_FULL_METHOD);
-            int callFlags = (int) map.get(DC.MC_CALL_FLAGS);
-            CalleeEntryMethodTaskInfo calleeEntryMethodTaskInfo =
-                    new CalleeEntryMethodTaskInfo(calleeMethodHash, calleeFullMethod, JACGClassMethodUtil.getMethodNameWithArgsFromFull(calleeFullMethod), callFlags);
+            String methodNameAndArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(methodCall.getCalleeFullMethod());
+            CalleeEntryMethodTaskInfo calleeEntryMethodTaskInfo = new CalleeEntryMethodTaskInfo(calleeMethodHash, methodCall.getCalleeFullMethod(), methodNameAndArgs,
+                    methodCall.getCallFlags());
             calleeEntryMethodTaskInfoList.add(calleeEntryMethodTaskInfo);
         }
 

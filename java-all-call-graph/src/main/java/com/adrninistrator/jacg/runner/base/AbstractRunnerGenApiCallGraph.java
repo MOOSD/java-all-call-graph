@@ -9,10 +9,14 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.method.ClassAndMethodName;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
+import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
-import com.adrninistrator.jacg.util.*;
+import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
+import com.adrninistrator.jacg.util.JACGJsonUtil;
+import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -114,9 +118,10 @@ public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCal
         }
 
         if (JavaCGCallTypeEnum.CTE_LAMBDA.getType().equals(callType)) {
-            ClassAndMethodName lambdaCalleeInfo = dbOperWrapper.getLambdaCalleeInfo(methodCallId);
+            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = dbOperWrapper.getLambdaCalleeInfo(methodCallId);
             if (lambdaCalleeInfo != null && (
-                    (JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK.equals(lambdaCalleeInfo.getClassName()) && JavaCGCommonNameConstants.METHOD_DO_IN_TRANSACTION.equals(lambdaCalleeInfo.getMethodName()))
+                    (JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
+                            JavaCGCommonNameConstants.METHOD_DO_IN_TRANSACTION.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))
             )) {
                 // 方法为Lambda表达式，且属于事务调用，在方法调用上增加在事务中执行的标志
                 node.runInTransaction();
@@ -145,11 +150,13 @@ public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCal
         }
 
         if (JavaCGCallTypeEnum.CTE_LAMBDA.getType().equals(callType)) {
-            ClassAndMethodName lambdaCalleeInfo = dbOperWrapper.getLambdaCalleeInfo(methodCallId);
-            if (lambdaCalleeInfo != null && (
-                    (JavaCGCommonNameConstants.CLASS_NAME_RUNNABLE.equals(lambdaCalleeInfo.getClassName()) && JavaCGCommonNameConstants.METHOD_RUNNABLE_RUN.equals(lambdaCalleeInfo.getMethodName())) ||
-                            (JavaCGCommonNameConstants.CLASS_NAME_CALLABLE.equals(lambdaCalleeInfo.getClassName()) && JavaCGCommonNameConstants.METHOD_CALLABLE_CALL.equals(lambdaCalleeInfo.getMethodName()))
-            )) {
+            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = dbOperWrapper.getLambdaCalleeInfo(methodCallId);
+            if (lambdaCalleeInfo != null &&
+                    ((JavaCGCommonNameConstants.CLASS_NAME_RUNNABLE.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
+                            JavaCGCommonNameConstants.METHOD_RUNNABLE_RUN.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))
+                            || (JavaCGCommonNameConstants.CLASS_NAME_CALLABLE.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
+                            JavaCGCommonNameConstants.METHOD_CALLABLE_CALL.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))
+                    )) {
                 // 方法为Lambda表达式，且属于线程调用，在方法调用上增加在其他线程执行的标志
                 node.getCalleeInfo().runInOtherThread();
             }
@@ -230,14 +237,14 @@ public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCal
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
-        Map<String, Object> businessDataMap = dbOperator.queryOneRow(sql, new Object[]{methodCallId});
-        if (JACGUtil.isMapEmpty(businessDataMap)) {
+        BaseBusinessData businessData = dbOperator.queryObject(sql, BaseBusinessData.class, methodCallId);
+        if (Objects.isNull(businessData)) {
             logger.error("查询方法调用业务功能数据不存在 {}", methodCallId);
             return false;
         }
 
         // 将方法调用业务功能数据加入被调用方法信息中
-        addBusinessData2Node((String) businessDataMap.get(DC.BD_DATA_TYPE), businessDataMap.get(DC.BD_DATA_VALUE), node);
+        addBusinessData2Node((String) businessData.getDataType(), businessData.getDataValue(), node);
         return true;
     }
 
