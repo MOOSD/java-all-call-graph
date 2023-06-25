@@ -18,11 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -85,6 +81,9 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
     // 当前需要读取的文件描述
     private String fileDesc;
+
+    // 是否增量更新数据库
+    private boolean incrementUpdate;
 
     public AbstractWriteDbHandler() {
         JACGWriteDbHandler jacgWriteDbHandler = this.getClass().getAnnotation(JACGWriteDbHandler.class);
@@ -275,11 +274,11 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
                 dataList.add(data);
                 // 将数据写入数据库
-                tryInsertDb(dataList);
+                tryDataPersistent(dataList);
             }
 
             // 结束前将剩余数据写入数据库
-            insertDb(dataList);
+            dataPersistent(dataList);
 
             // 执行完毕之前的操作
             beforeDone();
@@ -290,6 +289,31 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
         }
     }
 
+    /**
+     * 尝试持久化到数据库
+     * @param dataList
+     */
+    public void tryDataPersistent(List<T> dataList){
+        if (dataList.size() >= batchSize) {
+            if(incrementUpdate){
+//                updateDb(dataList);
+            }else{
+                insertDb(dataList);
+            }
+        }
+    }
+
+    /**
+     * 将数据持久化到数据库
+     * @param dataList
+     */
+    public void dataPersistent(List<T> dataList){
+        if (incrementUpdate) {
+//            updateDb(dataList);
+        }else{
+            insertDb(dataList);
+        }
+    }
     /**
      * 尝试将数据写入数据库
      *
@@ -427,5 +451,9 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
     public void setTaskQueueMaxSize(int taskQueueMaxSize) {
         this.taskQueueMaxSize = taskQueueMaxSize;
+    }
+
+    public void setIncrementUpdate(boolean incrementUpdate) {
+        this.incrementUpdate = incrementUpdate;
     }
 }

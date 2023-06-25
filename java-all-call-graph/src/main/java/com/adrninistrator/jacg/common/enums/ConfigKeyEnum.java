@@ -16,7 +16,9 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_OUTPUT_SUB_DIR_NAME("output.sub.dir.name", "生成调用链文件的子目录名（默认为当前时间）", String.class),
     CKE_DB_INSERT_BATCH_SIZE("db.insert.batch.size", "批量写入数据库时每次插入的数量", Integer.class),
     CKE_CHECK_JAR_FILE_UPDATED("check.jar.file.updated", "检查jar包文件是否有更新", Boolean.class),
-    CROSS_SERVICE_BY_OPENFEIGN("call.graph.cs.openfeign", "基于OpenFeign的RPC框架是否跨微服务生成调用链路", Boolean.class)
+    CROSS_SERVICE_BY_OPENFEIGN("call.graph.cs.openfeign", "基于OpenFeign的RPC框架是否跨微服务生成调用链路", Boolean.class),
+    INCREMENT_UPDATE("increment.update","增量的更新数据库(非全删全插)",Boolean.class),
+    APP_VERSION("app.version", "当前项目的版本号", String.class),
     ;
 
     // 参数key

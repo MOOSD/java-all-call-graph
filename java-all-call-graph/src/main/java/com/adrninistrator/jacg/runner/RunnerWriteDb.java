@@ -1,41 +1,10 @@
 package com.adrninistrator.jacg.runner;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
-import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.DbInsertMode;
-import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.common.enums.InputDirEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.extensions.manual_add_method_call.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodCallHandler;
-import com.adrninistrator.jacg.handler.write_db.AbstractWriteDbHandler;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4ClassAnnotation;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4ClassInfo;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4ClassName;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4ClassSignatureEi1;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4ExtendsImpl;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4ExtendsImplPre;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4InnerClassInfo;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4JarInfo;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4LambdaMethodInfo;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodAnnotation;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodArgGenericsType;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodArgType;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodCall;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodCallInfo;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodInfo;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodLineNumber;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MethodReturnGenericsType;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MyBatisMSTable;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4MyBatisMSWriteTable;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringBean;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringController;
-import com.adrninistrator.jacg.handler.write_db.WriteDbHandler4SpringTask;
-import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.handler.write_db.*;
-import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -46,13 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author adrninistrator
@@ -87,6 +50,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     // 是否使用H2数据库
     private boolean useH2Db;
 
+    // 是否增量更新数据库
+    private boolean incrementUpdate;
+
     @Override
     public boolean preHandle() {
         // 读取其他配置文件
@@ -112,6 +78,9 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
 
         // 批量写入数据库时每次插入的数量
         dbInsertBatchSize = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE);
+
+        // 是否增量更新数据库
+        incrementUpdate = configureWrapper.getMainConfig(ConfigKeyEnum.INCREMENT_UPDATE);
 
         // 初始化方法调用处理类
         methodCallHandler = new MethodCallHandler(dbOperWrapper);
@@ -401,6 +370,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         writeDbHandler.setAllowedClassPrefixSet(allowedClassPrefixSet);
         writeDbHandler.setThreadPoolExecutor(threadPoolExecutor);
         writeDbHandler.setTaskQueueMaxSize(taskQueueMaxSize);
+        writeDbHandler.setIncrementUpdate(incrementUpdate);
     }
 
     // 处理引用的类信息，需要首先处理

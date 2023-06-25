@@ -78,4 +78,35 @@ public class TestRunnerWriteDb {
         RunnerWriteDb runnerWriteDb = new RunnerWriteDb();
         runnerWriteDb.run(configureWrapper);
     }
+
+    /**
+     * 增量更新数据库。（非全删全插）
+     * 代码的修改意味着，新增，修改，删除 但是针对代码删除的情况无法同步删除记录的。
+     */
+    @Test
+    public void updateDBbyApiFori8(){
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        //config.properties
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
+        // 增量更新配置为true
+        configureWrapper.setMainConfig(ConfigKeyEnum.INCREMENT_UPDATE,"true");
+        //config_db.propertis
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+        //jar_dir.properties
+        ArrayList<String> otherConfigList = new ArrayList<>();
+        otherConfigList.add("D:\\Data\\TestData\\microservice\\i8");
+
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
+        //allow
+        HashSet<String>  otherConfigSet= new HashSet<>();
+        otherConfigSet.add("cn.newgrand");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,otherConfigSet);
+        RunnerWriteDb runnerWriteDb = new RunnerWriteDb();
+        runnerWriteDb.run(configureWrapper);
+    }
 }
