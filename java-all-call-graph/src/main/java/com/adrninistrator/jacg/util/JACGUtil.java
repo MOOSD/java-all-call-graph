@@ -135,7 +135,9 @@ public class JACGUtil {
      */
     public static Object[] genMethodCallObjectArray(WriteDbData4MethodCall data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
                 data.getCallId(),
+                data.getVersionId(),
                 data.getCallType(),
                 data.getCalleeObjType(),
                 data.getEnabled(),

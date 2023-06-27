@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MyBatisMSTable;
 import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlSqlInfoCodeParser;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 
 import java.util.Set;
 
@@ -45,14 +46,17 @@ public class WriteDbHandler4MyBatisMSTable extends AbstractWriteDbHandler<WriteD
                 sqlStatement,
                 tableSeq,
                 tableName,
-                mapperClassName
+                mapperClassName,
+                versionId
         );
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MyBatisMSTable data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
                 genNextRecordId(),
+                data.getVersionId(),
                 data.getMapperSimpleClassName(),
                 data.getMapperMethodName(),
                 data.getSqlStatement(),

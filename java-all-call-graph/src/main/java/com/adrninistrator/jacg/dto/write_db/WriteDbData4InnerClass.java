@@ -23,6 +23,16 @@ public class WriteDbData4InnerClass extends AbstractWriteDbData {
         this.anonymousClass = anonymousClass;
     }
 
+    public WriteDbData4InnerClass(String simpleInnerClassName, String innerClassName, String simpleOuterClassName,
+                                  String outerClassName, int anonymousClass, String versionId) {
+        this.versionId = versionId;
+        this.simpleInnerClassName = simpleInnerClassName;
+        this.innerClassName = innerClassName;
+        this.simpleOuterClassName = simpleOuterClassName;
+        this.outerClassName = outerClassName;
+        this.anonymousClass = anonymousClass;
+    }
+
     public String getSimpleInnerClassName() {
         return simpleInnerClassName;
     }

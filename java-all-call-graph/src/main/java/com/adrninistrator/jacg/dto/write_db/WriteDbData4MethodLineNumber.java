@@ -23,6 +23,16 @@ public class WriteDbData4MethodLineNumber extends AbstractWriteDbData {
         this.fullMethod = fullMethod;
     }
 
+    public WriteDbData4MethodLineNumber(String methodHash, String simpleClassName, int minLineNumber, int maxLineNumber,
+                                        String fullMethod, String versionId) {
+        super.versionId = versionId;
+        this.methodHash = methodHash;
+        this.simpleClassName = simpleClassName;
+        this.minLineNumber = minLineNumber;
+        this.maxLineNumber = maxLineNumber;
+        this.fullMethod = fullMethod;
+    }
+
     public String getMethodHash() {
         return methodHash;
     }

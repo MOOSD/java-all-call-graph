@@ -25,6 +25,16 @@ public class WriteDbData4ClassAnnotation extends AbstractWriteDbData {
         this.className = className;
     }
 
+    public WriteDbData4ClassAnnotation(String simpleClassName, String annotationName, String attributeName, String attributeType, String attributeValue, String className, String versionId) {
+        this.versionId = versionId;
+        this.simpleClassName = simpleClassName;
+        this.annotationName = annotationName;
+        this.attributeName = attributeName;
+        this.annotationType = annotationType;
+        this.attributeValue = attributeValue;
+        this.className = className;
+    }
+
     public String getSimpleClassName() {
         return simpleClassName;
     }

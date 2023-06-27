@@ -27,6 +27,18 @@ public class WriteDbData4JarInfo extends AbstractWriteDbData {
         this.jarHash = jarHash;
     }
 
+    public WriteDbData4JarInfo(int jarNum, String jarType, String jarPathHash, String jarFullPath, String jarFileName,
+                               String lastModified, String jarHash,String versionId) {
+        super.versionId = versionId;
+        this.jarNum = jarNum;
+        this.jarType = jarType;
+        this.jarPathHash = jarPathHash;
+        this.jarFullPath = jarFullPath;
+        this.jarFileName = jarFileName;
+        this.lastModified = lastModified;
+        this.jarHash = jarHash;
+    }
+
     public int getJarNum() {
         return jarNum;
     }

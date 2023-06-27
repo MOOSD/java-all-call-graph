@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodArgType;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodInfo;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
@@ -57,12 +58,15 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
                 methodName,
                 fullMethod,
                 simpleReturnType,
-                returnType);
+                returnType,
+                versionId);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodInfo data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
+                data.getVersionId(),
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getAccessFlags(),

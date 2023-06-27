@@ -28,6 +28,18 @@ public class WriteDbData4MethodReturnGenericsType extends AbstractWriteDbData {
         this.fullMethod = fullMethod;
     }
 
+    public WriteDbData4MethodReturnGenericsType(String methodHash, String simpleClassName, String type, int typeSeq, String simpleGenericsType, String genericsType,
+                                                String fullMethod, String versionId) {
+        this.versionId = versionId;
+        this.methodHash = methodHash;
+        this.simpleClassName = simpleClassName;
+        this.type = type;
+        this.typeSeq = typeSeq;
+        this.simpleGenericsType = simpleGenericsType;
+        this.genericsType = genericsType;
+        this.fullMethod = fullMethod;
+    }
+
     public String getMethodHash() {
         return methodHash;
     }

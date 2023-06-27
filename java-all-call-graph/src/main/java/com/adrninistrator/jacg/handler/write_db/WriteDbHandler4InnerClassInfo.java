@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4InnerClass;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
 import java.util.HashSet;
@@ -43,12 +44,15 @@ public class WriteDbHandler4InnerClassInfo extends AbstractWriteDbHandler<WriteD
                 innerClassName,
                 dbOperWrapper.getSimpleClassName(outerClassName),
                 outerClassName,
-                anonymousClass);
+                anonymousClass,
+                versionId);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4InnerClass data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
+                data.getVersionId(),
                 data.getSimpleInnerClassName(),
                 data.getInnerClassName(),
                 data.getSimpleOuterClassName(),

@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassSignatureEi1;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
 /**
@@ -34,13 +35,16 @@ public class WriteDbHandler4ClassSignatureEi1 extends AbstractWriteDbHandler<Wri
         }
 
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
-        return new WriteDbData4ClassSignatureEi1(simpleClassName, type, superItfClassName, seq, signClassName, className);
+        return new WriteDbData4ClassSignatureEi1(simpleClassName, type, superItfClassName, seq, signClassName,
+                className,versionId);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassSignatureEi1 data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
                 genNextRecordId(),
+                data.getVersionId(),
                 data.getSimpleClassName(),
                 data.getType(),
                 data.getSuperItfClassName(),

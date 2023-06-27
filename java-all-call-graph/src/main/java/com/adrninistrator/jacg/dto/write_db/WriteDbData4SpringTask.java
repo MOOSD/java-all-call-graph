@@ -19,6 +19,13 @@ public class WriteDbData4SpringTask extends AbstractWriteDbData {
         this.methodName = methodName;
     }
 
+    public WriteDbData4SpringTask(String springBeanName, String className, String methodName, String versionId) {
+        super.versionId = versionId;
+        this.springBeanName = springBeanName;
+        this.className = className;
+        this.methodName = methodName;
+    }
+
     public String getSpringBeanName() {
         return springBeanName;
     }

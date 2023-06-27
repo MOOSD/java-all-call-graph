@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.extensions.manual_add_method_call.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodCallHandler;
 import com.adrninistrator.jacg.handler.write_db.*;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -264,7 +265,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         List<String> allowedClassPrefixList = new ArrayList<>(allowedClassPrefixSet);
         Collections.sort(allowedClassPrefixList);
         for (int i = 0; i < allowedClassPrefixList.size(); i++) {
-            if (!dbOperator.insert(sql, i, allowedClassPrefixList.get(i))) {
+            if (!dbOperator.insert(sql, IdGenerateUtil.genId(), i, versionId, allowedClassPrefixList.get(i))) {
                 return false;
             }
         }
@@ -364,6 +365,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
     private void initWriteDbHandler(AbstractWriteDbHandler<?> writeDbHandler) {
         writeDbHandlerMap.put(writeDbHandler.getCurrentSimpleClassName(), writeDbHandler);
 
+        writeDbHandler.setVersionId(versionId);
         writeDbHandler.setDbOperWrapper(dbOperWrapper);
         writeDbHandler.setDbOperator(dbOperator);
         writeDbHandler.setBatchSize(dbInsertBatchSize);

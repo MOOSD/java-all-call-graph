@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCallInfo;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.util.JavaCGUtil;
@@ -48,12 +49,15 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
                 Integer.parseInt(seq),
                 type,
                 arrayFlag,
-                value);
+                value,
+                versionId);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodCallInfo data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
+                data.getVersionId(),
                 data.getCallId(),
                 data.getObjArgsSeq(),
                 data.getSeq(),

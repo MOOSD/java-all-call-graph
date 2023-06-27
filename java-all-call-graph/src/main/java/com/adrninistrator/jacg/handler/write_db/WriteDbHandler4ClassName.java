@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassName;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
@@ -51,6 +52,7 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassName data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
                 genNextRecordId(),
                 data.getClassName(),
                 data.getSimpleClassName(),

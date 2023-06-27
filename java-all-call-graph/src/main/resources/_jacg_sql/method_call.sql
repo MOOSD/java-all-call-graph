@@ -1,5 +1,7 @@
 CREATE TABLE if not exists method_call_{appName} (
+  id bigint NOT NULL COMMENT '主键',
   call_id int NOT NULL COMMENT '方法调用序号',
+  version_id varchar(50) NOT NULL DEFAULT 'snapshot'  COMMENT '版本号',
   call_type varchar(10) NOT NULL COMMENT '调用类型',
   callee_obj_type varchar(10) NOT NULL COMMENT '被调用对象类型，t:调用当前实例的方法，sf:调用静态字段的方法，f:调用字段的方法，v:调用其他变量的方法',
   enabled tinyint NOT NULL COMMENT '是否启用，1:启用',
@@ -17,7 +19,7 @@ CREATE TABLE if not exists method_call_{appName} (
   actual_return_type varchar(500) NOT NULL COMMENT '方法实际的返回类型',
   caller_jar_num int NULL COMMENT '调用方，Jar包序号',
   callee_jar_num int NULL COMMENT '被调用方，Jar包序号',
-  PRIMARY KEY (call_id),
+  PRIMARY KEY (id),
   INDEX idx_mc_rmh_{appName}(caller_method_hash),
   INDEX idx_mc_hash_{appName}(callee_method_hash, caller_method_hash),
   INDEX idx_mc_rsn_{appName}(caller_simple_class_name(255)),

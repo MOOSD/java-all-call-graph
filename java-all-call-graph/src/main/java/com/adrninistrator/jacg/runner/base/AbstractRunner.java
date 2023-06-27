@@ -66,6 +66,9 @@ public abstract class AbstractRunner {
     // 继承与实际相关的处理类
     protected JACGExtendsImplHandler jacgExtendsImplHandler;
 
+    // 项目版本号
+    protected String versionId;
+
     protected final String currentSimpleClassName = this.getClass().getSimpleName();
 
     /**
@@ -110,7 +113,10 @@ public abstract class AbstractRunner {
 
             this.configureWrapper = configureWrapper;
             if (handleDb()) {
+                // 初始化版本号
+                versionId = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION);
                 // 需要操作数据库时执行的操作
+                // 指定项目名
                 appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
                 // 完成需要使用的基础配置的初始化
                 dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);

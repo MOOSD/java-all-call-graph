@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ClassAnnotation;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.feign.OpenFeignUtil;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
@@ -87,13 +88,16 @@ public class WriteDbHandler4ClassAnnotation extends AbstractWriteDbHandler<Write
 
         }
 
-        return new WriteDbData4ClassAnnotation(simpleClassName, annotationName, attributeName, attributeType, attributeValue, className);
+        return new WriteDbData4ClassAnnotation(simpleClassName, annotationName, attributeName, attributeType,
+                attributeValue, className ,versionId);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ClassAnnotation data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
                 genNextRecordId(),
+                data.getVersionId(),
                 data.getSimpleClassName(),
                 data.getAnnotationName(),
                 data.getAttributeName(),

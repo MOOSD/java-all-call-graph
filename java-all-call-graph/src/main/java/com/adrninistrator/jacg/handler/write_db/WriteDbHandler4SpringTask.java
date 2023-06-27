@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringTask;
 import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.SpringTaskCodeParser;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +56,15 @@ public class WriteDbHandler4SpringTask extends AbstractWriteDbHandler<WriteDbDat
         }
 
         String methodName = array[1];
-        return new WriteDbData4SpringTask(springBeanName, springBeanClassName, methodName);
+        return new WriteDbData4SpringTask(springBeanName, springBeanClassName, methodName, versionId);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringTask data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
                 genNextRecordId(),
+                data.getVersionId(),
                 data.getSpringBeanName(),
                 data.getClassName(),
                 data.getMethodName()

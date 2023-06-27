@@ -27,6 +27,19 @@ public class WriteDbData4MethodInfo extends AbstractWriteDbData {
         this.returnType = returnType;
     }
 
+    public WriteDbData4MethodInfo(String methodHash, String simpleClassName, int accessFlags, String methodName,
+                                  String fullMethod, String simpleReturnType, String returnType, String versionId) {
+        super.versionId = versionId;
+        this.methodHash = methodHash;
+        this.simpleClassName = simpleClassName;
+        this.accessFlags = accessFlags;
+        this.methodName = methodName;
+        this.fullMethod = fullMethod;
+        this.simpleReturnType = simpleReturnType;
+        this.returnType = returnType;
+    }
+
+
     public String getMethodHash() {
         return methodHash;
     }

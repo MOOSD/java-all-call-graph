@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 
 /**
  * @author adrninistrator
@@ -18,6 +19,8 @@ public class WriteDbHandler4SpringController extends AbstractWriteDbHandler<Writ
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringController data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
+                data.getVersionId(),
                 data.getMethodHash(),
                 data.getSeq(),
                 data.getShowUri(),

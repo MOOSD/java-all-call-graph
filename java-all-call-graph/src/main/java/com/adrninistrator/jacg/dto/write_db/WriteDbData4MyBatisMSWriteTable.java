@@ -23,6 +23,16 @@ public class WriteDbData4MyBatisMSWriteTable extends AbstractWriteDbData {
         this.mapperClassName = mapperClassName;
     }
 
+    public WriteDbData4MyBatisMSWriteTable(String mapperSimpleClassName, String mapperMethodName, String sqlStatement,
+                                           String tableName, String mapperClassName, String versionId) {
+        super.versionId = versionId;
+        this.mapperSimpleClassName = mapperSimpleClassName;
+        this.mapperMethodName = mapperMethodName;
+        this.sqlStatement = sqlStatement;
+        this.tableName = tableName;
+        this.mapperClassName = mapperClassName;
+    }
+
     public String getMapperSimpleClassName() {
         return mapperSimpleClassName;
     }

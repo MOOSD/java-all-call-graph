@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodReturnGenericsType;
+import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
@@ -43,13 +44,16 @@ public class WriteDbHandler4MethodReturnGenericsType extends AbstractWriteDbHand
                 typeSeq,
                 dbOperWrapper.getSimpleClassName(genericsType),
                 genericsType,
-                fullMethod);
+                fullMethod,
+                versionId);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodReturnGenericsType data) {
         return new Object[]{
+                IdGenerateUtil.genId(),
                 genNextRecordId(),
+                data.getVersionId(),
                 data.getMethodHash(),
                 data.getSimpleClassName(),
                 data.getType(),
