@@ -57,8 +57,8 @@ public class WriteDbHandler4MethodCallInfo extends AbstractWriteDbHandler<WriteD
     protected Object[] genObjectArray(WriteDbData4MethodCallInfo data) {
         return new Object[]{
                 IdGenerateUtil.genId(),
-                data.getVersionId(),
                 data.getCallId(),
+                data.getVersionId(),
                 data.getObjArgsSeq(),
                 data.getSeq(),
                 data.getType(),

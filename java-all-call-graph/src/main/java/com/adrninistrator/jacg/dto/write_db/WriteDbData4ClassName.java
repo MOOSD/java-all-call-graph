@@ -19,6 +19,13 @@ public class WriteDbData4ClassName extends AbstractWriteDbData {
         this.duplicateClass = duplicateClass;
     }
 
+    public WriteDbData4ClassName(String className, String simpleClassName, int duplicateClass, String versionId) {
+        super.versionId = versionId;
+        this.className = className;
+        this.simpleClassName = simpleClassName;
+        this.duplicateClass = duplicateClass;
+    }
+
     public String getClassName() {
         return className;
     }

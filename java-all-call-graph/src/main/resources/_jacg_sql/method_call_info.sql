@@ -1,4 +1,4 @@
-CREATE TABLE if not exists method_call_{appName} (
+CREATE TABLE if not exists method_call_info_{appName} (
   id bigint NOT NULL COMMENT '主键',
   call_id int NOT NULL COMMENT '方法调用序号',
   version_id varchar(50) NOT NULL DEFAULT 'snapshot'  COMMENT '版本号',

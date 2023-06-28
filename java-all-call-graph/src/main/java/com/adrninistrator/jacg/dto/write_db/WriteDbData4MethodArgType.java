@@ -25,6 +25,16 @@ public class WriteDbData4MethodArgType extends AbstractWriteDbData {
         this.fullMethod = fullMethod;
     }
 
+    public WriteDbData4MethodArgType(String methodHash, Integer argSeq, String simpleArgType, String argType,
+                                     String simpleClassName, String fullMethod, String version) {
+        super.versionId = version;
+        this.methodHash = methodHash;
+        this.argSeq = argSeq;
+        this.simpleArgType = simpleArgType;
+        this.argType = argType;
+        this.simpleClassName = simpleClassName;
+        this.fullMethod = fullMethod;
+    }
     public String getMethodHash() {
         return methodHash;
     }
