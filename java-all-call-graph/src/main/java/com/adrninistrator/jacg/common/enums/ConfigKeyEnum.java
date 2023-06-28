@@ -18,7 +18,7 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_CHECK_JAR_FILE_UPDATED("check.jar.file.updated", "检查jar包文件是否有更新", Boolean.class),
     CROSS_SERVICE_BY_OPENFEIGN("call.graph.cs.openfeign", "基于OpenFeign的RPC框架是否跨微服务生成调用链路", Boolean.class),
     INCREMENT_UPDATE("increment.update","增量的更新数据库(非全删全插)",Boolean.class),
-    APP_VERSION("app.version", "当前项目的版本号", String.class),
+    APP_VERSION_ID("app.version.id", "当前项目的版本号id", String.class),
     ;
 
     // 参数key

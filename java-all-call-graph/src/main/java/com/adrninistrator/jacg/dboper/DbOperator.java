@@ -42,6 +42,8 @@ public class DbOperator {
 
     private final String appName;
 
+    private final String appVersionId;
+
     private final String objSeq;
 
     // 记录当前入口类的类名
@@ -80,7 +82,7 @@ public class DbOperator {
         dataSource.setTestWhileIdle(false);
 
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
-
+        appVersionId = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID);
         appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
         logger.info("[{}] 创建数据库操作对象 {}", objSeq, entrySimpleClassName);
@@ -223,6 +225,27 @@ public class DbOperator {
             logger.error("数据库表创建失败 [{}]", tableName);
             return false;
         }
+        return true;
+    }
+
+    /**
+     * 清空数据库表
+     *
+     * @param tableName
+     * @return
+     */
+    public boolean truncateTableByVersion(String tableName) {
+        String sql = "DELETE FROM "+tableName+" WHERE version_id = ?" ;
+        sql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
+        logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
+        try {
+            Integer update = update(sql, appVersionId);
+            logger.debug("表[{}]清除数据条数:{},",tableName,update);
+        }catch (Exception e){
+            logger.error("清理表异常:",e);
+            return false;
+        }
+
         return true;
     }
 
