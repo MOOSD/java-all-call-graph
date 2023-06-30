@@ -651,10 +651,10 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
                     " inner join " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableName() + " as f " +
                     " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI +
                     " and ( s." + DC.SPC_REQUEST_METHOD +" = f."+ DC.FC_REQUEST_METHOD +" or s."+DC.SPC_REQUEST_METHOD +" is null)" +
-                    " where " + " s." + DC.SPC_METHOD_HASH + " = ?";
+                    " where " + " s."+DC.COMMON_VERSION_ID+ " = ? AND " + " s." + DC.SPC_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<WriteDbData4MethodCall> resultList = dbOperator.queryList(sql, WriteDbData4MethodCall.class, ControllerHash);
+        List<WriteDbData4MethodCall> resultList = dbOperator.queryList(sql, WriteDbData4MethodCall.class, versionId,ControllerHash);
         //假设一个feignClient对应多个接口的情况不存在。
         logger.info("sql:"+sql +"入参:"+ControllerHash);
         logger.info("根据controller查询对应feign结果:"+resultList);

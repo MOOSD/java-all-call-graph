@@ -20,13 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -204,7 +198,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
         // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
-        return dbOperator.queryList(sql, WriteDbData4MethodAnnotation.class, annotationClassNames);
+        return dbOperator.queryList(sql, WriteDbData4MethodAnnotation.class, new Object[]{annotationClassNames});
     }
 
     /**
@@ -258,7 +252,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
         // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
-        return dbOperator.queryListOneColumn(sql, String.class, annotationClassNames);
+        return dbOperator.queryListOneColumn(sql, String.class, new Object[]{annotationClassNames});
     }
 
     /**

@@ -35,7 +35,7 @@ public class TestRunnerWriteDb {
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"2617ef94-0087-4322-872c-015061a3cb90");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.2 version");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
         //config_db.propertis

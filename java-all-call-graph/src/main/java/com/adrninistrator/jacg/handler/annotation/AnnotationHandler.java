@@ -7,12 +7,7 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
-import com.adrninistrator.jacg.dto.annotation.AnnotationAttributeInfo;
-import com.adrninistrator.jacg.dto.annotation.AnnotationWithAttributeInfo;
-import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation.EmptyAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation.StringAnnotationAttribute;
-import com.adrninistrator.jacg.dto.annotation.SuperClassWithAnnotation;
+import com.adrninistrator.jacg.dto.annotation.*;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.extractor.common.enums.SpTxPropagationEnum;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
@@ -25,11 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author adrninistrator
@@ -73,7 +64,7 @@ public class AnnotationHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
         // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
-        return dbOperator.queryListOneColumn(sql, String.class, annotationClassNames);
+        return dbOperator.queryListOneColumn(sql, String.class, new Object[]{annotationClassNames});
     }
 
     /**

@@ -621,7 +621,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         Collections.sort(writeDbHandlerNameList);
         for (String writeDbHandlerName : writeDbHandlerNameList) {
             AbstractWriteDbHandler<?> writeDbHandler = writeDbHandlerMap.get(writeDbHandlerName);
-            logger.info("{} 写入数据库记录数 {}", writeDbHandlerName, writeDbHandler.getWriteRecordNum());
+            logger.info("{} 执行状态 {} 写入数据库记录数 {}", writeDbHandlerName,writeDbHandler.checkFailed(), writeDbHandler.getWriteRecordNum());
 
             if (writeDbHandler instanceof WriteDbHandler4ClassName && writeDbHandler.getWriteRecordNum() == 0) {
                 logger.warn("未向数据库写入数据，请检查文件\n{}\n以及写入数据库时需要处理的类名前缀配置 {}", javaCGOutputInfo.getMainFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL),
