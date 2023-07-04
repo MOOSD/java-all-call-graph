@@ -1,0 +1,44 @@
+apply plugin: 'maven-publish'
+
+
+
+def group = 'cn.newgrand.ck'
+def artifact = 'jacg'
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId group
+            artifactId artifact
+            version "1.0.0-SNAPSHOT"
+            from components.java
+
+
+            pom {
+                name = "java-all-call-graph"
+                description = "Generate all call graph for Java Code."
+
+                developers {
+                    developer {
+                        id = "moosd"
+                        name = "mawenzhe"
+                        email = "mawz@newgrand.cn"
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name 'newgrand-snapshots'
+            url 'http://192.168.8.161:8080/repository/maven-snapshots/'
+            credentials {
+                username = "admin"
+                password = "zjc@1234509876"
+            }
+        }
+
+    }
+}
+

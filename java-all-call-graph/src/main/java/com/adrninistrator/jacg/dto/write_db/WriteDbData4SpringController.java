@@ -81,14 +81,18 @@ public class WriteDbData4SpringController extends AbstractWriteDbData {
     }
 
     //
+
+
     @Override
     public String toString() {
         return "WriteDbData4SpringController{" +
                 "methodHash='" + methodHash + '\'' +
                 ", seq=" + seq +
                 ", showUri='" + showUri + '\'' +
+                ", requestMethod='" + requestMethod + '\'' +
                 ", classPath='" + classPath + '\'' +
                 ", methodPath='" + methodPath + '\'' +
+                ", annotationName='" + annotationName + '\'' +
                 ", simpleClassName='" + simpleClassName + '\'' +
                 ", fullMethod='" + fullMethod + '\'' +
                 '}';

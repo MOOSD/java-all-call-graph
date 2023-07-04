@@ -105,7 +105,7 @@ public class TestRunnerGenGraph4ApiCallee {
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.1 version");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.3 version");
 //        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"2617ef94-0087-4322-872c-015061a3cb90");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
         //config_db.properties

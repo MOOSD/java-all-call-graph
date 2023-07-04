@@ -230,7 +230,7 @@ public class DbOperator {
     }
 
     /**
-     * 清空数据库表
+     * 清空数据库表中指定版本号的数据
      *
      * @param tableName
      * @return
@@ -309,6 +309,7 @@ public class DbOperator {
             jdbcTemplate.batchUpdate(sql, argumentList);
             return true;
         } catch (Exception e) {
+            logger.error("批量插入失败sql:"+sql+",插入失败数据:"+argumentList.size(),e);
             if (!noticeDropTable(e, sql)) {
                 if (argumentList.size() == 1) {
                     // 打印插入失败的数据

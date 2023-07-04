@@ -30,5 +30,10 @@
             <AppenderRef ref="console" />
             <AppenderRef ref="async" />
         </Logger>
+
+        <Logger name="com.adrninistrator.jacg.dboper.JdbcTemplateQuiet" level="info" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="async" />
+        </Logger>
     </Loggers>
 </Configuration>

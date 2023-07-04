@@ -3,6 +3,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 apply from: 'unittest.gradle'
+apply from: 'publish-private.gradle'
 
 group 'com.github.adrninistrator'
 version = "1.0.12"

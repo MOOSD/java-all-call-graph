@@ -340,7 +340,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
 
         writeRecordNum += dataList.size();
         if (logger.isDebugEnabled()) {
-            logger.debug("写入数据库 {} {}", currentSimpleClassName, dataList.size());
+            logger.trace("写入数据库 {} {}", currentSimpleClassName, dataList.size());
         }
         // 生成用于插入数据的sql语句
         String sql = dbOperWrapper.genAndCacheInsertSql(dbTableInfoEnum, DbInsertMode.DIME_INSERT);
@@ -358,6 +358,7 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
         threadPoolExecutor.execute(() -> {
             // 指量写入数据库
             if (!dbOperator.batchInsert(sql, objectList)) {
+                // 插入执行失败时，失败标识为真
                 failFlag.set(true);
             }
         });
