@@ -146,7 +146,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         }
 
         // 检查jar包文件是否有更新，检查允许处理的类名或包名前缀是否有更新
-        if (checkJarFileUpdated() || checkAllowedClassPrefixUpdated()) {
+        if (checkJarFileUpdated()) {
             return false;
         }
 

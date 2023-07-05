@@ -114,7 +114,7 @@ public class TestRunnerGenGraph4ApiCallee {
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
         //allow_class_prefix.properties
-        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
+//        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
         //这个方法被一个对外提供的controller调用
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
                 "cn.newgrand.pm.pmm.kc.service.impl.bill.KcBillHeadServiceImpl:batchSaveKcBillHead(java.util.List)");
