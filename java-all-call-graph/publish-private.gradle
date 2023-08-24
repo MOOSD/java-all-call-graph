@@ -35,7 +35,7 @@ publishing {
             url 'http://192.168.8.161:8080/repository/maven-snapshots/'
             credentials {
                 username = "admin"
-                password = "zjc@1234509876"
+                password = "newgrand@123"
             }
         }
 
