@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.call_graph.CallGraphNode4Callee;
 import com.adrninistrator.jacg.dto.call_graph.SuperCallChildInfo;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
+import com.adrninistrator.jacg.dto.method.MethodFullInfo;
 import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
@@ -30,7 +31,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.*;
 
 /**
@@ -148,7 +148,7 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
     // 通过方法名查找对应的方法并处理
     private boolean handleOneCalleeMethodByName(String calleeSimpleClassName, List<CalleeEntryMethodTaskInfo> calleeEntryMethodTaskInfoList, String origTaskText,
                                                 String methodInfoInTask) {
-        //匹配到的方法DO
+        //匹配到的被调用方法的DO
         CalleeEntryMethodTaskInfo usedCalleeEntryMethodTaskInfo = null;
         List<String> calleeFullMethodList = new ArrayList<>();
 
@@ -161,16 +161,31 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             }
         }
 
+        // 此类没有被调用的记录时,从方法信息表中查询数据（按照simpleClassName查找记录，然后模糊匹配所有方法）
         if (calleeFullMethodList.isEmpty()) {
+            List<MethodFullInfo> methodInfos = getMethodInfoBySimpleClassName(calleeSimpleClassName);
+            for (MethodFullInfo methodInfo : methodInfos) {
+                // 计算MethodNameAndArgs
+                String methodNameAndArgs = JACGClassMethodUtil.getMethodNameWithArgsFromFull(methodInfo.getFullMethod());
+                if (StringUtils.startsWith(methodNameAndArgs, methodInfoInTask)) {
+                    // 如果匹配，构建一个虚拟的calleeEntryMethodTaskInfo对象
+                    CalleeEntryMethodTaskInfo calleeEntryMethodTaskInfo = new CalleeEntryMethodTaskInfo(methodInfo.getMethodHash()
+                            ,methodInfo.getFullMethod(),methodNameAndArgs,0);
+                    usedCalleeEntryMethodTaskInfo = calleeEntryMethodTaskInfo;
+                    calleeFullMethodList.add(calleeEntryMethodTaskInfo.getFullMethod());
+                }
+            }
+        }
+
+        if(calleeFullMethodList.isEmpty()){
             // 未查找到匹配的方法
-            logger.error("未查询到类{}存在的方法:{}被调用过",calleeSimpleClassName,methodInfoInTask);
+            logger.error("未查询到方法[{}:{}]的相关信息",calleeSimpleClassName,methodInfoInTask);
             return false;
         }
 
         if (calleeFullMethodList.size() > 1) {
             // 查找到匹配的方法多于1个，返回处理失败
-            logger.error("根据配置文件 {}\n中的方法前缀 {} 找到多于一个方法，请指定更精确的方法信息\n{}", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                    origTaskText, StringUtils.join(calleeFullMethodList, "\n"));
+            logger.error("方法 {} 匹配到了多于一个的方法，请指定更精确的方法信息\n{}", origTaskText, StringUtils.join(calleeFullMethodList, "\n"));
             return false;
         }
 
@@ -259,7 +274,7 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
                 root.setAnnotation(methodAnnotationInfo);
             }
         }
-
+        // 处理被调用方法的泛型参数信息
         if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
             // 显示方法参数泛型类型
             if (!addMethodArgGenericsTypeInfo(true, callFlags, entryCalleeMethodHash, root)) {
@@ -273,16 +288,6 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         }
 
         return true;
-    }
-
-    // 生成空文件
-    private boolean genEmptyFile(String calleeSimpleClassName, String methodInfoInTask) {
-        // 生成内容为空的调用链文件名
-        String outputFilePath4EmptyFile = currentOutputDirPath + File.separator + JACGConstants.DIR_OUTPUT_METHODS + File.separator +
-                JACGCallGraphFileUtil.getEmptyCallGraphFileName(calleeSimpleClassName, methodInfoInTask);
-        logger.info("生成空文件 {} {} {}", calleeSimpleClassName, methodInfoInTask, outputFilePath4EmptyFile);
-        // 创建文件
-        return JACGFileUtil.createNewFile(outputFilePath4EmptyFile);
     }
 
     // 确定写入输出文件的当前被调用方法信息
@@ -892,7 +897,21 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         return calleeTaskInfoMap;
     }
 
-
+    /**
+     * 根据完整方法HASH+长度，获取方法对应的标志
+     */
+    public List<MethodFullInfo> getMethodInfoBySimpleClassName(String calleeSimpleClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_INFO_BY_CLASSNAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MI_SIMPLE_CLASS_NAME, DC.MI_METHOD_NAME, DC.MI_METHOD_HASH,
+                    DC.MI_FULL_METHOD) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ? ";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        return dbOperator.queryList(sql, MethodFullInfo.class, calleeSimpleClassName);
+    }
     /**
      * 处理要生成链路的所有任务
      * such as SELECT distinct (callee_method_hash),callee_method_name,callee_full_method FROM method_call_i8 where callee_simple_class_name = "IBoqFeign";
