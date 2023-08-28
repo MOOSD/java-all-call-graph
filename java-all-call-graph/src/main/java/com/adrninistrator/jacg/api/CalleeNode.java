@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * 被调用者树的节点，即向上的调用树
@@ -91,7 +92,21 @@ public class CalleeNode {
         return callees == null || callees.size() != 0;
     }
 
-
+    /**
+     * 遍历整个调用树
+     * @param consumer 迭代方法
+     */
+    public void forEach(Consumer<CalleeNode> consumer){
+        // 执行消费逻辑
+        consumer.accept(this);
+        // 递归出口
+        if(Objects.isNull(callees) || callees.isEmpty()){
+            return;
+        }
+        for (CalleeNode callee : callees) {
+            callee.forEach(consumer);
+        }
+    }
 
     /**
      * 此方法运行在声明式事务中

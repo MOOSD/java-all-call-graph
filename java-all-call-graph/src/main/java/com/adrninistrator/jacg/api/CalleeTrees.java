@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * 方法的被调用树
@@ -29,7 +31,21 @@ public class CalleeTrees {
         return calleeTrees;
     }
 
-
+    /**
+     * 循环整颗此调用树
+     * @param consumer 消费方法
+     */
+    public void forEach(Consumer<CalleeNode> consumer) {
+        if(Objects.isNull(trees)){
+            return;
+        }
+        for (CalleeNode root : trees.values()) {
+            if (Objects.isNull(root)){
+                continue;
+            }
+            root.forEach(consumer);
+        }
+    }
 
 
     public CalleeNode addTree(String fullMethod,CalleeNode calleeNode){
