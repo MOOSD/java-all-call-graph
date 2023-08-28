@@ -72,7 +72,7 @@ public class SpringMvcRequestMappingFormatter extends AbstractAnnotationFormatte
                 return path;
             }
         }
-        return "";
+        return null;
     }
 
     private String doGetPathInRequestMappingAnnotation(Map<String, BaseAnnotationAttribute> annotationAttributeMap, String attributeName) {

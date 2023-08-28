@@ -35,6 +35,8 @@ public class CalleeNode {
     private boolean inTransaction;
     //泛型信息
     private List<GenericsInfo> genericsInfo;
+    //controller信息，为空则表示不为controller
+    private ControllerInfo controllerInfo;
     //被调用信息
     private CalleeInfo calleeInfo;
     //此方法的被调用者
@@ -193,5 +195,13 @@ public class CalleeNode {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
+    }
+
+    public ControllerInfo getControllerInfo() {
+        return controllerInfo;
+    }
+
+    public void setControllerInfo(ControllerInfo controllerInfo) {
+        this.controllerInfo = controllerInfo;
     }
 }

@@ -13,8 +13,8 @@ import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.method.MethodFullInfo;
 import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
-import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.runner.base.AbstractRunnerGenApiCallGraph;
 import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
@@ -131,12 +131,17 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             if (!JavaCGUtil.isNumStr(methodInfoInTask)) {
                 // 通过方法名查找对应的方法并处理
                 if (!handleOneCalleeMethodByName(className, calleeEntryMethodTaskInfoList, origTaskText, methodInfoInTask)) {
-                    return false;
+                    logger.warn("未找到类:{} 的方法:{} 的相关信息",className,methodInfoInTask);
                 }
             } else {
                 // 通过代码行号查找对应的方法并处理
                 if (!handleOneCalleeMethodByLineNumber(className, origTaskText, methodInfoInTask)) {
-                    return false;
+                    logger.warn("未找到类:{} 在{}行处的方法信息",className,methodInfoInTask);
+//                    logger.warn("指定类的代码行号未查找到对应方法，请检查，可能因为以下原因\n" +
+//                            "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
+//                            "2. 指定的方法是接口中未实现的方法\n" +
+//                            "3. 指定的方法是抽象方法\n" +
+//                            "{} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey(), simpleClassName, methodLineNum);
                 }
             }
         }
@@ -199,15 +204,17 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
     private boolean handleOneCalleeMethodByLineNumber(String calleeSimpleClassName, String origTaskText, String methodInfoInTask) {
         int methodLineNum = Integer.parseInt(methodInfoInTask);
 
-        // 通过代码行号获取对应方法
-        FindMethodTaskInfo findMethodTaskInfo = findMethodByLineNumber(true, calleeSimpleClassName, methodLineNum);
-        if (findMethodTaskInfo.isError()) {
+        // 通过代码行号获取对应方法信息
+        WriteDbData4MethodLineNumber methodInfoByLineNumber = getMethodInfoByLineNumber(calleeSimpleClassName, methodLineNum);
+        if (Objects.isNull(methodInfoByLineNumber)) {
             // 返回处理失败
             return false;
         }
+        // 查询方法的标记（如果有调用关系，那么此处用于获取调用标记。若未查询到调用标记则默认返回0）
+        int methodCallFlags = queryMethodCallFlags(true, methodInfoByLineNumber.getMethodHash());
 
         // 处理一个被调用方法
-        handleOneCalleeMethod(calleeSimpleClassName, findMethodTaskInfo.getMethodHash(), findMethodTaskInfo.getFullMethod(), findMethodTaskInfo.getCallFlags(), origTaskText);
+        handleOneCalleeMethod(calleeSimpleClassName, methodInfoByLineNumber.getMethodHash(), methodInfoByLineNumber.getFullMethod(), methodCallFlags, origTaskText);
         return true;
     }
 
@@ -266,14 +273,21 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
         // 判断被调用方法上是否有注解，假如被调用方法没有调用者，即没有记录，那么调用标识就不存在
         // 增加调用标识不为空的标识
+        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
         if (callFlags == 0 || MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
             // 添加方法注解信息
             List<String> methodAnnotationInfo = new ArrayList<>();
-            getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash,methodAnnotationInfo);
+            methodAnnotationMap = getMethodAnnotationInfo(entryCalleeFullMethod, entryCalleeMethodHash, methodAnnotationInfo);
             if (methodAnnotationInfo.size() > 0) {
                 root.setAnnotation(methodAnnotationInfo);
             }
         }
+        // todo 为方法调用信息增加是否在其他线程执行标志,为方法调用信息增加是否在事务中执行标志
+//        addRunInOtherThread(methodCallId, callType, methodAnnotationMap, caller);
+//        addRunInTransaction(methodCallId, callType, methodAnnotationMap, caller);
+
+        // 增加controller相关信息
+        addControllerInfo(entryCalleeFullMethod, methodAnnotationMap, root);
         // 处理被调用方法的泛型参数信息
         if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {
             // 显示方法参数泛型类型
@@ -282,12 +296,8 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
             }
         }
 
-        // 根据指定的调用者方法HASH，查找所有被调用的方法信息
-        if (!genAllGraph4Callee(entryCalleeMethodHash, entryCalleeFullMethod)) {
-            return false;
-        }
-
-        return true;
+        // 根据指定的调用者方法HASH，生成调用树
+        return genAllGraph4Callee(entryCalleeMethodHash, entryCalleeFullMethod);
     }
 
     // 确定写入输出文件的当前被调用方法信息
@@ -383,7 +393,8 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
 
             // 检查是否为远程过程调用
             boolean isRpc = ExtendCallTypeEnum.RPC.getType().equals(callerMethod.getCallType());
-            // 获取方法调用方信息
+
+            // 获取方法调用方信息，生成被调用者节点，处理注解泛型信息等
             caller = recordCallerInfo(callerFullMethod, isRpc, methodCallId, callerMethod.getCallFlags(), callType,
                     callerMethod.getCallerLineNumber(), callGraphNode4CalleeStack.getHead(), callerMethodHash, back2Level);
             //调用方更新调用列表
@@ -480,6 +491,9 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
         if (!addBusinessData(methodCallId, callFlags, callerMethodHash, caller)) {
             return null;
         }
+
+        // 方法添加controller相关信息
+        addControllerInfo(callerFullMethod, methodAnnotationMap, caller);
 
         // 为方法调用信息增加是否在其他线程执行标志
         addRunInOtherThread(methodCallId, callType, methodAnnotationMap, caller);
@@ -898,7 +912,7 @@ public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
     }
 
     /**
-     * 根据完整方法HASH+长度，获取方法对应的标志
+     * 根据类名获取方法信息
      */
     public List<MethodFullInfo> getMethodInfoBySimpleClassName(String calleeSimpleClassName) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_INFO_BY_CLASSNAME;

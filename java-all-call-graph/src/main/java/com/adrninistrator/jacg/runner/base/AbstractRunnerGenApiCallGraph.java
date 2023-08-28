@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.runner.base;
 import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.api.BusinessData;
 import com.adrninistrator.jacg.api.CalleeNode;
+import com.adrninistrator.jacg.api.ControllerInfo;
 import com.adrninistrator.jacg.api.MethodArgument;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
@@ -11,6 +12,7 @@ import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
@@ -97,6 +99,25 @@ public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCal
         }
 
         return methodAnnotationMap;
+    }
+
+    /**
+     * 添加controller相关信息
+     * @param methodAnnotationMap 注解信息
+     * @param node 方法节点
+     */
+    protected void addControllerInfo(String fullMethod ,Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap, CalleeNode node) {
+        if(Objects.isNull(methodAnnotationMap) || methodAnnotationMap.isEmpty()){
+            return;
+        }
+        for (String springMvcMappingAnnotation : JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS) {
+            if (Objects.isNull(methodAnnotationMap.get(springMvcMappingAnnotation))){
+                continue;
+            }
+            // 查询controller信息
+            ControllerInfo controllerInfo = getControllerInfoDOByFullMethod(fullMethod);
+            node.setControllerInfo(controllerInfo);
+        }
     }
 
     /**
@@ -286,5 +307,43 @@ public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCal
 
         businessData.add(new BusinessData(dataType,jsonStr));
 
+    }
+
+    /**
+     * 通过代码行号获取对应方法
+     */
+    protected WriteDbData4MethodLineNumber getMethodInfoByLineNumber(String simpleClassName, int methodLineNum) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MLN_QUERY_METHOD_HASH;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MLN_METHOD_HASH, DC.MLN_FULL_METHOD) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_LINE_NUMBER.getTableName() +
+                    " where " + DC.MLN_SIMPLE_CLASS_NAME + " = ?" +
+                    " and " + DC.MLN_MIN_LINE_NUMBER + " <= ?" +
+                    " and " + DC.MLN_MAX_LINE_NUMBER + " >= ?" +
+                    " limit 1";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        return dbOperator.queryObject(sql, WriteDbData4MethodLineNumber.class, simpleClassName, methodLineNum, methodLineNum);
+
+    }
+
+    /**
+     * 根据方法的全名 获取所有的Spring Controller信息
+     */
+    public ControllerInfo getControllerInfoDOByFullMethod(String fullMethod) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_INFO_BY_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.SPC_METHOD_HASH, DC.SPC_SEQ,
+                    DC.SPC_SHOW_URI, DC.SPC_REQUEST_METHOD, DC.SPC_CLASS_PATH, DC.SPC_METHOD_PATH,
+                    DC.SPC_ANNOTATION_ANNOTATION_NAME, DC.SPC_SIMPLE_CLASS_NAME, DC.SPC_FULL_METHOD) +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName() +
+                    " where " + DC.SPC_FULL_METHOD + " = ? ";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        return dbOperator.queryObject(sql, ControllerInfo.class, fullMethod);
     }
 }
