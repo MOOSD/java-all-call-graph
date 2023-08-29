@@ -1,5 +1,7 @@
 package com.adrninistrator.jacg.api;
 
+import java.util.Objects;
+
 /**
  * controller方法信息表
  */
@@ -66,5 +68,31 @@ public class ControllerInfo {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    @Override
+    public String toString() {
+        return "ControllerInfo{" +
+                "showUri='" + showUri + '\'' +
+                ", requestMethod='" + requestMethod + '\'' +
+                ", classPath='" + classPath + '\'' +
+                ", methodPath='" + methodPath + '\'' +
+                ", annotationName='" + annotationName + '\'' +
+                ", simpleClassName='" + simpleClassName + '\'' +
+                ", fullMethod='" + fullMethod + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ControllerInfo that = (ControllerInfo) o;
+        return Objects.equals(showUri, that.showUri) && Objects.equals(requestMethod, that.requestMethod) && Objects.equals(classPath, that.classPath) && Objects.equals(methodPath, that.methodPath) && Objects.equals(annotationName, that.annotationName) && Objects.equals(simpleClassName, that.simpleClassName) && Objects.equals(fullMethod, that.fullMethod);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(showUri, requestMethod, classPath, methodPath, annotationName, simpleClassName, fullMethod);
     }
 }
