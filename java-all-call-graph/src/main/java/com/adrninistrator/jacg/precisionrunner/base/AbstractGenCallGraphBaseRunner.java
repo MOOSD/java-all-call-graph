@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.runner.base;
+package com.adrninistrator.jacg.precisionrunner.base;
 
 import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.common.DC;
@@ -21,7 +21,7 @@ import com.adrninistrator.jacg.handler.method.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMapperHandler;
 import com.adrninistrator.jacg.markdown.enums.MDCodeBlockTypeEnum;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
-import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
+import com.adrninistrator.jacg.precisionrunner.GenGraphCalleePRunner;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
 import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
@@ -44,11 +44,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description:
  */
 
-public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenCallGraph.class);
+public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractGenCallGraphBaseRunner.class);
 
     // 当前生成的完整方法调用链方向是否为向上
-    protected final boolean order4ee = this instanceof RunnerGenAllGraph4Callee;
+    protected final boolean order4ee = this instanceof GenGraphCalleePRunner;
 
     // 配置文件中指定的需要处理的任务
     protected Set<String> taskSet;
@@ -280,7 +280,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
      * @return
      */
     protected boolean createOutputDir(String prefix) {
-        synchronized (AbstractRunnerGenCallGraph.class) {
+        synchronized (AbstractGenCallGraphBaseRunner.class) {
             String outputDirPrefix;
             String outputRootPathInProperties = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_OUTPUT_ROOT_PATH);
             if (StringUtils.isNotBlank(outputRootPathInProperties)) {
@@ -375,7 +375,7 @@ public abstract class AbstractRunnerGenCallGraph extends AbstractRunner {
         String calleeFullMethod = methodCall.getCalleeFullMethod();
 
         // 以下对Map及Set的处理会并发执行，需要串行执行，避免添加的数据丢失
-        synchronized (AbstractRunnerGenCallGraph.class) {
+        synchronized (AbstractGenCallGraphBaseRunner.class) {
             MultiCallInfo multiCallInfo = methodCallMap.computeIfAbsent(callerFullMethod, k -> new MultiCallInfo(callerMethodHash, new HashSet<>()));
             Set<String> calleeMethodSet = multiCallInfo.getCalleeFullMethodSet();
             calleeMethodSet.add(calleeFullMethod);

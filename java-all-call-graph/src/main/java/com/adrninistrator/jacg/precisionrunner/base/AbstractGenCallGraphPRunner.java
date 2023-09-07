@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.runner.base;
+package com.adrninistrator.jacg.precisionrunner.base;
 
 import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.api.BusinessData;
@@ -28,8 +28,11 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 
-public abstract class AbstractRunnerGenApiCallGraph extends AbstractRunnerGenCallGraph {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractRunnerGenApiCallGraph.class);
+/**
+ * 生成调用树所用的抽象类
+ */
+public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBaseRunner {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractGenCallGraphPRunner.class);
 
     //是否跨基于OpenFeign的服务生成调用链路
     protected boolean crossServiceByOpenFeign;

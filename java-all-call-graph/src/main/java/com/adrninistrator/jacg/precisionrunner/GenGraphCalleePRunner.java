@@ -1,4 +1,4 @@
-package com.adrninistrator.jacg.runner;
+package com.adrninistrator.jacg.precisionrunner;
 
 import com.adrninistrator.jacg.api.CalleeNode;
 import com.adrninistrator.jacg.api.CalleeTrees;
@@ -15,7 +15,8 @@ import com.adrninistrator.jacg.dto.task.CalleeEntryMethodTaskInfo;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
-import com.adrninistrator.jacg.runner.base.AbstractRunnerGenApiCallGraph;
+import com.adrninistrator.jacg.precisionrunner.base.AbstractGenCallGraphPRunner;
+import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
@@ -36,10 +37,17 @@ import java.util.*;
 /**
  * 生成java对象的向上调用链的runner
  */
-public class RunnerGenGraph4ApiCallee extends AbstractRunnerGenApiCallGraph {
+public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
     private static final Logger logger = LoggerFactory.getLogger(RunnerGenAllGraph4Callee.class);
 
     private CalleeTrees calleeTrees;
+
+
+    @Override
+    public String setRunnerName() {
+        return "向上调用树生成Runner";
+    }
+
     // 生成指定方法向上的调用链路
     public CalleeTrees getLink(ConfigureWrapper config){
         //运行方法，结果收集到指定对象中。

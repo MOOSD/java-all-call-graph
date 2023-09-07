@@ -3,8 +3,8 @@ package test.jacg;
 import com.adrninistrator.jacg.api.CalleeTrees;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.RunConfig;
+import com.adrninistrator.jacg.precisionrunner.GenGraphCalleePRunner;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
-import com.adrninistrator.jacg.runner.RunnerGenGraph4ApiCallee;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ import org.junit.Test;
  * @description: 生成向上的方法完整调用链
  */
 
-public class TestRunnerGenGraph4ApiCallee {
+public class TestGenGraphCalleeRunner {
 
     public static void main(String[] args) {
         new RunnerGenAllGraph4Callee().run();
@@ -26,7 +26,7 @@ public class TestRunnerGenGraph4ApiCallee {
      */
     @Test
     public void getAllGraph4CalleeForI8(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
@@ -63,7 +63,7 @@ public class TestRunnerGenGraph4ApiCallee {
      */
     @Test
     public void getAllGraph4CalleeForI8ByMethodLine(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
@@ -102,7 +102,7 @@ public class TestRunnerGenGraph4ApiCallee {
      */
     @Test
     public void getAllGraph4CalleeForI8CrossMS(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
@@ -146,7 +146,7 @@ public class TestRunnerGenGraph4ApiCallee {
      */
     @Test
     public void getAllGraph4CalleeForJacg(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"jacg");
@@ -184,7 +184,7 @@ public class TestRunnerGenGraph4ApiCallee {
      */
     @Test
     public void getAllGraph4CalleeForJacgByClass(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"jacg");

@@ -6,7 +6,7 @@ import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.RunConfig;
-import com.adrninistrator.jacg.runner.RunnerGenGraph4ApiCallee;
+import com.adrninistrator.jacg.precisionrunner.GenGraphCalleePRunner;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import org.junit.Test;
 
@@ -19,7 +19,7 @@ public class bkGenAllGraph4Callee {
 
     @Test
     public void getAllGraph4CalleeForBK(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"bugkiller");
@@ -55,7 +55,7 @@ public class bkGenAllGraph4Callee {
 
     @Test
     public void getAllGraph4CalleeForBK1(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"bugkiller");
@@ -90,7 +90,7 @@ public class bkGenAllGraph4Callee {
     }
     @Test
     public void getAllGraph4CalleeListForBK(){
-        RunnerGenGraph4ApiCallee runnerGenAllGraph4Callee = new RunnerGenGraph4ApiCallee();
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"bugkiller");
