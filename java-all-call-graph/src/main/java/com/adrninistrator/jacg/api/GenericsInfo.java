@@ -1,8 +1,11 @@
 package com.adrninistrator.jacg.api;
 
 public class GenericsInfo {
-    String genType;
-    String genValue;
+    private String genType;
+    private String genValue;
+
+    public GenericsInfo() {
+    }
 
     public String getGenType() {
         return genType;

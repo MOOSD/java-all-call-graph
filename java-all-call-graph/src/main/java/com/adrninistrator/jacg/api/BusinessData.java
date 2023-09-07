@@ -1,6 +1,9 @@
 package com.adrninistrator.jacg.api;
 
 public class BusinessData {
+    public BusinessData() {
+    }
+
     public BusinessData(String dataType, String dataValue) {
         this.dataType = dataType;
         this.dataValue = dataValue;

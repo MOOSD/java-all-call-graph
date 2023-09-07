@@ -7,15 +7,18 @@ import java.util.List;
  */
 public class MethodArgument {
     //参数的完全限定类名
-    String fqcn;
+    private String fqcn;
 
     //参数的泛型信息
-    List<String> genericsInfo;
+    private List<String> genericsInfo;
 
 
     public MethodArgument(String fqcn, List<String> genericsInfo) {
         this.fqcn = fqcn;
         this.genericsInfo = genericsInfo;
+    }
+
+    public MethodArgument() {
     }
 
     public String getFqcn() {
