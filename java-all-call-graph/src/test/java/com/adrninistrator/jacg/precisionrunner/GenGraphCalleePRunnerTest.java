@@ -1,6 +1,6 @@
 package com.adrninistrator.jacg.precisionrunner;
 
-import com.adrninistrator.jacg.api.CalleeTrees;
+import com.adrninistrator.jacg.api.CallTrees;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.RunConfig;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
@@ -41,7 +41,7 @@ public class GenGraphCalleePRunnerTest {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = genGraphCalleePRunner.getLink(runConfig);
+        CallTrees tree = genGraphCalleePRunner.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
@@ -81,7 +81,7 @@ public class GenGraphCalleePRunnerTest {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 

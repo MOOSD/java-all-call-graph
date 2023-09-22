@@ -1,6 +1,6 @@
 package test.jacg;
 
-import com.adrninistrator.jacg.api.CalleeTrees;
+import com.adrninistrator.jacg.api.CallTrees;
 import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
@@ -47,7 +47,7 @@ public class bkGenAllGraph4Callee {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
@@ -83,7 +83,7 @@ public class bkGenAllGraph4Callee {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
@@ -118,7 +118,7 @@ public class bkGenAllGraph4Callee {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         // 平展整个节点树
         List<String> nodeList = new ArrayList<>();

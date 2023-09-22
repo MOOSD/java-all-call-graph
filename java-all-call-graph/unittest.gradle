@@ -1,6 +1,7 @@
 apply plugin: 'jacoco'
 
 test {
+    enabled(true)
     doFirst {
         exclude('test/other')
         minHeapSize = "256m"

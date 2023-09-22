@@ -1,6 +1,6 @@
 package test.jacg;
 
-import com.adrninistrator.jacg.api.CalleeTrees;
+import com.adrninistrator.jacg.api.CallTrees;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.RunConfig;
 import com.adrninistrator.jacg.precisionrunner.GenGraphCalleePRunner;
@@ -52,7 +52,7 @@ public class TestGenGraphCalleeRunner {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
@@ -91,7 +91,7 @@ public class TestGenGraphCalleeRunner {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
@@ -131,7 +131,7 @@ public class TestGenGraphCalleeRunner {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
@@ -173,7 +173,7 @@ public class TestGenGraphCalleeRunner {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
@@ -210,7 +210,7 @@ public class TestGenGraphCalleeRunner {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CalleeTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 

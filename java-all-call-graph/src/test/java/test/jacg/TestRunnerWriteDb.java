@@ -46,7 +46,7 @@ public class TestRunnerWriteDb {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED,"true");
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("D:\\Data\\TestData\\microservice\\i8");
+        otherConfigList.add("D:\\work\\jar\\i8\\dev");
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow

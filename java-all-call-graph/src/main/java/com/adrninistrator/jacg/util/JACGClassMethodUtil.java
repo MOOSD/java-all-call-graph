@@ -82,6 +82,11 @@ public class JACGClassMethodUtil {
         return StringUtils.substringBefore(fullMethod, JavaCGConstants.FLAG_LEFT_BRACKET);
     }
 
+
+    public static String getClassFullyQualifiedClassName(String fullMethod) {
+        return StringUtils.substringBefore(fullMethod, JavaCGConstants.FLAG_COLON);
+    }
+
     /**
      * 将方法名中的<替换为(，>替换为)，防止无法在Windows环境生成文件
      * 用于处理<init>、<clint>等方法

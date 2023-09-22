@@ -12,38 +12,16 @@ import java.util.function.Consumer;
  * 根节点代表查询的方法A，叶子节点代表方法A的调用者们，深度属性直接表示调用层级。
  * 因此在向上的调用树中，从根向叶子节点看有许多路径；从一个叶子节点到根节点的路径唯一。
  */
-public class CalleeNode {
+public class CalleeNode extends MethodNode<CalleeNode>{
 
     //当前节点深度
     private int depth;
-    //方法名
-    private String methodName;
-    //当前方法所在类的类名
-    private String className;
     //是否方法入口
     private boolean isEntrance;
-    //当前方法所在类的完全限定类名
-    private String fqcn;
-    //当前方法所在服务的服务名
-    private String serviceName;
-    //方法参数
-    private List<MethodArgument> methodArguments;
-    //方法注解
-    private List<String> annotation;
-    //业务数据信息
-    private List<BusinessData> businessData;
-    //是否运行在声明式方法中 todo:默认值不序列化
-    private boolean inTransaction;
-    //泛型信息
-    private List<GenericsInfo> genericsInfo;
-    //controller信息，为空则表示不为controller
-    private ControllerInfo controllerInfo;
-    //被调用信息
-    private CalleeInfo calleeInfo;
-    //此方法的被调用者
+    //此方法被哪些方法调用
     private List<CalleeNode> callees;
-    //此方法调用的方法
     @JsonIgnore
+    //此方法调用的方法
     private List<CalleeNode> callers;
 
     /**
@@ -55,7 +33,7 @@ public class CalleeNode {
         calleeNode.callees = new ArrayList<>();
         calleeNode.callers = new ArrayList<>();
         //实例化调用信息
-        calleeNode.calleeInfo = new CalleeInfo();
+        calleeNode.callInfo = new CallInfo();
         return calleeNode;
     }
 
@@ -63,13 +41,13 @@ public class CalleeNode {
         CalleeNode calleeNode = new CalleeNode();
         calleeNode.callees = new ArrayList<>();
         //实例化调用信息
-        calleeNode.calleeInfo = new CalleeInfo();
+        calleeNode.callInfo = new CallInfo();
         return calleeNode;
     }
 
     /**
      * 添加一个此方法的调用者
-     * @param calleeNode 调用此方法的方法节点
+     * @param calleeNode 调用此方法的方法节点是唯一的
      */
     public void addCallee(CalleeNode calleeNode){
         Objects.requireNonNull(callees).add(Objects.requireNonNull(calleeNode));
@@ -93,6 +71,14 @@ public class CalleeNode {
     }
 
     /**
+     * 获取调用此方法的方法节点
+     * @return
+     */
+    @JsonIgnore
+    public CalleeNode getCaller(){
+        return this.callers.get(0);
+    }
+    /**
      * 遍历整个调用树
      * @param consumer 迭代方法
      */
@@ -108,15 +94,12 @@ public class CalleeNode {
         }
     }
 
-    /**
-     * 此方法运行在声明式事务中
-     */
-    public void runInTransaction(){
-        this.inTransaction = true;
+    public List<CalleeNode> getCallers() {
+        return callers;
     }
 
-    public List<GenericsInfo> getGenericsInfo() {
-        return genericsInfo;
+    public CallInfo getCallInfo() {
+        return callInfo;
     }
 
     public int getDepth() {
@@ -127,50 +110,6 @@ public class CalleeNode {
         this.depth = depth;
     }
 
-    public String getFqcn() {
-        return fqcn;
-    }
-
-    public void setFqcn(String fqcn) {
-        this.fqcn = fqcn;
-    }
-
-    public List<MethodArgument> getMethodArguments() {
-        return methodArguments;
-    }
-
-    public void setMethodArguments(List<MethodArgument> methodArguments) {
-        this.methodArguments = methodArguments;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public List<String> getAnnotation() {
-        return annotation;
-    }
-
-    public void setAnnotation(List<String> annotation) {
-        this.annotation = annotation;
-    }
-
-    public CalleeInfo getCalleeInfo() {
-        return calleeInfo;
-    }
-
-    public List<CalleeNode> getCallees() {
-        return callees;
-    }
-
-    public List<CalleeNode> getCallers() {
-        return callers;
-    }
-
     public boolean isEntrance() {
         return isEntrance;
     }
@@ -179,44 +118,7 @@ public class CalleeNode {
         isEntrance = entrance;
     }
 
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-
-    public void setGenericsInfo(List<GenericsInfo> genericsInfo) {
-        this.genericsInfo = genericsInfo;
-    }
-
-    public List<BusinessData> getBusinessData() {
-        return businessData;
-    }
-
-    public void setBusinessData(List<BusinessData> businessData) {
-        this.businessData = businessData;
-    }
-
-    public boolean isInTransaction() {
-        return inTransaction;
-    }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
-    }
-
-    public ControllerInfo getControllerInfo() {
-        return controllerInfo;
-    }
-
-    public void setControllerInfo(ControllerInfo controllerInfo) {
-        this.controllerInfo = controllerInfo;
+    public List<CalleeNode> getCallees() {
+        return callees;
     }
 }

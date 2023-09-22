@@ -1,0 +1,11 @@
+15:57:43:548 INFO  [      main] om.adrninistrator.jacg.exec.LogTest - info
+15:57:43:553 DEBUG [      main] om.adrninistrator.jacg.exec.LogTest - debug
+15:57:43:553 WARN  [      main] om.adrninistrator.jacg.exec.LogTest - warn
+15:58:05:470 INFO  [      main] om.adrninistrator.jacg.exec.LogTest - info
+15:58:05:474 DEBUG [      main] om.adrninistrator.jacg.exec.LogTest - debug
+15:58:05:474 WARN  [      main] om.adrninistrator.jacg.exec.LogTest - warn
+16:04:40:821 [34mINFO [m [      main] om.adrninistrator.jacg.exec.LogTest - info
+16:04:40:825 [mDEBUG[m [      main] om.adrninistrator.jacg.exec.LogTest - debug
+16:04:40:826 [31mWARN [m [      main] om.adrninistrator.jacg.exec.LogTest - warn
+16:10:40:820 [34mINFO [m [      main] om.adrninistrator.jacg.exec.LogTest - info
+16:10:40:823 [31mWARN [m [      main] om.adrninistrator.jacg.exec.LogTest - warn

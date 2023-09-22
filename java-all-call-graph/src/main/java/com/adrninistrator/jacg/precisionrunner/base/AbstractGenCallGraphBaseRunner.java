@@ -2,20 +2,14 @@ package com.adrninistrator.jacg.precisionrunner.base;
 
 import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.common.DC;
-import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.*;
-import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
-import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
+import com.adrninistrator.jacg.dto.method.SimpleMethodInfo;
 import com.adrninistrator.jacg.dto.multiple.MultiCallInfo;
-import com.adrninistrator.jacg.dto.task.FindMethodTaskInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4JarInfo;
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
-import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
-import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.handler.method.MethodArgGenericsTypeHandler;
 import com.adrninistrator.jacg.handler.method.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMapperHandler;
@@ -23,8 +17,10 @@ import com.adrninistrator.jacg.markdown.enums.MDCodeBlockTypeEnum;
 import com.adrninistrator.jacg.markdown.writer.MarkdownWriter;
 import com.adrninistrator.jacg.precisionrunner.GenGraphCalleePRunner;
 import com.adrninistrator.jacg.runner.RunnerWriteDb;
-import com.adrninistrator.jacg.util.*;
-import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
+import com.adrninistrator.jacg.util.JACGClassMethodUtil;
+import com.adrninistrator.jacg.util.JACGFileUtil;
+import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
@@ -32,6 +28,7 @@ import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -733,15 +730,6 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
         return rtnMap;
     }
 
-    /**
-     * 获取本次执行时的输出目录
-     *
-     * @return
-     */
-    public String getCurrentOutputDirPath() {
-        return currentOutputDirPath;
-    }
-
     // 添加用于添加对方法上的注解进行处理的类
     protected boolean addMethodAnnotationHandlerExtensions() {
         List<String> methodAnnotationHandlerClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER, true);
@@ -816,71 +804,11 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
     }
 
     /**
-     * 获取方法对应的注解信息
-     *
-     * @param fullMethod              完整方法
-     * @param methodHash              完整方法HASH+长度
-     * @param formattedAnnotationInfo 保存格式化后的注解信息
-     * @return 当前方法上的注解信息
-     */
-    protected Map<String, Map<String, BaseAnnotationAttribute>> getMethodAnnotationInfo(String fullMethod, String methodHash, StringBuilder formattedAnnotationInfo) {
-        // 根据完整方法HASH+长度获取对应的注解信息
-        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = annotationHandler.queryAnnotationMap4FullMethod(fullMethod);
-        if (methodAnnotationMap == null) {
-            // 当前方法上没有注解
-            return null;
-        }
-
-        // 当前方法上有注解
-        String existedAnnotationInfo = methodAllAnnotationInfoMap.get(methodHash);
-        if (existedAnnotationInfo != null) {
-            // 当前方法对应的注解信息已查询过，直接使用
-            formattedAnnotationInfo.append(existedAnnotationInfo);
-            return methodAnnotationMap;
-        }
-
-        // 当前方法对应的注解信息未查询过
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // 遍历当前方法上的所有注解进行处理
-        for (Map.Entry<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMapEntry : methodAnnotationMap.entrySet()) {
-            String annotationName = methodAnnotationMapEntry.getKey();
-            // 遍历用于对方法上的注解进行处理的类
-            for (AbstractAnnotationFormatter annotationFormatter : annotationFormatterList) {
-                if (!annotationFormatter.checkHandleAnnotation(annotationName)) {
-                    continue;
-                }
-
-                String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
-                // 找到能够处理的类进行处理
-                String annotationInfo = annotationFormatter.handleAnnotation(fullMethod, className, annotationName, methodAnnotationMapEntry.getValue());
-                if (annotationInfo != null) {
-                    // 替换TAB、回车、换行等字符，再将半角的@替换为全角，避免影响通过@对注解进行分隔
-                    String finalAnnotationInfo = JACGCallGraphFileUtil.replaceSplitChars(annotationInfo)
-                            .replace(JACGConstants.FLAG_AT, JACGConstants.FLAG_AT_FULL_WIDTH);
-
-                    // 注解信息以@开头，在以上方法中不需要返回以@开头
-                    stringBuilder.append(JACGConstants.FLAG_AT).append(finalAnnotationInfo);
-                }
-                break;
-            }
-        }
-
-        String allAnnotationInfo = stringBuilder.toString();
-        methodAllAnnotationInfoMap.putIfAbsent(methodHash, allAnnotationInfo);
-        formattedAnnotationInfo.append(allAnnotationInfo);
-        return methodAnnotationMap;
-    }
-
-    /**
      * 通过代码行号获取对应方法
      *
      * @param isCallee        true: 生成向上的方法调用链 false: 生成向下的方法调用链
-     * @param simpleClassName
-     * @param methodLineNum
-     * @return
      */
-    protected FindMethodTaskInfo findMethodByLineNumber(boolean isCallee, String simpleClassName, int methodLineNum) {
+    protected @Nullable SimpleMethodInfo findMethodByLineNumber(boolean isCallee, String simpleClassName, int methodLineNum) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MLN_QUERY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -895,26 +823,27 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
 
         WriteDbData4MethodLineNumber methodAndHash = dbOperator.queryObject(sql, WriteDbData4MethodLineNumber.class, simpleClassName, methodLineNum, methodLineNum);
         if (methodAndHash == null) {
-            logger.warn("指定类的代码行号未查找到对应方法，请检查，可能因为以下原因\n" +
-                    "1. 指定的类所在的jar包未在配置文件 {} 中指定\n" +
+            String warnMessage = "指定类的代码行号未查找到对应方法，请检查，可能因为以下原因\n" +
+                    "1. 指定的类所在的jar包未在配置文件 "+ OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey() +"中指定\n" +
                     "2. 指定的方法是接口中未实现的方法\n" +
-                    "3. 指定的方法是抽象方法\n" +
-                    "{} {}", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey(), simpleClassName, methodLineNum);
-            return FindMethodTaskInfo.genFindMethodInfoGenEmptyFile();
+                    "3. 指定的方法是抽象方法\n" + simpleClassName + " " + methodLineNum;
+            logger.warn(warnMessage);
+            failTaskList.add(warnMessage);
+            return null;
         }
 
-        // 查询方法的标记
+        // 查询方法的标记，若未查询到则返回0
         int methodCallFlags = queryMethodCallFlags(isCallee, methodAndHash.getMethodHash());
         // 指定类的代码行号查找到对应方法
-        return FindMethodTaskInfo.genFindMethodInfoSuccess(methodAndHash.getMethodHash(), methodAndHash.getFullMethod(), methodCallFlags);
+        return new SimpleMethodInfo(methodAndHash.getMethodHash(), methodAndHash.getFullMethod(), methodCallFlags);
     }
 
     /**
      * 查询方法的标记
      *
      * @param isCallee   true: 生成向上的方法调用链 false: 生成向下的方法调用链
-     * @param methodHash
-     * @return
+     * @param methodHash 方法hash值
+     * @return 方法调用标记, 若未查询到则返回0
      */
     protected int queryMethodCallFlags(boolean isCallee, String methodHash) {
         SqlKeyEnum sqlKeyEnum = isCallee ? SqlKeyEnum.MC_QUERY_FLAG_4EE : SqlKeyEnum.MC_QUERY_FLAG_4ER;
@@ -1041,211 +970,6 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
             return true;
         }
         return false;
-    }
-
-    /**
-     * 为方法调用信息增加是否在其他线程执行标志
-     *
-     * @param callInfo
-     * @param methodCallId
-     * @param callType
-     * @param methodAnnotationMap
-     */
-    protected void addRunInOtherThread(StringBuilder callInfo, int methodCallId, String callType, Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap) {
-        if (StringUtils.equalsAny(callType,
-                JavaCGCallTypeEnum.CTE_RUNNABLE_INIT_RUN2.getType(),
-                JavaCGCallTypeEnum.CTE_CALLABLE_INIT_CALL2.getType(),
-                JavaCGCallTypeEnum.CTE_THREAD_START_RUN.getType())) {
-            // 方法调用类型属于线程调用，在方法调用上增加在其他线程执行的标志
-            doAddRunInOtherThread(callInfo);
-            return;
-        }
-
-        if (methodAnnotationMap != null && methodAnnotationMap.get(JACGCommonNameConstants.SPRING_ASYNC_ANNOTATION) != null) {
-            // 方法上的注解包括@Async，在方法调用上增加在其他线程执行的标志
-            doAddRunInOtherThread(callInfo);
-            return;
-        }
-
-        if (JavaCGCallTypeEnum.CTE_LAMBDA.getType().equals(callType)) {
-            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = dbOperWrapper.getLambdaCalleeInfo(methodCallId);
-            if (lambdaCalleeInfo != null &&
-                    ((JavaCGCommonNameConstants.CLASS_NAME_RUNNABLE.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
-                            JavaCGCommonNameConstants.METHOD_RUNNABLE_RUN.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))
-                            || (JavaCGCommonNameConstants.CLASS_NAME_CALLABLE.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
-                            JavaCGCommonNameConstants.METHOD_CALLABLE_CALL.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))
-                    )) {
-                // 方法为Lambda表达式，且属于线程调用，在方法调用上增加在其他线程执行的标志
-                doAddRunInOtherThread(callInfo);
-            }
-        }
-    }
-
-    // 在方法调用上增加在其他线程执行的标志
-    private void doAddRunInOtherThread(StringBuilder callInfo) {
-        callInfo.append(JACGConstants.CALL_FLAG_RUN_IN_OTHER_THREAD);
-    }
-
-    /**
-     * 为方法调用信息增加是否在事务中执行标志
-     *
-     * @param callInfo
-     * @param methodCallId
-     * @param callType
-     * @param methodAnnotationMap
-     */
-    protected void addRunInTransaction(StringBuilder callInfo, int methodCallId, String callType, Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap) {
-        if (StringUtils.equalsAny(callType,
-                JavaCGCallTypeEnum.CTE_TX_CALLBACK_INIT_CALL2.getType(),
-                JavaCGCallTypeEnum.CTE_TX_CALLBACK_WR_INIT_CALL2.getType())) {
-            // 方法调用类型属于事务调用，在方法调用上增加在事务中执行的标志
-            doAddRunInTransaction(callInfo);
-            return;
-        }
-
-        if (methodAnnotationMap != null && methodAnnotationMap.get(JACGCommonNameConstants.SPRING_TX_ANNOTATION) != null) {
-            // 方法上的注解包括@Transactional，在方法调用上增加在事务中执行的标志
-            doAddRunInTransaction(callInfo);
-            return;
-        }
-
-        if (JavaCGCallTypeEnum.CTE_LAMBDA.getType().equals(callType)) {
-            WriteDbData4LambdaMethodInfo lambdaCalleeInfo = dbOperWrapper.getLambdaCalleeInfo(methodCallId);
-            if (lambdaCalleeInfo != null && (
-                    (JavaCGCommonNameConstants.CLASS_NAME_TRANSACTION_CALLBACK.equals(lambdaCalleeInfo.getLambdaCalleeClassName()) &&
-                            JavaCGCommonNameConstants.METHOD_DO_IN_TRANSACTION.equals(lambdaCalleeInfo.getLambdaCalleeMethodName()))
-            )) {
-                // 方法为Lambda表达式，且属于事务调用，在方法调用上增加在事务中执行的标志
-                doAddRunInTransaction(callInfo);
-            }
-        }
-    }
-
-    // 在方法调用上增加在事务中执行的标志
-    private void doAddRunInTransaction(StringBuilder callInfo) {
-        callInfo.append(JACGConstants.CALL_FLAG_RUN_IN_TRANSACTION);
-    }
-
-    /**
-     * 添加方法调用业务功能数据
-     *
-     * @param methodCallId  方法调用ID
-     * @param callFlags     方法调用标志
-     * @param methodHash    对应的方法HASH+长度
-     * @param callGraphInfo 调用信息
-     * @return
-     */
-    protected boolean addBusinessData(int methodCallId,
-                                      int callFlags,
-                                      String methodHash,
-                                      StringBuilder callGraphInfo) {
-        // 添加默认的方法调用业务功能数据
-        if (!addDefaultBusinessData(methodCallId, callFlags, methodHash, callGraphInfo)) {
-            return false;
-        }
-
-        if (!MethodCallFlagsEnum.MCFE_EE_BUSINESS_DATA.checkFlag(callFlags)) {
-            // 被调用方法不存在自定义的业务功能数据
-            return true;
-        }
-
-        // 存在程序识别的方法调用业务功能数据，从数据库查询
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.BD_QUERY_BUSINESS_DATA;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns(DC.BD_DATA_TYPE, DC.BD_DATA_VALUE) +
-                    " from " + DbTableInfoEnum.DTIE_BUSINESS_DATA.getTableName() +
-                    " where " + DC.BD_CALL_ID + " = ?";
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-
-        BaseBusinessData businessData = dbOperator.queryObject(sql, BaseBusinessData.class, methodCallId);
-        if (businessData == null) {
-            logger.error("查询方法调用业务功能数据不存在 {}", methodCallId);
-            return false;
-        }
-
-        // 将方法调用业务功能数据加入被调用方法信息中
-        addBusinessData2CallGraphInfo(businessData.getDataType(), businessData.getDataValue(), callGraphInfo);
-        return true;
-    }
-
-    // 添加默认的方法调用业务功能数据
-    private boolean addDefaultBusinessData(int methodCallId,
-                                           int callFlags,
-                                           String methodHash,
-                                           StringBuilder callGraphInfo) {
-        for (String businessDataType : businessDataTypeList) {
-            if (DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType().equals(businessDataType)) {
-                // 显示方法调用信息
-                if (!MethodCallFlagsEnum.MCFE_METHOD_CALL_INFO.checkFlag(callFlags)) {
-                    continue;
-                }
-
-                ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(methodCallId);
-                if (objArgsInfoInMethodCall == null) {
-                    return false;
-                }
-                addBusinessData2CallGraphInfo(businessDataType, objArgsInfoInMethodCall, callGraphInfo);
-            } else if (DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType().equals(businessDataType)) {
-                // 显示方法参数泛型类型
-                if (!addMethodArgGenericsTypeInfo(false, callFlags, methodHash, callGraphInfo)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * 显示方法参数泛型类型
-     *
-     * @param handleEntryMethod 是否处理入口方法
-     * @param callFlags
-     * @param methodHash
-     * @param callGraphInfo
-     * @return
-     */
-    protected boolean addMethodArgGenericsTypeInfo(boolean handleEntryMethod, int callFlags, String methodHash, StringBuilder callGraphInfo) {
-        if (handleEntryMethod) {
-             /*
-                处理入口方法
-                生成向上的完整方法调用链时，判断被调用方法（即入口方法）是否存在参数泛型类型
-                生成向下的完整方法调用链时，判断调用方法（即入口方法）是否存在参数泛型类型
-             */
-            if ((order4ee && !MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
-                    (!order4ee && !MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
-                return true;
-            }
-        } else if ((order4ee && !MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
-                (!order4ee && !MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.checkFlag(callFlags))) {
-             /*
-                处理非入口方法
-                生成向上的完整方法调用链时，判断调用方法是否存在参数泛型类型
-                生成向下的完整方法调用链时，判断被调用方法是否存在参数泛型类型
-             */
-            return true;
-        }
-
-        MethodArgGenericsTypeInfo methodArgGenericsTypeInfo = methodArgGenericsTypeHandler.queryGenericsTypeInfo(methodHash);
-        if (methodArgGenericsTypeInfo == null) {
-            return false;
-        }
-        addBusinessData2CallGraphInfo(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(), methodArgGenericsTypeInfo, callGraphInfo);
-        return true;
-    }
-
-    /**
-     * 将方法调用业务功能数据加入被调用方法信息中
-     *
-     * @param dataType      方法调用业务功能数据类型
-     * @param dataValue     方法调用业务功能数据值
-     * @param callGraphInfo 方法调用信息
-     */
-    protected void addBusinessData2CallGraphInfo(String dataType, Object dataValue, StringBuilder callGraphInfo) {
-        String jsonStr = JACGJsonUtil.getJsonStr(dataValue);
-        addBusinessData2CallGraphInfo(dataType, jsonStr, callGraphInfo);
     }
 
     /**

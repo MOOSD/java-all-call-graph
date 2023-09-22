@@ -3,13 +3,17 @@ package com.adrninistrator.jacg.api;
 import com.adrninistrator.jacg.common.JACGConstants;
 
 /**
- * 保存调用者调用被调用者时候的调用信息。
+ * 此方法表示节点与节点之间连线的信息
+ * 即调用关系。
  */
-public class CalleeInfo {
+public class CallInfo {
 
 
-    //当前方法被调用的调用行
-    private int row;
+    //当前方法被调用的调用行,如果节点没有被调用，那么值为空
+    private Integer callerRow;
+
+    //当前方法调用者所在的类,如果节点没有被调用，那么值为空
+    private String callerClassName;
 
     //循环调用
     private int cycleCall = JACGConstants.NO_CYCLE_CALL_FLAG;
@@ -28,12 +32,12 @@ public class CalleeInfo {
         this.isAsync = true;
     }
 
-    public int getRow() {
-        return row;
+    public Integer getCallerRow() {
+        return this.callerRow;
     }
 
-    public void setRow(int row) {
-        this.row = row;
+    public void setCallerRow(int callerRow) {
+        this.callerRow = callerRow;
     }
 
 
@@ -46,15 +50,23 @@ public class CalleeInfo {
     }
 
 
-    public boolean isAsync() {
+    public boolean getAsync() {
         return isAsync;
     }
 
-    public boolean isRpc() {
+    public boolean getRpc() {
         return isRpc;
     }
 
     public void setRpc(boolean rpc) {
         isRpc = rpc;
+    }
+
+    public String getCallerClassName() {
+        return callerClassName;
+    }
+
+    public void setCallerClassName(String callerClassName) {
+        this.callerClassName = callerClassName;
     }
 }

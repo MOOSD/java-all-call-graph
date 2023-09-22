@@ -9,25 +9,25 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * 方法的被调用树
+ * 方法的被调用树(T 表示树的类型)
  */
-public class CalleeTrees {
+public class CallTrees<T extends MethodNode<T>> {
 
 
     //查询方法的被调用的树的列表(仅存储根节点)
     //key:方法的完全限定名
     //value:以此方法为根节点的向上的调用树
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private Map<String,CalleeNode> trees;
+    private Map<String,T> trees;
 
     //失败执行的方法
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> failTaskList;
+
     //实例化
-    public static CalleeTrees instantiate(){
-        HashMap<String,CalleeNode> trees = new HashMap<>();
-        CalleeTrees calleeTrees = new CalleeTrees();
-        calleeTrees.trees = trees;
+    public static <T extends MethodNode<T>> CallTrees<T> instantiate(){
+        CallTrees<T> calleeTrees = new CallTrees<>();
+        calleeTrees.trees = new HashMap<>();
         return calleeTrees;
     }
 
@@ -35,11 +35,11 @@ public class CalleeTrees {
      * 循环整颗此调用树
      * @param consumer 消费方法
      */
-    public void forEach(Consumer<CalleeNode> consumer) {
+    public  void forEach(Consumer<T> consumer) {
         if(Objects.isNull(trees)){
             return;
         }
-        for (CalleeNode root : trees.values()) {
+        for (T root : trees.values()) {
             if (Objects.isNull(root)){
                 continue;
             }
@@ -47,20 +47,24 @@ public class CalleeTrees {
         }
     }
 
-
-    public CalleeNode addTree(String fullMethod,CalleeNode calleeNode){
+    /**
+     * 添加一被调用棵树
+     * @param fullMethod 方法信息
+     * @param calleeNode 被调用树的根节点
+     */
+    public T addTree(String fullMethod,T calleeNode){
         return trees.put(fullMethod,calleeNode);
     }
 
-    public CalleeNode getTree(String fullMethod){
+    public T getTree(String fullMethod){
         return trees.get(fullMethod);
     }
 
-    public Map<String, CalleeNode> getTrees() {
+    public Map<String, T> getTrees() {
         return trees;
     }
 
-    public void setTrees(Map<String, CalleeNode> trees) {
+    public void setTrees(Map<String, T> trees) {
         this.trees = trees;
     }
 
