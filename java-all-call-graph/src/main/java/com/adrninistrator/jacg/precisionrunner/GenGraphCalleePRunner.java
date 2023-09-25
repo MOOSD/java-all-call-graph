@@ -350,7 +350,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 //如果开启跨微服务生成,且当前为方法是一个controller
                 if(crossServiceByOpenFeign && Objects.nonNull(methodNode.getAnnotation()) && isControllerMethod(methodNode.getAnnotation())){
                     //找到此controller对应的openfeign,将feignClient作为此Controller的调用者继续生成调用链路,即伪造一次调用
-                    FeignAndControllerInfo feignAndControllerInfo = getFeignInfoByControllerMethodHash(callGraphNode4Callee.getCalleeMethodHash());
+                    FeignAndControllerInfo feignAndControllerInfo = getFeignInfoByControllerMethodHash(callGraphNode4Callee);
                     if (Objects.nonNull(feignAndControllerInfo)){
                         serviceName = feignAndControllerInfo.getServiceName();
                         callerMethod = getFeignCallByControllerMethodHash(feignAndControllerInfo);
@@ -671,13 +671,14 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
     /**
      * 根据controller的methodhash 获取feign相关信息
-     * @param ControllerHash
      * @return
      */
-    private FeignAndControllerInfo getFeignInfoByControllerMethodHash(String ControllerHash){
-        // 第一次查询
-        // 确定查询被调用关系时所需字段
-        // todo 应该新增按照服务名过滤
+    private FeignAndControllerInfo getFeignInfoByControllerMethodHash(CallGraphNode4Callee callGraphNode4Callee){
+        if (Objects.nonNull(callGraphNode4Callee.getCallerMethodHash())){
+            // 如果调用者信息已经生成,则表示此次的rpc调用被查询过不是第一次被查询，那么直接返回null，表示没有额外的rpc调用
+            return null;
+        }
+        String controllerHash = callGraphNode4Callee.getCalleeMethodHash();
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_RPC1;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if(sql == null){
@@ -696,9 +697,9 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                     " where " + " s." + DC.COMMON_VERSION_ID + " = ? AND " + " s." + DC.SPC_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<FeignAndControllerInfo> resultList = dbOperator.queryList(sql, FeignAndControllerInfo.class, versionId,ControllerHash);
+        List<FeignAndControllerInfo> resultList = dbOperator.queryList(sql, FeignAndControllerInfo.class, versionId,controllerHash);
         //假设一个feignClient对应多个接口的情况不存在。
-        logger.info("sql:"+sql +"入参:"+ControllerHash);
+        logger.info("sql:"+sql +"入参:"+controllerHash);
         logger.info("根据controller查询对应feign结果:"+resultList);
         if(Objects.isNull(resultList) || resultList.size() == 0){
             return null;
@@ -706,7 +707,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         // 结果集的校验
         StringBuilder warnMessage = new StringBuilder();
         if(resultList.size() > 1){
-            warnMessage.append("controller和feign的对应大于一条,controllerHash: ").append(ControllerHash);
+            warnMessage.append("controller和feign的对应大于一条,controllerHash: ").append(controllerHash);
             addWarningMessage(warnMessage.toString());
         }
 

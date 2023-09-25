@@ -492,8 +492,10 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             if(calleeMethod == null && crossServiceByOpenFeign && isFeignMethodInvocation(methodNode.getAnnotation())){
                 FeignAndControllerInfo feignAndControllerInfo = getControllerInfoByFeignMethodHash(callGraphNode4Caller.getCallerMethodHash());
                 if(Objects.nonNull(feignAndControllerInfo)){
-                    methodNode.setServiceName(feignAndControllerInfo.getServiceName());
-                    calleeMethod = getControllerCallByFeignMethodHash(feignAndControllerInfo);
+                    if(StringUtils.isNotBlank(methodNode.getServiceName())){
+                        methodNode.setServiceName(feignAndControllerInfo.getServiceName());
+                    }
+                    calleeMethod = getControllerCallByFeignMethodHash(feignAndControllerInfo,callGraphNode4Caller);
                 }
             }
             // 查询到被调用方法为空时的处理
@@ -578,7 +580,11 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
     /**
      * 这里相当于是feign调用了某个controller方法，根据feign的信息，查询controller的信息伪造一次调用。
      */
-    private WriteDbData4MethodCall getControllerCallByFeignMethodHash(FeignAndControllerInfo feignAndControllerInfo){
+    private WriteDbData4MethodCall getControllerCallByFeignMethodHash(FeignAndControllerInfo feignAndControllerInfo, CallGraphNode4Caller callGraphNode4Caller){
+        // 一次rpc调用只可能有一种调用关系，因此一次调用中对此方法的重复调用返回null
+        if(callGraphNode4Caller.getMethodCallId() == -feignAndControllerInfo.hashCode()){
+            return null;
+        }
         // 模拟一条调用记录
         WriteDbData4MethodCall writeDbData4MethodCall = new WriteDbData4MethodCall();
         writeDbData4MethodCall.setCalleeMethodHash(feignAndControllerInfo.getControllerMethodHash());
@@ -614,7 +620,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                     " from " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableName() + " as f " +
                     " inner join " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName() + " as s " +
                     " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI + " COLLATE utf8mb4_general_ci" +
-                    " and (s." + DC.SPC_REQUEST_METHOD +" = f."+ DC.FC_REQUEST_METHOD +" or " + DC.SPC_REQUEST_METHOD + " is null)" +
+                    " and (s." + DC.SPC_REQUEST_METHOD +" = f."+ DC.FC_REQUEST_METHOD + " or s." + DC.SPC_REQUEST_METHOD + " is null)" +
                     " and s." + DC.COMMON_VERSION_ID + " = f." + DC.COMMON_VERSION_ID +
                     " where " + " f."+DC.COMMON_VERSION_ID+ " = ? AND " + " f." + DC.FC_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -646,6 +652,9 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         return feignAndControllerInfo;
     }
     private boolean isFeignMethodInvocation(List<String> annotationList){
+        if (Objects.isNull(annotationList)){
+            return false;
+        }
         return annotationList.stream().anyMatch(SpringMvcRequestMappingUtil::isControllerHandlerMethod);
     }
 
@@ -988,6 +997,11 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         // 为向下的方法完整调用链添加默认的方法调用业务功能数据
         if (!addDefaultBusinessData4er(callFlags, calleeClassName, calleeMethodName, caller)) {
             return null;
+        }
+
+        // 为节点添加远程调用信息
+        if(callType.equals(ExtendCallTypeEnum.RPC.getType())){
+            caller.getCallInfo().setRpc(true);
         }
 
         // 为方法调用信息增加是否在其他线程执行标志
