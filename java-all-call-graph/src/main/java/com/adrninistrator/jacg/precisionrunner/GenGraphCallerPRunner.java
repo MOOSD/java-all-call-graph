@@ -567,6 +567,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             // 获取下一层节点
             CallGraphNode4Caller nextCallGraphNode4Caller = new CallGraphNode4Caller(calleeMethodHash, JavaCGConstants.METHOD_CALL_ID_START, calleeFullMethod);
             callGraphNode4CallerStack.push(nextCallGraphNode4Caller);
+            // 当前节点添加调用信息
+            methodNode.addCaller(caller);
             methodNode = caller;
 
             // 继续下一层处理
@@ -976,8 +978,6 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         caller.getCallInfo().setCallerClassName(methodNode.getClassName());
         // 新节点添加被调用者信息
         caller.addCallee(methodNode);
-        // 当前节点添加调用信息
-        methodNode.addCaller(caller);
         // 判断被调用方法上是否有注解
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
         if (MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) {
@@ -1029,7 +1029,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         Set<CallerNode> callerRecordedCalleeSet = recordedCalleeStack.peek();
         if (!callerRecordedCalleeSet.add(calleeInfo)) {
             // 当前被调用方法在调用方法中已被调用过，忽略
-            logger.debug("忽略一个方法中被调用多次的方法 {} {}", callGraphNode4CallerStack.getHead(), calleeInfo);
+            logger.debug("忽略一个方法中被调用多次的方法 {} {}", callGraphNode4CallerStack.getHead(), calleeInfo.getMethodName());
 
             // 更新当前处理节点的id
             callGraphNode4CallerStack.peek().setMethodCallId(methodCallId);
