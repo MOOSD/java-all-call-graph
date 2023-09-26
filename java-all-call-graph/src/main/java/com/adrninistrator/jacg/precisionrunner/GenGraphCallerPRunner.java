@@ -63,6 +63,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         if (someTaskFail){
             callerTrees.setFailTaskList(failTaskList);
         }
+        callerTrees.setWarningMessages(warningMessages);
+        callerTrees.setErrorMessages(errorMessages);
         return callerTrees;
     }
 
@@ -96,14 +98,14 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
 
     // 执行实际处理
     private boolean operate() {
+        // 创建调用树
+        this.callerTrees = CallTrees.instantiate();
         // 生成文件中指定的需要执行的任务信息
         List<CallerTaskInfo> callerTaskInfoList = genCallerTaskInfo();
         if (JavaCGUtil.isCollectionEmpty(callerTaskInfoList)) {
             logger.error("执行失败，请检查配置文件 {} 的内容", OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER);
             return false;
         }
-        // 创建调用树
-        this.callerTrees = CallTrees.instantiate();
         // 创建线程
         createThreadPoolExecutor(callerTaskInfoList.size());
 
@@ -145,6 +147,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
 
         List<CallerTaskInfo> callerTaskInfoList = new ArrayList<>(taskSet.size());
         for (String task : taskSet) {
+            // 对task进行处理，将文本中的#替换为:
+            task = task.replace("#",JavaCGConstants.FLAG_COLON);
             if (!StringUtils.containsAny(task, JACGConstants.FLAG_SPACE, JavaCGConstants.FLAG_COLON)) {
                 // 当前任务不包含空格或冒号，说明需要将一个类的全部方法添加至任务中
                 if (!addAllMethodsInClass2Task(task, handledClassNameSet, callerTaskInfoList)) {
@@ -292,7 +296,6 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         // 获取调用者完整类名
         String entryCallerClassName = getCallerClassName(entryCallerSimpleClassName);
         if (StringUtils.isBlank(entryCallerClassName)) {
-            // 生成空文件并返回成功
             addWarningMessage("类" + entryCallerSimpleClassName + "的信息不存在");
             return true;
         }
@@ -302,7 +305,12 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         if (callerTaskInfo.getCallerMethodName() != null) {
             // 通过方法名称获取调用者方法
             simpleMethodInfo = findCallerMethodByName(entryCallerClassName, callerTaskInfo);
+            if (Objects.isNull(simpleMethodInfo)){
+                // 如果方法调用表中查询不到记录，则从方法表中查询方法信息，并且给与一个默认的调用类型
+                simpleMethodInfo = getMethodInfoLikeFullMethod(entryCallerClassName, callerTaskInfo);
+            }
         } else {
+            // 后缀是数字，用代码行号来获取调用者方法
             simpleMethodInfo = findCallerMethodByLineNumber(callerTaskInfo);
         }
         // 若未查询到方法信息，则直接返回
@@ -336,7 +344,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
 
         int callFlags = simpleMethodInfo.getCallFlags();
         // 判断调用方法上是否有注解
-        if (MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(callFlags)) {
+        if (callFlags == 0 || MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(callFlags)) {
             List<String> methodAnnotations = new ArrayList<>();
             // 添加方法注解信息
             getMethodAnnotationInfo(entryCallerFullMethod, entryCallerMethodHash, methodAnnotations);
@@ -364,7 +372,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         if (sql == null) {
             sql = "select " + JACGSqlUtil.joinColumns("distinct(" + DC.MC_CALLER_METHOD_HASH + ")", DC.MC_CALLER_FULL_METHOD, DC.MC_CALL_FLAGS) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                    " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ?" +
+                    " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ? " +
                     " and " + DC.MC_CALLER_FULL_METHOD +
                     " like concat(?, '%')";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -399,14 +407,46 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         }
 
         if (callerFullMethodList.size() > 1) {
-            String errorMessage = "通过配置文件 "+OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER+"\n" +
-                    "中的方法前缀 " + fullMethodPrefix + " 找到多于一个方法，请指定更精确的方法信息\n" +
+            String errorMessage = "通过方法前缀 " + fullMethodPrefix + " 找到多于一个方法，请指定更精确的方法信息\n" +
                     StringUtils.join(callerFullMethodList, "\n");
             logger.error(errorMessage);
             addWarningMessage(errorMessage);
             return null;
         }
         return new SimpleMethodInfo(callerMethodHash,callerFullMethodList.get(0), callFlags);
+    }
+
+    /**
+     * 根据类名获取方法信息
+     */
+    public SimpleMethodInfo getMethodInfoLikeFullMethod(String callerClassName , CallerTaskInfo callerTaskInfo) {
+        String callerMethodNameInTask = callerTaskInfo.getCallerMethodName();
+        String callerSimpleClassName = callerTaskInfo.getCallerSimpleClassName();
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_INFO_LIKE_FULL_METHOD;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.MI_METHOD_HASH, DC.MI_FULL_METHOD) +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ? " +
+                    " and " + DC.MI_FULL_METHOD +
+                    " like concat(?, '%')";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+        String fullMethodPrefix = JACGClassMethodUtil.getClassAndMethodName(callerClassName, callerMethodNameInTask);
+        List<SimpleMethodInfo> simpleMethodInfos = dbOperator.queryList(sql, SimpleMethodInfo.class, callerSimpleClassName, fullMethodPrefix);
+        if(Objects.isNull(simpleMethodInfos) || simpleMethodInfos.size() < 1){
+            return null;
+        }
+        // 校验
+        if(simpleMethodInfos.size() > 1){
+            String errorMessage = "通过方法前缀 " + fullMethodPrefix + " 找到多于一个方法，请指定更精确的方法信息\n" +
+                    StringUtils.join(simpleMethodInfos, "\n");
+            logger.error(errorMessage);
+            addWarningMessage(errorMessage);
+        }
+        SimpleMethodInfo simpleMethodInfo = simpleMethodInfos.get(0);
+        simpleMethodInfo.setCallFlags(0);
+        return simpleMethodInfo;
     }
 
     // 通过代码行号获取调用者方法
@@ -599,7 +639,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         writeDbData4MethodCall.setCallType(ExtendCallTypeEnum.RPC.getType());
         //设置调用标识为调用者带有注解
         // todo setflag(0) 等价于 MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.getFlag();
-        writeDbData4MethodCall.setCallFlags(MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.setFlag(0));
+        writeDbData4MethodCall.setCallFlags(MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.setFlag(0));
         //调用行设置为0
         writeDbData4MethodCall.setCallerLineNumber(0);
         writeDbData4MethodCall.setEnabled(1);
@@ -1060,19 +1100,21 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         }
 
         // 根据简单类名，查找对应的完整方法
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLER_FULL_METHOD;
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MI_QUERY_BY_SIMPLE_CLASS_NAME;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + DC.MC_CALLER_FULL_METHOD +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                    " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ?" +
+            sql = "select " + DC.MI_FULL_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_METHOD_INFO.getTableName() +
+                    " where " + DC.MI_SIMPLE_CLASS_NAME + " = ?" +
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
 
         String fullMethod = dbOperator.queryObjectOneColumn(sql, String.class, callerSimpleClassName);
         if (fullMethod == null) {
-            logger.warn("从方法调用关系表未找到对应的完整类名 {}", callerSimpleClassName);
+            String warningMessage = "未找到"+callerSimpleClassName+"所在类信息";
+            addWarningMessage(warningMessage);
+            logger.warn(warningMessage);
             return null;
         }
 

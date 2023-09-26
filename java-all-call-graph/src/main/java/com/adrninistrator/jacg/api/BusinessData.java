@@ -4,13 +4,13 @@ public class BusinessData {
     public BusinessData() {
     }
 
-    public BusinessData(String dataType, String dataValue) {
+    public BusinessData(String dataType, Object dataValue) {
         this.dataType = dataType;
         this.dataValue = dataValue;
     }
 
     private String dataType;
-    private String dataValue;
+    private Object dataValue;
 
 
 
@@ -22,7 +22,7 @@ public class BusinessData {
         this.dataType = dataType;
     }
 
-    public String getDataValue() {
+    public Object getDataValue() {
         return dataValue;
     }
 

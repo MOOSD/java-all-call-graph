@@ -13,7 +13,6 @@ import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
-import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
@@ -312,9 +311,8 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
             businessData = new ArrayList<>();
             node.setBusinessData(businessData);
         }
-        String jsonStr = JACGJsonUtil.getJsonStr(dataValue);
 
-        businessData.add(new BusinessData(dataType,jsonStr));
+        businessData.add(new BusinessData(dataType,dataValue));
 
     }
 

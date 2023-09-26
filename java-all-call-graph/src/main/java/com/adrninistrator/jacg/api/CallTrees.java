@@ -24,6 +24,12 @@ public class CallTrees<T extends MethodNode<T>> {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> failTaskList;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> warningMessages;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> errorMessages;
+
     //实例化
     public static <T extends MethodNode<T>> CallTrees<T> instantiate(){
         CallTrees<T> calleeTrees = new CallTrees<>();
@@ -76,5 +82,19 @@ public class CallTrees<T extends MethodNode<T>> {
         this.failTaskList = failTaskList;
     }
 
+    public List<String> getWarningMessages() {
+        return warningMessages;
+    }
 
+    public void setWarningMessages(List<String> warningMessages) {
+        this.warningMessages = warningMessages;
+    }
+
+    public List<String> getErrorMessages() {
+        return errorMessages;
+    }
+
+    public void setErrorMessages(List<String> errorMessages) {
+        this.errorMessages = errorMessages;
+    }
 }

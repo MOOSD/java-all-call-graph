@@ -10,6 +10,9 @@ public class SimpleMethodInfo {
     // 方法调用的标志
     private int callFlags;
 
+    public SimpleMethodInfo() {
+    }
+
     public SimpleMethodInfo(String methodHash, String fullMethod, int callFlags) {
         this.methodHash = methodHash;
         this.fullMethod = fullMethod;
