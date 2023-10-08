@@ -154,7 +154,7 @@ public class GenGraphCallerPRunnerTest {
         //allow_class_prefix.properties
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
 
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,"cn.newgrand.mspm.cg.services.ICgFeign#getReqPMByDicWhere");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,"cn.newgrand.pm.crm.zb.service.impl.CntAwardNoticeServiceImpl:saveCntAwardNotice(cn.newgrand.pm.crm.zb.domain.CntAwardNoticeModel,java.util.List,java.lang.String,boolean)");
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_CLASS_KEYWORD,"ApiResultUtil");
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),

@@ -148,6 +148,16 @@ public class JACGConstants {
     //此次调用是否为rpc
     public static final String IS_RPC = "isRpc";
 
+    // 代表方法调用表中未知的call_flags的值
+    public static final int UNKNOWN_CALL_FLAGS = -1;
+
+    // 代表方法调用表中未知的call_id的值
+    public static final int UNKNOWN_CALL_ID = 0;
+
+    // 代表方法调用表中未知的call_type的值
+    public static final String UNKNOWN_CALL_TYPES = null;
+
+
     private JACGConstants() {
         throw new IllegalStateException("illegal");
     }

@@ -4,7 +4,7 @@ import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.*;
-import com.adrninistrator.jacg.dto.method.SimpleMethodInfo;
+import com.adrninistrator.jacg.dto.method.SimpleMethodCallDTO;
 import com.adrninistrator.jacg.dto.multiple.MultiCallInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.adrninistrator.jacg.common.JACGConstants.*;
 
 /**
  * @author adrninistrator
@@ -808,7 +810,8 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
      *
      * @param isCallee        true: 生成向上的方法调用链 false: 生成向下的方法调用链
      */
-    protected @Nullable SimpleMethodInfo findMethodByLineNumber(boolean isCallee, String simpleClassName, int methodLineNum) {
+    protected @Nullable
+    SimpleMethodCallDTO findMethodByLineNumber(boolean isCallee, String simpleClassName, int methodLineNum) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MLN_QUERY_METHOD_HASH;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -832,10 +835,10 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
             return null;
         }
 
-        // 查询方法的标记，若未查询到则返回0
+        // 查询方法的标记，若未查询到则返回默认值
         int methodCallFlags = queryMethodCallFlags(isCallee, methodAndHash.getMethodHash());
         // 指定类的代码行号查找到对应方法
-        return new SimpleMethodInfo(methodAndHash.getMethodHash(), methodAndHash.getFullMethod(), methodCallFlags);
+        return new SimpleMethodCallDTO(methodAndHash.getMethodHash(), methodAndHash.getFullMethod(), methodCallFlags, UNKNOWN_CALL_ID, UNKNOWN_CALL_TYPES);
     }
 
     /**
@@ -843,7 +846,7 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
      *
      * @param isCallee   true: 生成向上的方法调用链 false: 生成向下的方法调用链
      * @param methodHash 方法hash值
-     * @return 方法调用标记, 若未查询到则返回0
+     * @return 方法调用标记, 若未查询到则返回-1
      */
     protected int queryMethodCallFlags(boolean isCallee, String methodHash) {
         SqlKeyEnum sqlKeyEnum = isCallee ? SqlKeyEnum.MC_QUERY_FLAG_4EE : SqlKeyEnum.MC_QUERY_FLAG_4ER;
@@ -859,7 +862,7 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
 
         Integer callFlags = dbOperator.queryObjectOneColumn(sql, Integer.class, methodHash);
         if (callFlags == null) {
-            return 0;
+            return UNKNOWN_CALL_FLAGS;
         }
         return callFlags;
     }

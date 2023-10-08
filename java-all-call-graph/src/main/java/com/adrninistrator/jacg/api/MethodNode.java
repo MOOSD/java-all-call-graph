@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -10,6 +11,12 @@ import java.util.function.Consumer;
  * 方法节点信息
  */
 public abstract class MethodNode<T> {
+
+    @JsonIgnore
+    protected String fullMethod;
+
+    @JsonIgnore
+    protected String methodHash;
 
     //方法名
     protected String methodName;
@@ -143,6 +150,22 @@ public abstract class MethodNode<T> {
 
     public void setBusinessData(List<BusinessData> businessData) {
         this.businessData = businessData;
+    }
+
+    public String getFullMethod() {
+        return fullMethod;
+    }
+
+    public void setFullMethod(String fullMethod) {
+        this.fullMethod = fullMethod;
+    }
+
+    public String getMethodHash() {
+        return methodHash;
+    }
+
+    public void setMethodHash(String methodHash) {
+        this.methodHash = methodHash;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.api;
 
 import com.adrninistrator.jacg.common.JACGConstants;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 此方法表示节点与节点之间连线的信息
@@ -8,6 +9,12 @@ import com.adrninistrator.jacg.common.JACGConstants;
  */
 public class CallInfo {
 
+    @JsonIgnore
+    private int callId;
+
+    private Integer callFlags;
+
+    private String callType;
 
     //当前方法被调用的调用行,如果节点没有被调用，那么值为空
     private Integer callerRow;
@@ -69,4 +76,30 @@ public class CallInfo {
     public void setCallerClassName(String callerClassName) {
         this.callerClassName = callerClassName;
     }
+
+    public int getCallId() {
+        return callId;
+    }
+
+    public void setCallId(int callId) {
+        this.callId = callId;
+    }
+
+    public Integer getCallFlags() {
+        return callFlags;
+    }
+
+    public void setCallFlags(Integer callFlags) {
+        this.callFlags = callFlags;
+    }
+
+    public String getCallType() {
+        return callType;
+    }
+
+    public void setCallType(String callType) {
+        this.callType = callType;
+    }
+
+
 }

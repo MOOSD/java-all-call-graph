@@ -31,7 +31,7 @@ public class CallerNode extends MethodNode<CallerNode> {
      * @param calleeNode 调用此方法的方法节点
      */
     public void addCallee(CallerNode calleeNode){
-        Objects.requireNonNull(callees).add(Objects.requireNonNull(calleeNode));
+        Objects.requireNonNull(callees).add(calleeNode);
 
     }
 
@@ -65,13 +65,6 @@ public class CallerNode extends MethodNode<CallerNode> {
         return calleeNode;
     }
 
-    public static CallerNode instantiate(boolean isRoot){
-        CallerNode callerNode = new CallerNode();
-        callerNode.callers = new ArrayList<>();
-        //实例化调用信息
-        callerNode.callInfo = new CallInfo();
-        return callerNode;
-    }
 
     @Override
     void forEach(Consumer<CallerNode> consumer) {

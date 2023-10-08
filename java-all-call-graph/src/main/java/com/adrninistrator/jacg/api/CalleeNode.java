@@ -59,7 +59,7 @@ public class CalleeNode extends MethodNode<CalleeNode>{
      * @param calleeNode
      */
     public void addCaller(CalleeNode calleeNode){
-        Objects.requireNonNull(callers).add(Objects.requireNonNull(calleeNode));
+        Objects.requireNonNull(callers).add(calleeNode);
     }
 
     /**
