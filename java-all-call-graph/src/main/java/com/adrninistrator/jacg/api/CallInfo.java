@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.api;
 
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.method_call.MethodCallInfo;
+import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class CallInfo {
     private Integer callFlags;
 
     private String callType;
+
+    private String callTypeDesc;
 
     //当前方法被调用的调用行,如果节点没有被调用，那么值为空
     private Integer callerRow;
@@ -107,6 +110,15 @@ public class CallInfo {
 
     public void setCallType(String callType) {
         this.callType = callType;
+        setCallTypeDesc(JavaCGCallTypeEnum.getFromType(callType).getDesc());
+    }
+
+    public String getCallTypeDesc() {
+        return callTypeDesc;
+    }
+
+    public void setCallTypeDesc(String callTypeDesc) {
+        this.callTypeDesc = callTypeDesc;
     }
 
     public Map<Integer, List<MethodCallInfo>> getCallActualArguments() {
