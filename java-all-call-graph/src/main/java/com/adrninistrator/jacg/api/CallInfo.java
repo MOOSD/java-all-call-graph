@@ -1,7 +1,10 @@
 package com.adrninistrator.jacg.api;
 
 import com.adrninistrator.jacg.common.JACGConstants;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.adrninistrator.jacg.dto.method_call.MethodCallInfo;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 此方法表示节点与节点之间连线的信息
@@ -9,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class CallInfo {
 
-    @JsonIgnore
     private int callId;
 
     private Integer callFlags;
@@ -18,6 +20,12 @@ public class CallInfo {
 
     //当前方法被调用的调用行,如果节点没有被调用，那么值为空
     private Integer callerRow;
+
+    // 方法调用时的实参信息
+    private Map<Integer, List<MethodCallInfo>> callActualArguments;
+
+    // 方法调用时的对象信息
+    private List<MethodCallInfo> callObjectInfo;
 
     //当前方法调用者所在的类,如果节点没有被调用，那么值为空
     private String callerClassName;
@@ -101,5 +109,19 @@ public class CallInfo {
         this.callType = callType;
     }
 
+    public Map<Integer, List<MethodCallInfo>> getCallActualArguments() {
+        return callActualArguments;
+    }
 
+    public void setCallActualArguments(Map<Integer, List<MethodCallInfo>> callActualArguments) {
+        this.callActualArguments = callActualArguments;
+    }
+
+    public List<MethodCallInfo> getCallObjectInfo() {
+        return callObjectInfo;
+    }
+
+    public void setCallObjectInfo(List<MethodCallInfo> callObjectInfo) {
+        this.callObjectInfo = callObjectInfo;
+    }
 }

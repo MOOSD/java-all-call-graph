@@ -155,7 +155,7 @@ public class JACGConstants {
     public static final int UNKNOWN_CALL_ID = 0;
 
     // 代表方法调用表中未知的call_type的值
-    public static final String UNKNOWN_CALL_TYPES = null;
+    public static final String UNKNOWN_CALL_TYPE = null;
 
 
     private JACGConstants() {

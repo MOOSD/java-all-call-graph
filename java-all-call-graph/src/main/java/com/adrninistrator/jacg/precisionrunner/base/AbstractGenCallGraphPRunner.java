@@ -1,10 +1,7 @@
 package com.adrninistrator.jacg.precisionrunner.base;
 
 import com.adrninistrator.jacg.annotation.formatter.AbstractAnnotationFormatter;
-import com.adrninistrator.jacg.api.BusinessData;
-import com.adrninistrator.jacg.api.ControllerInfo;
-import com.adrninistrator.jacg.api.MethodArgument;
-import com.adrninistrator.jacg.api.MethodNode;
+import com.adrninistrator.jacg.api.*;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.common.JACGConstants;
@@ -212,9 +209,10 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
         // 如果是未知的调用标识，或者是具有注解的调用标识则扫描注解信息
         if (callFlags == UNKNOWN_CALL_FLAGS ||
-                (order4ee && MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags)) ||
-                (!order4ee && MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(callFlags))
+                (order4ee && MethodCallFlagsEnum.MCFE_ER_METHOD_ANNOTATION.checkFlag(callFlags)) ||
+                (!order4ee && MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.checkFlag(callFlags))
         ) {
+            // 向下调用链路生成的总是被调用者节点，因此仅关注被调用者是否有信息需要生成，向上相反
             List<String> methodAnnotations = new ArrayList<>();
             // 添加方法注解信息
             methodAnnotationMap = getMethodAnnotationInfo(methodNode.getFullMethod(), methodNode.getMethodHash(), methodAnnotations);
@@ -234,14 +232,15 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      */
     protected boolean addMethodArgGenericsTypeInfo(int callFlags, String methodHash, MethodNode<?> node) {
         // 如果是未知的方法标识，则直接查询。
-        if (UNKNOWN_CALL_FLAGS != callFlags &&
-                ((order4ee && !MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
-                (!order4ee && !MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.checkFlag(callFlags)))
-        ) {
-             /*
-                处理非入口方法
-                生成向上的完整方法调用链时，判断调用方法是否存在参数泛型类型
-                生成向下的完整方法调用链时，判断被调用方法是否存在参数泛型类型
+        if(!(UNKNOWN_CALL_FLAGS == callFlags ||
+                (order4ee && MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
+                (!order4ee && MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.checkFlag(callFlags))
+            )
+        ){
+            /*
+             * 默认调用标识的方法 默认均处理
+             * 向上调用链路时，处理调用者上的泛型信息
+             * 向下调用链路时，处理被盗用这的泛型信息
              */
             return true;
         }
@@ -251,7 +250,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
             return false;
         }
         // 遍历所有的方法泛型信息
-        List<MethodArgument> methodArguments = node.getMethodArguments();
+        List<MethodArgument> methodArguments = node.getMethodFormalArguments();
         // 为节点添加方法泛型信息
         methodArgGenericsTypeInfo.forEach((argSeq,genInfo)-> methodArguments.get(argSeq).setGenericsInfo(genInfo.getArgGenericsTypeList()));
         return true;
@@ -312,7 +311,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
                 if (objArgsInfoInMethodCall == null) {
                     return false;
                 }
-                addBusinessData2Node(businessDataType, objArgsInfoInMethodCall, node);
+                addMethodCallInfo2Node(objArgsInfoInMethodCall, node);
             } else if (DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType().equals(businessDataType)) {
                 // 显示方法参数泛型类型
                 addMethodArgGenericsTypeInfo(callFlags, methodHash, node);
@@ -320,6 +319,12 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
         }
 
         return true;
+    }
+
+    protected void addMethodCallInfo2Node(ObjArgsInfoInMethodCall methodCallInfo, MethodNode<?> node){
+        CallInfo callInfo = node.getCallInfo();
+        callInfo.setCallActualArguments(methodCallInfo.getArgInfoMap());
+        callInfo.setCallObjectInfo(methodCallInfo.getObjInfo());
     }
 
     protected void addBusinessData2Node(String dataType, Object dataValue, MethodNode<?> node){

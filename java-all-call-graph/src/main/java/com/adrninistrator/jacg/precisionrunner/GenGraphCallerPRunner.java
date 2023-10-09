@@ -334,9 +334,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         }
 
         // 创建根节点
-        CallerNode callerRoot = genCallerNode(entryCallerFullMethod, entryCallerFullMethod, simpleMethodCall.getCallId(),
-                simpleMethodCall.getCallFlags(), simpleMethodCall.getCallTypes(),JACGConstants.CALL_GRAPH_METHOD_LEVEL_START
-                , 0,null);
+        CallerNode callerRoot = genCallerNode(entryCallerFullMethod, entryCallerMethodHash,  UNKNOWN_CALL_ID, UNKNOWN_CALL_FLAGS,
+                UNKNOWN_CALL_TYPE, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, 0,null);
 
         // 设置指定的起始行和结束行
         callerRoot.setStartLineNum(entryLineNumStart);
@@ -355,7 +354,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_TOP_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns("distinct(" + DC.MC_CALLER_METHOD_HASH + ")", DC.MC_CALLER_FULL_METHOD, DC.MC_CALL_FLAGS, DC.MC_CALL_TYPE, DC.MC_CALL_ID) +
+            sql = "select " + JACGSqlUtil.joinColumns("distinct(" + DC.MC_CALLER_METHOD_HASH + ")", DC.MC_CALLER_FULL_METHOD) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLER_SIMPLE_CLASS_NAME + " = ? " +
                     " and " + DC.MC_CALLER_FULL_METHOD +
@@ -375,18 +374,12 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         }
 
         String callerMethodHash = null;
-        int callId = UNKNOWN_CALL_ID;
-        String callTypes = UNKNOWN_CALL_TYPES;
-        int callFlags = UNKNOWN_CALL_FLAGS;
         List<String> callerFullMethodList = new ArrayList<>();
 
         // 遍历找到的方法
         for (WriteDbData4MethodCall callerMethod : callerMethodList) {
             // 找到一个方法
             callerMethodHash = callerMethod.getCallerMethodHash();
-            callFlags = callerMethod.getCallFlags();
-            callId = callerMethod.getCallId();
-            callTypes = callerMethod.getCallType();
             String callerFullMethod = callerMethod.getCallerFullMethod();
             // 以上查询时包含了call_flags，因此caller_method_hash和caller_full_method可能有重复，需要过滤
             if (!callerFullMethodList.contains(callerFullMethod)) {
@@ -401,7 +394,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             addWarningMessage(errorMessage);
             return null;
         }
-        return new SimpleMethodCallDTO(callerMethodHash,callerFullMethodList.get(0), callFlags, callId, callTypes);
+        return new SimpleMethodCallDTO(callerMethodHash,callerFullMethodList.get(0));
     }
 
     /**
@@ -433,11 +426,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             addWarningMessage(errorMessage);
         }
         // 设置默认的CallId 、CallTypes、以及CallFlags
-        SimpleMethodCallDTO simpleMethodCall = simpleMethodCalls.get(0);
-        simpleMethodCall.setCallFlags(UNKNOWN_CALL_FLAGS);
-        simpleMethodCall.setCallTypes(UNKNOWN_CALL_TYPES);
-        simpleMethodCall.setCallId(UNKNOWN_CALL_ID);
-        return simpleMethodCall;
+        return simpleMethodCalls.get(0);
     }
 
     // 通过代码行号获取调用者方法
@@ -450,7 +439,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             return null;
         }
         // 通过代码行号获取对应方法
-        return findMethodByLineNumber(false, callerTaskInfo.getCallerSimpleClassName(), methodLineNum);
+        return findMethodByLineNumber(callerTaskInfo.getCallerSimpleClassName(), methodLineNum);
     }
 
     // 生成空文件
@@ -1005,8 +994,9 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         caller.setFQCN(calleeClassName);
         caller.setClassName(dbOperWrapper.getSimpleClassName(calleeClassName));
         caller.setMethodName(calleeMethodName);
-        caller.setMethodArguments(MethodUtil.genMethodArgTypeList(calleeFullMethod));
+        caller.setMethodFormalArguments(MethodUtil.genMethodArgTypeList(calleeFullMethod));
         caller.setDepth(currentNodeLevel);
+        // 在生成向下调用节点的时候如果没有调用者，表示没有调用关系（或者当前正在生成的就是调用者），不生成调用信息
         CallInfo callInfo = caller.getCallInfo();
         callInfo.setCallerRow(callerLineNumber);
         if(Objects.nonNull(callee)){
@@ -1015,7 +1005,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         callInfo.setCallId(methodCallId);
         callInfo.setCallFlags(callFlags);
         callInfo.setCallType(callType);
-        if(callType.equals(ExtendCallTypeEnum.RPC.getType())){
+        if(ExtendCallTypeEnum.RPC.getType().equals(callType)){
             callInfo.setRpc(true);
         }
         // 新节点添加被调用者信息

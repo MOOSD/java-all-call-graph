@@ -27,8 +27,8 @@ public abstract class MethodNode<T> {
     //当前方法所在类的完全限定类名
     protected String FQCN;
 
-    //方法参数
-    protected List<MethodArgument> methodArguments;
+    //方法形参数
+    protected List<MethodArgument> methodFormalArguments;
 
     //方法注解
     protected List<String> annotation;
@@ -88,12 +88,12 @@ public abstract class MethodNode<T> {
         this.FQCN = FQCN;
     }
 
-    public List<MethodArgument> getMethodArguments() {
-        return methodArguments;
+    public List<MethodArgument> getMethodFormalArguments() {
+        return methodFormalArguments;
     }
 
-    public void setMethodArguments(List<MethodArgument> methodArguments) {
-        this.methodArguments = methodArguments;
+    public void setMethodFormalArguments(List<MethodArgument> methodFormalArguments) {
+        this.methodFormalArguments = methodFormalArguments;
     }
 
     public List<String> getAnnotation() {
@@ -178,7 +178,7 @@ public abstract class MethodNode<T> {
 
         return new EqualsBuilder().append(methodName, that.methodName)
                 .append(FQCN, that.FQCN)
-                .append(methodArguments, that.methodArguments)
+                .append(methodFormalArguments, that.methodFormalArguments)
                 .append(annotation, that.annotation)
                 .isEquals();
     }
@@ -188,7 +188,7 @@ public abstract class MethodNode<T> {
         return new HashCodeBuilder(17, 37)
                 .append(methodName)
                 .append(FQCN)
-                .append(methodArguments)
+                .append(methodFormalArguments)
                 .append(annotation).toHashCode();
     }
 }

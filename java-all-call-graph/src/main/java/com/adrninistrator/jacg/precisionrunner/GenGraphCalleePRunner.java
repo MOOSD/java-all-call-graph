@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static com.adrninistrator.jacg.common.JACGConstants.*;
-
 /**
  * 生成java对象的向上调用链的runner
  */
@@ -177,7 +175,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 if (StringUtils.startsWith(methodNameAndArgs, methodInfoInTask)) {
                     // 如果匹配，构建一个虚拟的SimpleMethodCallDTO对象
                     SimpleMethodCallDTO methodCallDTO = new SimpleMethodCallDTO(methodInfo.getMethodHash()
-                            ,methodInfo.getFullMethod(), UNKNOWN_CALL_FLAGS, UNKNOWN_CALL_ID, UNKNOWN_CALL_TYPES);
+                            ,methodInfo.getFullMethod());
                     usedMethodCall = methodCallDTO;
                     calleeFullMethodList.add(methodCallDTO.getFullMethod());
                 }
@@ -206,7 +204,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         int methodLineNum = Integer.parseInt(methodInfoInTask);
 
         // 通过代码行号获取对应方法信息
-        SimpleMethodCallDTO simpleMethodCall = findMethodByLineNumber(true, calleeSimpleClassName, methodLineNum);
+        SimpleMethodCallDTO simpleMethodCall = findMethodByLineNumber(calleeSimpleClassName, methodLineNum);
         if (Objects.isNull(simpleMethodCall)) {
             // 返回处理失败
             return false;
@@ -228,8 +226,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         threadPoolExecutor.execute(() -> {
             try {
                 // 执行处理一个被调用方法
-                if (!recordOneCalleeMethod(methodCallDTO.getMethodHash(), fullMethod, methodCallDTO.getCallId(),
-                        methodCallDTO.getCallFlags(), methodCallDTO.getCallTypes())) {
+                if (!recordOneCalleeMethod(methodCallDTO.getMethodHash(), fullMethod)) {
                     // 记录执行失败的任务信息
                     recordTaskFail(origTaskText != null ? origTaskText : fullMethod);
                 }
@@ -243,19 +240,16 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
     // 记录一个被调用方法的调用链信息
     private boolean recordOneCalleeMethod(String entryCalleeMethodHash,
-                                          String entryCalleeFullMethod,
-                                          int callId,
-                                          int callFlags,
-                                          String callType
-                                          ){
+                                          String entryCalleeFullMethod
+    ){
 
         // 判断配置文件中是否已指定忽略当前方法
         if (ignoreCurrentMethod(null, entryCalleeFullMethod)) {
             logger.info("配置文件中已指定忽略当前方法，不处理 {}", entryCalleeFullMethod);
             return true;
         }
-        // 创建跟节点
-        CalleeNode root = genCalleeNode(entryCalleeFullMethod, callId, callFlags, callType, 0,
+        // 创建根节点，调用关系使用默认值
+        CalleeNode root = genCalleeNode(entryCalleeFullMethod, JACGConstants.UNKNOWN_CALL_ID, JACGConstants.UNKNOWN_CALL_FLAGS, JACGConstants.UNKNOWN_CALL_TYPE, 0,
                 JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, entryCalleeMethodHash, JACGConstants.NO_CYCLE_CALL_FLAG,
                 null, null);
         calleeTrees.addTree(entryCalleeFullMethod,root);
@@ -419,7 +413,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         caller.setDepth(currentNodeLevel);
         caller.setFQCN(callerClassName);
         caller.setMethodName(JACGClassMethodUtil.getMethodNameFromFull(callerFullMethod));
-        caller.setMethodArguments((MethodUtil.genMethodArgTypeList(callerFullMethod)));
+        caller.setMethodFormalArguments((MethodUtil.genMethodArgTypeList(callerFullMethod)));
         // 检查是否为远程过程调用
         CallInfo callInfo = caller.getCallInfo();
         callInfo.setCallId(methodCallId);
@@ -829,6 +823,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         Map<String, CalleeTaskInfo> calleeTaskInfoMap = new HashMap<>();
         // 生成需要处理的类名Set
         for (String task : taskSet) {
+            // 将#替换为:
+            task = task.replace("#",JavaCGConstants.FLAG_COLON);
             String[] taskArray = StringUtils.splitPreserveAllTokens(task, JavaCGConstants.FLAG_COLON);
             //这里校验可以去掉。
             if (taskArray.length != 1 && taskArray.length != 2) {
@@ -912,7 +908,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_CALLEE_ALL_METHODS;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
-            sql = "select " + JACGSqlUtil.joinColumns("distinct(" + DC.MC_CALLEE_METHOD_HASH + ")", DC.MC_CALLEE_FULL_METHOD, DC.MC_CALL_FLAGS, DC.MC_CALL_ID, DC.MC_CALL_TYPE) +
+            sql = "select " + JACGSqlUtil.joinColumns("distinct(" + DC.MC_CALLEE_METHOD_HASH + ")", DC.MC_CALLEE_FULL_METHOD) +
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLEE_SIMPLE_CLASS_NAME + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -935,8 +931,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             }
 
 
-            SimpleMethodCallDTO methodCallDTO = new SimpleMethodCallDTO(calleeMethodHash, methodCall.getCalleeFullMethod(),
-                    methodCall.getCallFlags(), methodCall.getCallId(), methodCall.getCallType());
+            SimpleMethodCallDTO methodCallDTO = new SimpleMethodCallDTO(calleeMethodHash, methodCall.getCalleeFullMethod());
             simpleMethodCallList.add(methodCallDTO);
         }
 
