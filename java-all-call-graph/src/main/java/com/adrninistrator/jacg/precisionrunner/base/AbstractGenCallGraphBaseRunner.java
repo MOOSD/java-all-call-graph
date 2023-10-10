@@ -10,6 +10,7 @@ import com.adrninistrator.jacg.dto.write_db.WriteDbData4JarInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodLineNumber;
 import com.adrninistrator.jacg.handler.annotation.AnnotationHandler;
+import com.adrninistrator.jacg.handler.jpa.NgJPAHandler;
 import com.adrninistrator.jacg.handler.method.MethodArgGenericsTypeHandler;
 import com.adrninistrator.jacg.handler.method.MethodCallInfoHandler;
 import com.adrninistrator.jacg.handler.mybatis.MyBatisMapperHandler;
@@ -81,6 +82,9 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
 
     // 对MyBatis Mapper的处理类
     protected MyBatisMapperHandler myBatisMapperHandler;
+
+    // 对jpa的处理类
+    protected NgJPAHandler ngJPAHandler;
 
     // 方法参数泛型类型处理类
     protected MethodArgGenericsTypeHandler methodArgGenericsTypeHandler;
@@ -793,6 +797,10 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
         if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType()) || businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_WRITE_TABLE.getType())) {
             // 初始化对MyBatis Mapper的处理类
             myBatisMapperHandler = new MyBatisMapperHandler(dbOperWrapper);
+        }
+        if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_NG_JAP_OPERATE_INFO.getType())) {
+            // 初始化对JPA的处理类
+            ngJPAHandler = new NgJPAHandler(dbOperWrapper);
         }
 
         if (businessDataTypeSet.contains(DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType())) {

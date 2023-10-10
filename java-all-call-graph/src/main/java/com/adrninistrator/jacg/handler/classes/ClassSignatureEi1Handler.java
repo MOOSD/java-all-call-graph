@@ -5,8 +5,10 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.common.enums.SqlKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.domain.ClassSignatureEi1DO;
 import com.adrninistrator.jacg.handler.base.BaseHandler;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
+import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,14 @@ public class ClassSignatureEi1Handler extends BaseHandler {
     public List<String> queryClassSignatureEi1InfoFull(String className, String upperClassName) {
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
         return queryClassSignatureEi1InfoSimple(simpleClassName, upperClassName);
+    }
+    /**
+     * 查询指定类在继承父类/实现接口时签名中的类名列表，使用相关类的完整类名
+     * @param className  类的完全限定名
+     */
+    public List<ClassSignatureEi1DO> queryClassSignatureEi1ByClassName(String className) {
+        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
+        return querySignClassNameByClassName(simpleClassName);
     }
 
     /**
@@ -96,6 +106,20 @@ public class ClassSignatureEi1Handler extends BaseHandler {
 
         return dbOperator.queryListOneColumn(sql, String.class, simpleClassName);
     }
+
+    private List<ClassSignatureEi1DO> querySignClassNameByClassName(String simpleClassName) {
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.CSEI1_QUERY_SUPER_INTERFACE_CLASS_NAME;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if (sql == null) {
+            sql = "select " + JACGSqlUtil.joinColumns(DC.CSEI1_TYPE, DC.CSEI1_SEQ, DC.CSEI1_SUPER_ITF_CLASS_NAME, DC.CSEI1_CLASS_NAME, DC.CSEI1_SIGN_CLASS_NAME)  +
+                    " from " + DbTableInfoEnum.DTIE_CLASS_SIGNATURE_EI1.getTableName() +
+                    " where " + DC.CSEI1_SIMPLE_CLASS_NAME + " = ?";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        return dbOperator.queryList(sql, ClassSignatureEi1DO.class, simpleClassName);
+    }
+
 
     /**
      * 查询指定类，及指定父类/接口对应的签名中的类名列表

@@ -29,7 +29,8 @@ public class GenGraphCallerPRunnerTest {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,"cn.newgrand.pm.crm.zb.service.impl.CntBidDocMServiceImpl#saveCntBidDocM");
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
-                DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType(),
+                DefaultBusinessDataTypeEnum.BDTE_NG_JAP_OPERATE_INFO.getType()
         );
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",

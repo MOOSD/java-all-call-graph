@@ -41,7 +41,8 @@ public class CallInfo {
 
     //是否是rpc调用
     private boolean isRpc;
-
+    // dao层操作信息
+    private DaoOperateInfo daoOperateInfo;
 
     /**
      * 此方法运行在其他线程
@@ -135,5 +136,13 @@ public class CallInfo {
 
     public void setCallObjectInfo(List<MethodCallInfo> callObjectInfo) {
         this.callObjectInfo = callObjectInfo;
+    }
+
+    public DaoOperateInfo getDaoOperateInfo() {
+        return daoOperateInfo;
+    }
+
+    public void setDaoOperateInfo(DaoOperateInfo daoOperateInfo) {
+        this.daoOperateInfo = daoOperateInfo;
     }
 }

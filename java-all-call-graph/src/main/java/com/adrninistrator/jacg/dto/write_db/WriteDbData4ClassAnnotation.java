@@ -30,7 +30,7 @@ public class WriteDbData4ClassAnnotation extends AbstractWriteDbData {
         this.simpleClassName = simpleClassName;
         this.annotationName = annotationName;
         this.attributeName = attributeName;
-        this.annotationType = annotationType;
+        this.annotationType = attributeType;
         this.attributeValue = attributeValue;
         this.className = className;
     }

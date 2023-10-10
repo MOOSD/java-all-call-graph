@@ -1105,8 +1105,10 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         String calleeClassName = callerNode.getFQCN();
         String calleeMethodName = callerNode.getMethodName();
         for (String businessDataType : businessDataTypeList) {
-
-            if (DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType().equals(businessDataType)) {
+            if(DefaultBusinessDataTypeEnum.BDTE_NG_JAP_OPERATE_INFO.getType().equals(businessDataType)){
+                // 处理此方法jpa信息
+                ngJPAHandler.addJPAOperateInfo(callerNode);
+            } else if (DefaultBusinessDataTypeEnum.BDTE_MYBATIS_MYSQL_TABLE.getType().equals(businessDataType)) {
                 // 显示MyBatis的XML文件中对应的数据库表名
                 if (!MethodCallFlagsEnum.MCFE_EE_MYBATIS_MAPPER.checkFlag(callFlags)) {
                     continue;
