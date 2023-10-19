@@ -86,7 +86,7 @@ public class JACGConstants {
     // 允许使用的最大线程数
     public static final int MAX_THREAD_NUM = 100;
     // 生成调用链文件时，记录数达到多少以后打印日志
-    public static final int NOTICE_LINE_NUM = 5000;
+    public static final int NOTICE_LINE_NUM = 1000;
     // 批量写入数据库时每次插入的数量允许的最大值
     public static final int MAX_DB_INSERT_BATCH_SIZE = 5000;
     // 数据库分页操作数量

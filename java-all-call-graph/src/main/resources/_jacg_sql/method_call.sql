@@ -20,7 +20,7 @@ CREATE TABLE if not exists method_call_{appName} (
   caller_jar_num int NULL COMMENT '调用方，Jar包序号',
   callee_jar_num int NULL COMMENT '被调用方，Jar包序号',
   PRIMARY KEY (id),
-  INDEX idx_mc_rmh_{appName}(caller_method_hash),
+  INDEX idx_mc_rmh_{appName}(caller_method_hash, call_id),
   INDEX idx_mc_hash_{appName}(callee_method_hash, caller_method_hash),
   INDEX idx_mc_rsn_{appName}(caller_simple_class_name(255)),
   INDEX idx_mc_esn_{appName}(callee_simple_class_name(255))

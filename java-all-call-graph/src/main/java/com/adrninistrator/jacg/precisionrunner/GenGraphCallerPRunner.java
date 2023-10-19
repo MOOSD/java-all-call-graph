@@ -484,8 +484,6 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
 
         // 输出结果数量
         int recordNum = 0;
-        // 是否需要显示方法调用被调用方法数
-        boolean showCalleeMethodNum;
 
         // 记录各个层级的调用方法中有被调用过的方法（包含方法注解、方法调用业务功能数据）
         ListAsStack<Set<CallerNode>> recordedCalleeStack = null;
@@ -503,7 +501,6 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                 lineNumStart = entryLineNumStart;
                 lineNumEnd = entryLineNumEnd;
             }
-
             // 从栈顶获取当前正在处理的节点
             CallGraphNode4Caller callGraphNode4Caller = callGraphNode4CallerStack.peek();
             // 查询当前节点的一个下层被调用方法
@@ -528,10 +525,13 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                 methodNode = methodNode.getCallee();
                 continue;
             }
-
-            // 查询到记录，处理输出记录数
-            showCalleeMethodNum = handleOutputLineNumber(++recordNum, entryCallerFullMethod);
-
+            // 节点记录数+1
+            if(recordNum++ > 500){
+                String warningMessage = "调用树节点超过500,中断生成。可结合输出尝试优化忽略条件";
+                addWarningMessage(warningMessage);
+                logger.warn(warningMessage);
+                return true;
+            }
             String callerFullMethod = callGraphNode4Caller.getCallerFullMethod();
             int methodCallId = calleeMethod.getCallId();
             String callType = calleeMethod.getCallType();
@@ -565,7 +565,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             }
 
             // 处理方法调用的节点信息
-            int back2Level = handleCallerNodeInfo(callGraphNode4CallerStack, calleeMethodHash, calleeFullMethod, showCalleeMethodNum);
+            int back2Level = handleCallerNodeInfo(callGraphNode4CallerStack, calleeMethodHash, calleeFullMethod);
             // 写入循环调用标志
             if (back2Level != JACGConstants.NO_CYCLE_CALL_FLAG) {
                 caller.getCallInfo().setCycleCall(back2Level);
@@ -840,19 +840,15 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
      * @param callGraphNode4CallerStack
      * @param calleeMethodHash
      * @param calleeFullMethod
-     * @param showCalleeMethodNum
      * @return -1: 未出现循环调用，非-1: 出现循环调用，值为发生循环调用的层级
      */
     private int handleCallerNodeInfo(ListAsStack<CallGraphNode4Caller> callGraphNode4CallerStack,
                                      String calleeMethodHash,
-                                     String calleeFullMethod,
-                                     boolean showCalleeMethodNum) {
+                                     String calleeFullMethod) {
         int cycleCallLevel = JACGConstants.NO_CYCLE_CALL_FLAG;
         // 方法调用被调用方法数信息
         StringBuilder calleeMethodNumLogInfo = null;
-        if (showCalleeMethodNum) {
-            calleeMethodNumLogInfo = new StringBuilder();
-        }
+
 
         // 循环调用的日志信息
         StringBuilder cycleCallLogInfo = new StringBuilder();
@@ -878,15 +874,6 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                         .append(callGraphNode4Caller.getCallerFullMethod());
             }
 
-            if (showCalleeMethodNum) {
-                // 记录方法调用被调用方法数
-                if (calleeMethodNumLogInfo.length() > 0) {
-                    calleeMethodNumLogInfo.append("\n");
-                }
-                calleeMethodNumLogInfo.append(JACGCallGraphFileUtil.genOutputLevelFlag(i))
-                        .append(" 被调用方法数:").append(callGraphNode4Caller.getCallerMethodNum()).append(" ")
-                        .append(callGraphNode4Caller.getCallerFullMethod());
-            }
         }
 
         // 每个层级的被调用方法遍历完之后的处理
@@ -899,10 +886,6 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             logger.info("找到循环调用的方法\n{}", cycleCallLogInfo);
         }
 
-        if (showCalleeMethodNum) {
-            // 显示方法调用被调用方法数
-            logger.info("被调用方法数（当前方法向下会调用的方法数量）\n{}", calleeMethodNumLogInfo);
-        }
         return cycleCallLevel;
     }
 
