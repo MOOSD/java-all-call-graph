@@ -91,7 +91,7 @@ public class GenGraphCalleePRunnerTest {
         GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
-        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"bugkiller");
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"hawkeye");
         runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
         //config_db.properties
@@ -103,10 +103,12 @@ public class GenGraphCalleePRunnerTest {
 //        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
 
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                "io.metersphere.api.dto.definition.parse.Swagger3Parser:966",
-                "io.metersphere.controller.ProjectFeignController:25",
-                "io.metersphere.api.controller.ApiDefinitionController:87",
-                "io.metersphere.config.TaskSchedulerConfig:12");
+                "cn.newgrand.ck.service.impl.GetDiffTest:52",
+                "cn.newgrand.ck.service.impl.GitInfoServiceImpl:416",
+                "cn.newgrand.ck.util.JGitUtil:662",
+                "cn.newgrand.ck.service.impl.GitInfoServiceImpl:386",
+                "cn.newgrand.ck.service.impl.GitInfoServiceImpl:176"
+        );
 
 
 

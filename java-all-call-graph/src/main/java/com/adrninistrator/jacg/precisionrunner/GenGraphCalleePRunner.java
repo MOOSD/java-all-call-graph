@@ -841,7 +841,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             // 获取唯一类名（简单类名或完整类名）
             String simpleClassName = getSimpleClassName(className);
             if (simpleClassName == null) {
-                return null;
+                addWarningMessage("字节码信息库中不存在类，跳过其链路生成:"+className);
+                continue;
             }
 
             CalleeTaskInfo calleeTaskInfo = calleeTaskInfoMap.computeIfAbsent(simpleClassName, k -> new CalleeTaskInfo());

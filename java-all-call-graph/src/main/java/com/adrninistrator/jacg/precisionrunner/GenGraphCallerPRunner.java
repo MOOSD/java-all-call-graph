@@ -217,7 +217,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             // 获取唯一类名（简单类名或完整类名）
             String simpleClassName = getSimpleClassName(callerClassName);
             if (simpleClassName == null) {
-                return Collections.emptyList();
+                addWarningMessage("字节码信息库中不存在类，跳过其链路生成:"+callerClassName);
+                continue;
             }
 
             if (handledClassNameSet.contains(simpleClassName)) {
