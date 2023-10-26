@@ -1,5 +1,8 @@
 package com.adrninistrator.jacg.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class BusinessData {
     public BusinessData() {
     }

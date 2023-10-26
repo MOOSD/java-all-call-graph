@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.api;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.method_call.MethodCallInfo;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Map;
  * 此方法表示节点与节点之间连线的信息
  * 即调用关系。
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CallInfo {
 
     private int callId;

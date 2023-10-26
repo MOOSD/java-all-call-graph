@@ -11,23 +11,20 @@ import java.util.function.Consumer;
 /**
  * 方法的被调用树(T 表示树的类型)
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CallTrees<T extends MethodNode<T>> {
 
 
     //查询方法的被调用的树的列表(仅存储根节点)
     //key:方法的完全限定名
     //value:以此方法为根节点的向上的调用树
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Map<String,T> trees;
 
     //失败执行的方法
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> failTaskList;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> warningMessages;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> errorMessages;
 
     //实例化

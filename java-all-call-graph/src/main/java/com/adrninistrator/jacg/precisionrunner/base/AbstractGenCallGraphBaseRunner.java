@@ -148,9 +148,9 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
         }
 
         // 检查jar包文件是否有更新，检查允许处理的类名或包名前缀是否有更新
-        if (checkJarFileUpdated()) {
-            return false;
-        }
+//        if (checkJarFileUpdated()) {
+//            return false;
+//        }
 
         // 获取生成方法完整调用链时需要忽略的信息
         if (!initIgnoreInfo()) {
@@ -833,10 +833,9 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
 
         WriteDbData4MethodLineNumber methodAndHash = dbOperator.queryObject(sql, WriteDbData4MethodLineNumber.class, simpleClassName, methodLineNum, methodLineNum);
         if (methodAndHash == null) {
-            String warnMessage = "指定类的代码行号未查找到对应方法，请检查，可能因为以下原因\n" +
-                    "1. 指定的类所在的jar包未在配置文件 "+ OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey() +"中指定\n" +
+            String warnMessage = "指定类的代码行号未查找到方法"+simpleClassName + ":" + methodLineNum+"，可能原因如下\n" +
                     "2. 指定的方法是接口中未实现的方法\n" +
-                    "3. 指定的方法是抽象方法\n" + simpleClassName + " " + methodLineNum;
+                    "3. 指定的方法是抽象方法\n";
             logger.warn(warnMessage);
             failTaskList.add(warnMessage);
             return null;

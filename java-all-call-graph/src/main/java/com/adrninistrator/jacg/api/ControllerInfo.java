@@ -1,10 +1,13 @@
 package com.adrninistrator.jacg.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
 /**
  * controller方法信息表
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ControllerInfo {
     private String showUri;
     private String requestMethod;

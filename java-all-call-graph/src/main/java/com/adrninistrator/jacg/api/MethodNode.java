@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -10,6 +11,7 @@ import java.util.function.Consumer;
 /**
  * 方法节点信息
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class MethodNode<T> {
 
     @JsonIgnore

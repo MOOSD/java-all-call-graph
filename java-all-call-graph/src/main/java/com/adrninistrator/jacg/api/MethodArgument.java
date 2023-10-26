@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -8,6 +9,7 @@ import java.util.List;
 /**
  * 方法参数类
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MethodArgument {
     //参数的完全限定类名
     private String fqcn;

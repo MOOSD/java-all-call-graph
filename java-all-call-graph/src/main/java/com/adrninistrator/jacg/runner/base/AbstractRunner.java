@@ -241,7 +241,7 @@ public abstract class AbstractRunner {
         }
 
         // 任务队列最大长度，设置为线程数2倍
-        taskQueueMaxSize = threadNum * 2;
+        taskQueueMaxSize = 500;
         threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 10L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(taskQueueMaxSize), new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER));
     }
