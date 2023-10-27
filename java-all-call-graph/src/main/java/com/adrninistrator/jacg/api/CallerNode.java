@@ -2,12 +2,7 @@ package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
-
-public class CallerNode extends MethodNode<CallerNode> {
+public class CallerNode extends MethodNode {
 
     //当前节点深度
     private int depth;
@@ -19,19 +14,13 @@ public class CallerNode extends MethodNode<CallerNode> {
 
     private Integer endLineNum;
 
-    //此方法被哪些方法调用
-    @JsonIgnore
-    private List<CallerNode> callees;
-
-    //此方法调用的方法
-    private List<CallerNode> callers;
 
     /**
-     * 添加一个此方法的调用者
+     * 设置此方法的调用者
      * @param calleeNode 调用此方法的方法节点
      */
-    public void addCallee(CallerNode calleeNode){
-        Objects.requireNonNull(callees).add(calleeNode);
+    public void setCallee(CallerNode calleeNode){
+        before = calleeNode;
 
     }
 
@@ -40,16 +29,9 @@ public class CallerNode extends MethodNode<CallerNode> {
      * @param calleeNode
      */
     public void addCaller(CallerNode calleeNode){
-        Objects.requireNonNull(callers).add(Objects.requireNonNull(calleeNode));
+        super.addNext(calleeNode);
     }
 
-    /**
-     * 当前树是否有任意叶子节点
-     * @return
-     */
-    public boolean hasNext(){
-        return callees == null || callees.size() != 0;
-    }
 
 
     /**
@@ -58,35 +40,18 @@ public class CallerNode extends MethodNode<CallerNode> {
      */
     public static CallerNode instantiate(){
         CallerNode calleeNode = new CallerNode();
-        calleeNode.callees = new ArrayList<>();
-        calleeNode.callers = new ArrayList<>();
-        //实例化调用信息
-        calleeNode.callInfo = new CallInfo();
         return calleeNode;
     }
 
 
-    @Override
-    void forEach(Consumer<CallerNode> consumer) {
-        consumer.accept(this);
-        // 获取下一个节点
-        if (Objects.isNull(callers) || callers.isEmpty()){
-            return;
-        }
-        for (CallerNode caller : callers) {
-            caller.forEach(consumer);
-        }
-
-    }
 
     /**
      * 返回此节点的调用者
      */
     @JsonIgnore
     public CallerNode getCallee(){
-        return this.callees.get(0);
+        return (CallerNode) this.before;
     }
-
 
     public CallInfo getCallInfo() {
         return callInfo;
@@ -124,11 +89,4 @@ public class CallerNode extends MethodNode<CallerNode> {
         this.endLineNum = endLineNum;
     }
 
-    public List<CallerNode> getCallees() {
-        return callees;
-    }
-
-    public List<CallerNode> getCallers() {
-        return callers;
-    }
 }

@@ -30,7 +30,7 @@ public class NgJPAHandler {
         annotationHandler = new AnnotationHandler(dbOperWrapper);
     }
 
-    public void addJPAOperateInfo(MethodNode<?> methodNode){
+    public void addJPAOperateInfo(MethodNode methodNode){
         // 仅对以dao和rule结尾的文件进行处理
         String lowCaseClassName = methodNode.getClassName().toLowerCase();
         if(!lowCaseClassName.endsWith("dao") && !lowCaseClassName.endsWith("rule")){

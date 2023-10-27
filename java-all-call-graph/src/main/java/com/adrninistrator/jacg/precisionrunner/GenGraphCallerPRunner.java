@@ -336,12 +336,12 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
 
         // 创建根节点
         CallerNode callerRoot = genCallerNode(entryCallerFullMethod, entryCallerMethodHash,  UNKNOWN_CALL_ID, UNKNOWN_CALL_FLAGS,
-                UNKNOWN_CALL_TYPE, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, 0,null);
+                UNKNOWN_CALL_TYPE, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, 0,null,true);
 
         // 设置指定的起始行和结束行
         callerRoot.setStartLineNum(entryLineNumStart);
         callerRoot.setEndLineNum(entryLineNumEnd);
-        callerTrees.addTree(entryCallerFullMethod,callerRoot);
+        callerTrees.addTree(callerRoot);
 
 
         // 生成向下调用树
@@ -555,7 +555,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             }
             // 获取此方法调用的方法
             CallerNode caller = genCallerNode(calleeFullMethod, calleeMethodHash, methodCallId, calleeMethod.getCallFlags(),
-                    callType, callGraphNode4CallerStack.getHead()+1, calleeMethod.getCallerLineNumber(), methodNode);
+                    callType, callGraphNode4CallerStack.getHead()+1, calleeMethod.getCallerLineNumber(),
+                    methodNode, false);
             if (caller == null) {
                 return false;
             }
@@ -967,7 +968,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                                        String callType,
                                        int currentNodeLevel,
                                        int callerLineNumber,
-                                       CallerNode callee) {
+                                       CallerNode callee,
+                                       boolean isRoot ) {
 
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
         String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
@@ -983,17 +985,20 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         // 在生成向下调用节点的时候如果没有调用者，表示没有调用关系（或者当前正在生成的就是调用者），不生成调用信息
         CallInfo callInfo = caller.getCallInfo();
         callInfo.setCallerRow(callerLineNumber);
-        if(Objects.nonNull(callee)){
-            callInfo.setCallerClassName(callee.getClassName());
-        }
         callInfo.setCallId(methodCallId);
         callInfo.setCallFlags(callFlags);
         callInfo.setCallType(callType);
+        // 构建根节点
+        if(isRoot){
+            caller.isRoot();
+            callInfo.setCallerClassName(callee.getClassName());
+        }
+
         if(ExtendCallTypeEnum.RPC.getType().equals(callType)){
             callInfo.setRpc(true);
         }
         // 新节点添加被调用者信息
-        caller.addCallee(callee);
+        caller.setCallee(callee);
 
         // 判断被调用方法上是否有注解
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = addMethodAnnotationInfo(caller);

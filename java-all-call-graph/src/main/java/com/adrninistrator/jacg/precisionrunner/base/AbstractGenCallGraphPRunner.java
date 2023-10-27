@@ -116,7 +116,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      * @param methodAnnotationMap 注解信息
      * @param node 方法节点
      */
-    protected void addControllerInfo(Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap, MethodNode<?> node) {
+    protected void addControllerInfo(Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap, MethodNode node) {
         if(Objects.isNull(methodAnnotationMap) || methodAnnotationMap.isEmpty()){
             return;
         }
@@ -125,15 +125,14 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
                 continue;
             }
             // 查询controller信息
-            ControllerInfo controllerInfo = getControllerInfoDOByFullMethod(node.getFullMethod());
-            node.setControllerInfo(controllerInfo);
+            node.setControllerInfo(getControllerInfoDOByFullMethod(node.getFullMethod()));
         }
     }
 
     /**
      * 添加事务标识
      */
-    protected void addRunInTransaction(Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap, MethodNode<?> node) {
+    protected void addRunInTransaction(Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap, MethodNode node) {
         int methodCallId = node.getCallInfo().getCallId();
         String callType = node.getCallInfo().getCallType();
         if (StringUtils.equalsAny(callType,
@@ -166,7 +165,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      * 为方法调用信息增加是否在其他线程执行标志
      *
      */
-    protected void addRunInOtherThread(Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap, MethodNode<?> node) {
+    protected void addRunInOtherThread(Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap, MethodNode node) {
         int methodCallId = node.getCallInfo().getCallId();
         String callType = node.getCallInfo().getCallType();
 
@@ -204,7 +203,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      * @param methodNode 方法节点
      * @return
      */
-    protected Map<String, Map<String, BaseAnnotationAttribute>> addMethodAnnotationInfo(MethodNode<?> methodNode){
+    protected Map<String, Map<String, BaseAnnotationAttribute>> addMethodAnnotationInfo(MethodNode methodNode){
         Integer callFlags = methodNode.getCallInfo().getCallFlags();
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = null;
         // 如果是未知的调用标识，或者是具有注解的调用标识则扫描注解信息
@@ -230,7 +229,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      * @param node 方法节点
      * @return 执行是否成功
      */
-    protected boolean addMethodArgGenericsTypeInfo(int callFlags, String methodHash, MethodNode<?> node) {
+    protected boolean addMethodArgGenericsTypeInfo(int callFlags, String methodHash, MethodNode node) {
         // 如果是未知的方法标识，则直接查询。
         if(!(UNKNOWN_CALL_FLAGS == callFlags ||
                 (order4ee && MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
@@ -261,7 +260,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      * @param node 节点信息
      * @return
      */
-    protected boolean addBusinessData(MethodNode<?> node) {
+    protected boolean addBusinessData(MethodNode node) {
         int methodCallId = node.getCallInfo().getCallId();
         int callFlags = node.getCallInfo().getCallFlags();
         // 添加默认的(入参指定的)方法调用业务功能数据。其中包括:方法调用信息、方法参数泛型类型
@@ -299,7 +298,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
     private boolean addDefaultBusinessData(int methodCallId,
                                            int callFlags,
                                            String methodHash,
-                                           MethodNode<?> node) {
+                                           MethodNode node) {
         for (String businessDataType : businessDataTypeList) {
             if (DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType().equals(businessDataType)) {
                 // 显示方法调用信息
@@ -321,13 +320,13 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
         return true;
     }
 
-    protected void addMethodCallInfo2Node(ObjArgsInfoInMethodCall methodCallInfo, MethodNode<?> node){
+    protected void addMethodCallInfo2Node(ObjArgsInfoInMethodCall methodCallInfo, MethodNode node){
         CallInfo callInfo = node.getCallInfo();
         callInfo.setCallActualArguments(methodCallInfo.getArgInfoMap());
         callInfo.setCallObjectInfo(methodCallInfo.getObjInfo());
     }
 
-    protected void addBusinessData2Node(String dataType, Object dataValue, MethodNode<?> node){
+    protected void addBusinessData2Node(String dataType, Object dataValue, MethodNode node){
         List<BusinessData> businessData = node.getBusinessData();
         if (Objects.isNull(businessData)) {
             businessData = new ArrayList<>();
@@ -342,7 +341,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
     /**
      * 根据方法的全名 获取所有的Spring Controller信息
      */
-    public ControllerInfo getControllerInfoDOByFullMethod(String fullMethod) {
+    public List<ControllerInfo> getControllerInfoDOByFullMethod(String fullMethod) {
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_INFO_BY_METHOD;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
@@ -353,7 +352,6 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
                     " where " + DC.SPC_FULL_METHOD + " = ? ";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-
-        return dbOperator.queryObject(sql, ControllerInfo.class, fullMethod);
+        return dbOperator.queryList(sql,ControllerInfo.class,fullMethod);
     }
 }

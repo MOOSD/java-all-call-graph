@@ -54,9 +54,10 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         //运行方法，结果收集到指定对象中。
         run(config);
         //错误处理记录抛出
-        if (someTaskFail){
-            calleeTrees.setFailTaskList(failTaskList);
-        }
+        calleeTrees.setFailTaskList(failTaskList);
+        calleeTrees.setWarningMessages(warningMessages);
+        calleeTrees.setErrorMessages(errorMessages);
+
         return calleeTrees;
     }
 
@@ -226,7 +227,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         threadPoolExecutor.execute(() -> {
             try {
                 // 执行处理一个被调用方法
-                if (!recordOneCalleeMethod(methodCallDTO.getMethodHash(), fullMethod)) {
+                if (!recordOneCalleeMethod(methodCallDTO.getMethodHash(), fullMethod, origTaskText)) {
                     // 记录执行失败的任务信息
                     recordTaskFail(origTaskText != null ? origTaskText : fullMethod);
                 }
@@ -240,7 +241,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
     // 记录一个被调用方法的调用链信息
     private boolean recordOneCalleeMethod(String entryCalleeMethodHash,
-                                          String entryCalleeFullMethod
+                                          String entryCalleeFullMethod,
+                                          String origTaskText
     ){
 
         // 判断配置文件中是否已指定忽略当前方法
@@ -249,22 +251,23 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             return true;
         }
         // 创建根节点，调用关系使用默认值
-        CalleeNode root = genCalleeNode(entryCalleeFullMethod, JACGConstants.UNKNOWN_CALL_ID, JACGConstants.UNKNOWN_CALL_FLAGS, JACGConstants.UNKNOWN_CALL_TYPE, 0,
-                JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, entryCalleeMethodHash, JACGConstants.NO_CYCLE_CALL_FLAG,
-                null, null);
-        calleeTrees.addTree(entryCalleeFullMethod,root);
+        CalleeNode root = genCalleeNode(entryCalleeFullMethod, JACGConstants.UNKNOWN_CALL_ID, JACGConstants.UNKNOWN_CALL_FLAGS,
+                JACGConstants.UNKNOWN_CALL_TYPE, 0, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START,
+                entryCalleeMethodHash, JACGConstants.NO_CYCLE_CALL_FLAG, null, null, origTaskText,true);
+        calleeTrees.addTree(root);
 
         // 根据指定的调用者方法HASH，生成调用树
-        return genAllGraph4Callee(entryCalleeMethodHash, entryCalleeFullMethod);
+        return genAllGraph4Callee(entryCalleeMethodHash, entryCalleeFullMethod, root);
     }
 
     /**
      * 根据指定的被调用者方法HASH，查找所有调用方法信息
      */
     protected boolean genAllGraph4Callee(String entryCalleeMethodHash,
-                                         String entryCalleeFullMethod) {
+                                         String entryCalleeFullMethod,
+                                         CalleeNode root) {
         //方法被调用方,默认是根节点
-        CalleeNode methodNode = calleeTrees.getTree(entryCalleeFullMethod);
+        CalleeNode methodNode = root;
         // 记录当前处理的方法调用信息的栈
         ListAsStack<CallGraphNode4Callee> callGraphNode4CalleeStack = new ListAsStack<>();
         // 记录父类方法调用子类方法对应信息的栈
@@ -340,8 +343,15 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             // 获取此方法调用者信息，处理注解泛型信息等
             CalleeNode callee = genCalleeNode(callerFullMethod, methodCallId, callerMethod.getCallFlags(), callType,
                     callerMethod.getCallerLineNumber(), callGraphNode4CalleeStack.getHead()+1, callerMethodHash, back2Level,
-                    serviceName, methodNode);
-
+                    serviceName, methodNode,null ,false);
+            // 未生成节点，节点向上遍历
+            if(Objects.isNull(callee)){
+                if (handleCallerEmptyResult(callGraphNode4CalleeStack, superCallChildInfoStack ,methodNode)) {
+                    return true;
+                }
+                methodNode = methodNode.getCaller();
+                continue;
+            }
 
             // 记录可能出现一对多的方法调用
             if (!recordMethodCallMayBeMulti(methodCallId, callType)) {
@@ -392,7 +402,10 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
         return callerMethodCall;
     }
-    // 记录调用方法信息
+
+    /**
+     * @return 如果返回null，则表示节点已经生成过了，不应继续重复生成链路
+     */
     protected CalleeNode genCalleeNode(String callerFullMethod,
                                        int methodCallId,
                                        int callFlags,
@@ -402,7 +415,9 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                                        String callerMethodHash,
                                        int back2Level,
                                        String serviceName,
-                                       CalleeNode callee) {
+                                       CalleeNode callee,
+                                       String originText,
+                                       boolean isRoot) {
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
 
@@ -423,9 +438,20 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         callInfo.setCallerRow(callerLineNum);
         callInfo.setCallerClassName(callerSimpleClassName);
         // 调用方更新调用列表
-        caller.addCaller(callee);
+        caller.setCaller(callee);
         caller.setClassName(callerSimpleClassName);
         caller.setServiceName(serviceName);
+        // 对根节点进行单独处理
+        if(isRoot){
+            caller.isRoot();
+            caller.getOriginTextInfo().add(originText);
+        }
+        // 引用添加到节点集合中
+        boolean addSuccess = calleeTrees.addNode(caller);
+        // 未添加成功，则表示此节点已经存在，无需生成后续节点
+        if (!addSuccess){
+            return null;
+        }
 
 
         // 获取方法上的注解信息
@@ -484,7 +510,9 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         return new MethodAndHash(callerFullMethod, callerMethodHash);
     }
 
-
+    /**
+     * 是否结束调用树生成
+     */
     private boolean handleCallerEmptyResult(ListAsStack<CallGraphNode4Callee> callGraphNode4CalleeStack,
                                             ListAsStack<SuperCallChildInfo> superCallChildInfoStack,
                                             CalleeNode calleeNode) {
