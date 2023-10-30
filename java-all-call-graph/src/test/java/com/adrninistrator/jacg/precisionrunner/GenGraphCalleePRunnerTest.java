@@ -183,7 +183,7 @@ public class GenGraphCalleePRunnerTest {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CallTrees tree = genGraphCalleePRunner.getLink(runConfig);
+        CallTrees<CalleeNode> tree = genGraphCalleePRunner.getLink(runConfig);
 
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 

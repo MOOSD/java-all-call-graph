@@ -260,7 +260,9 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
     }
 
 
-    //处理openfeign相关注解
+    /**
+     * 处理openFeign相关注解
+     */
     private boolean handleFeignClientAnnotation(String methodHash, String fullMethod, String className,String simpleClassName, String annotationName, String attributeName,
                                                 String attributeValue){
         MappingType mappingType = SpringMvcRequestMappingUtil.getMappingType(annotationName);

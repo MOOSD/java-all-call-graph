@@ -356,12 +356,14 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     // 按照版本号清理数据库表
     private boolean truncateTablesByVersion() {
         logger.info("清理数据库表");
+        long beginTime = System.currentTimeMillis();
         for (DbTableInfoEnum dbTableInfoEnum : DbTableInfoEnum.values()) {
             if (DbTableInfoEnum.DTIE_ILLEGAL != dbTableInfoEnum &&
-                    !dbOperator.truncateTableByVersion(dbTableInfoEnum.getTableName())) {
+                    !dbOperator.truncateTableById(dbTableInfoEnum.getTableName())) {
                 return false;
             }
         }
+        logger.warn("清除数据库耗时:{}",System.currentTimeMillis() - beginTime);
         return true;
     }
 

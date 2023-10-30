@@ -14,9 +14,11 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.Connection;
 import java.sql.SQLSyntaxErrorException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -241,6 +243,34 @@ public class DbOperator {
         logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
         try {
             Integer update = jdbcTemplate.update(sql, appVersionId);
+            logger.debug("表[{}]清除数据条数:{},",tableName,update);
+        }catch (Exception e){
+            logger.error("清理表异常:",e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 使用主键索引删除数据，防止锁表的情况
+     */
+    public boolean truncateTableById(String tableName) {
+        // 查询要删除的主键信息
+        String selectSql = JACGSqlUtil.replaceAppNameInSql("SELECT id FROM " + tableName + " WHERE version_id = ? ", appName);
+        List<Long> idList = jdbcTemplate.queryForList(selectSql, Long.class, appVersionId);
+        if (idList.isEmpty()){
+            logger.info("表[{}],尚未查询到版本为[{}]的数据",tableName,appVersionId);
+            return true;
+        }
+        logger.debug("表[{}]预计清除数据条数:{},",tableName,idList.size());
+        // 使用主键索引进行删除
+        String deleteSql = JACGSqlUtil.replaceAppNameInSql("DELETE FROM " + tableName + " WHERE id in ( :idList )", appName);
+        try {
+            HashMap<String, Object> paramMap = new HashMap<>();
+            paramMap.put("idList",idList);
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+            int update = namedParameterJdbcTemplate.update(deleteSql, paramMap);
             logger.debug("表[{}]清除数据条数:{},",tableName,update);
         }catch (Exception e){
             logger.error("清理表异常:",e);
