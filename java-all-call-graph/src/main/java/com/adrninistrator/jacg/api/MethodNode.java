@@ -2,6 +2,8 @@ package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -12,6 +14,8 @@ import java.util.function.Consumer;
 /**
  * 方法节点信息
  */
+@JsonTypeInfo(use= JsonTypeInfo.Id.CLASS,property = "@class")
+@JsonSubTypes({@JsonSubTypes.Type(value = CallerNode.class),@JsonSubTypes.Type(value = CalleeNode.class)})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class MethodNode {
 
@@ -51,28 +55,21 @@ public abstract class MethodNode {
     protected List<BusinessData> businessData;
 
     //调用信息
-    protected CallInfo callInfo;
+    protected CallInfo callInfo = new CallInfo();
 
     protected boolean isRoot;
     // 修改的方法信息
-    protected List<String> originTextInfo;
+    protected List<String> originTextInfo = new LinkedList<>();
     // 方法被修改的次数
-    protected AtomicInteger modifyNum;
+    protected AtomicInteger modifyNum = new AtomicInteger(0);
     // 方法受影响的次数
-    protected AtomicInteger affectedNum;
+    protected AtomicInteger affectedNum = new AtomicInteger(1);
 
-    protected List<MethodNode> nextNodes;
+    protected List<MethodNode> nextNodes = new ArrayList<>();
 
     @JsonIgnore
     protected MethodNode before;
 
-    public MethodNode() {
-        this.originTextInfo = new LinkedList<>();
-        this.modifyNum = new AtomicInteger(0);
-        this.affectedNum = new AtomicInteger(1);
-        this.nextNodes = new ArrayList<>();
-        this.callInfo = new CallInfo();
-    }
 
     // 根节点创建的时候，必然是一个受影响过的节点
     public void isRoot(){
