@@ -31,7 +31,10 @@ import static com.adrninistrator.jacg.common.JACGConstants.UNKNOWN_CALL_FLAGS;
 public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBaseRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractGenCallGraphPRunner.class);
 
-    //是否跨基于OpenFeign的服务生成调用链路
+    // 单颗树最大节点生成数量
+    protected int maxNodeGenNum;
+
+    // 是否跨基于OpenFeign的服务生成调用链路
     protected boolean crossServiceByOpenFeign;
 
     // 保存各个方法已处理过的所有注解信息
@@ -44,18 +47,30 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
 
     @Override
     protected boolean commonPreHandle() {
+        maxNodeGenNum = configureWrapper.<Integer>getMainConfig(ConfigKeyEnum.MAX_NODE_NUM);
+        if(maxNodeGenNum <= 0){
+            throw new RuntimeException("单棵调用树的最大节点数量小于等于0，请检查配置");
+        }
         crossServiceByOpenFeign = configureWrapper.<Boolean>getMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN);
         return super.commonPreHandle();
     }
 
-    protected void addWarningMessage(String message){
+    protected synchronized void addWarningMessage(String message){
         warningMessages.add(message);
     }
 
-    protected void addErrorMessage(String message){
+    protected synchronized void addErrorMessage(String message){
         errorMessages.add(message);
     }
 
+    /**
+     * 根据节点数判断调用树是否继续生成
+     * @param genNodeNum 以生成的节点数
+     * @return true: 中断树生成 ；false：继续树生成
+     */
+    protected boolean cutDownByNodeNum(int genNodeNum){
+        return genNodeNum > maxNodeGenNum;
+    }
     /**
      * 获取方法对应的注解信息
      *

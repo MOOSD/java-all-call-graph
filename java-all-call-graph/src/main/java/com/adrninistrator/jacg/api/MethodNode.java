@@ -59,22 +59,23 @@ public abstract class MethodNode {
 
     protected boolean isRoot;
     // 修改的方法信息
-    protected List<String> originTextInfo = new LinkedList<>();
-    // 方法被修改的次数
-    protected AtomicInteger modifyNum = new AtomicInteger(0);
-    // 方法受影响的次数
-    protected AtomicInteger affectedNum = new AtomicInteger(1);
-
+    protected List<String> originTextInfo;
+    // 调用树重复出现的次数
+    protected AtomicInteger repeatNum;
+    // 下一个节点
     protected List<MethodNode> nextNodes = new ArrayList<>();
 
     @JsonIgnore
     protected MethodNode before;
 
+    // 节点生成时候的数据信息
+    protected List<String> genMessage;
 
-    // 根节点创建的时候，必然是一个受影响过的节点
-    public void isRoot(){
+    // 根节点创建的时候，必然是一个被修改的节点
+    public void isRoot(String originText){
         this.isRoot = true;
-        this.modifyNum.incrementAndGet();
+        this.originTextInfo = new ArrayList<>();
+        originTextInfo.add(originText);
     }
     /**
      * 当前树是否有任意叶子节点
@@ -96,6 +97,9 @@ public abstract class MethodNode {
             // 出队
             MethodNode node = taskQueue.poll();
             consumer.accept(node);
+            if (node.getCallInfo().getCycleCall() != -1) {
+                return;
+            }
             // 将其子节点添加到队列
             if (Objects.nonNull(node.getNextNodes()) && !node.getNextNodes().isEmpty()){
                 taskQueue.addAll(node.getNextNodes());
@@ -112,23 +116,29 @@ public abstract class MethodNode {
      * 增加此节点的修改次数
      */
     public void incrementModifyNum(){
-        // 此节点如果是被修改节点，那么一定是受影响的节点
-        modifyNum.incrementAndGet();
-        incrementAffectedNum();
+        if (Objects.isNull(repeatNum)){
+            this.repeatNum = new AtomicInteger(1);
+            return;
+        }
+        repeatNum.incrementAndGet();
     };
-
-    /**
-     * 如果此节点被影响，那么以此节点为根节点后续的调用树的影响次数均需要增加
-     */
-    public void incrementAffectedNum(){
-        this.forEach(methodNode -> methodNode.getAffectedNum().incrementAndGet());
-    }
 
     /**
      * 此方法运行在声明式事务中
      */
     public void runInTransaction(){
         this.inTransaction = true;
+    }
+
+    /**
+     * 添加节点生成信息
+     */
+    public void addGenMessage(String message){
+        // 懒加载
+        if (Objects.isNull(genMessage)) {
+            genMessage = new ArrayList<>();
+        }
+        genMessage.add(message);
     }
 
     public String getMethodName() {
@@ -243,20 +253,12 @@ public abstract class MethodNode {
         this.originTextInfo = originTextInfo;
     }
 
-    public AtomicInteger getModifyNum() {
-        return modifyNum;
+    public AtomicInteger getRepeatNum() {
+        return repeatNum;
     }
 
-    public void setModifyNum(AtomicInteger modifyNum) {
-        this.modifyNum = modifyNum;
-    }
-
-    public AtomicInteger getAffectedNum() {
-        return affectedNum;
-    }
-
-    public void setAffectedNum(AtomicInteger affectedNum) {
-        this.affectedNum = affectedNum;
+    public void setRepeatNum(AtomicInteger repeatNum) {
+        this.repeatNum = repeatNum;
     }
 
     public List<MethodNode> getNextNodes() {
@@ -265,6 +267,14 @@ public abstract class MethodNode {
 
     public MethodNode getBefore() {
         return before;
+    }
+
+    public List<String> getGenMessage() {
+        return genMessage;
+    }
+
+    public void setGenMessage(List<String> genMessage) {
+        this.genMessage = genMessage;
     }
 
     @Override

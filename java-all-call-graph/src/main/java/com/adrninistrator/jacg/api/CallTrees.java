@@ -2,6 +2,8 @@ package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.function.Consumer;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CallTrees<T extends MethodNode> {
-
+    private static final Logger logger = LoggerFactory.getLogger(CallTrees.class);
 
     //查询方法的被调用的树的列表(仅存储根节点)
     //key:方法的完全限定名
@@ -31,13 +33,13 @@ public class CallTrees<T extends MethodNode> {
 
     @JsonIgnore
     // 所有方法节点的索引，索引值是节点名称
-    private Map<String, T> nodeIndex;
+    private Map<String, T> rootIndex;
 
     //实例化
     public static <T extends MethodNode> CallTrees<T> instantiate(){
         CallTrees<T> calleeTrees = new CallTrees<>();
         calleeTrees.trees = new ArrayList<>();
-        calleeTrees.nodeIndex = new ConcurrentHashMap<>();
+        calleeTrees.rootIndex = new ConcurrentHashMap<>();
         return calleeTrees;
     }
 
@@ -60,38 +62,24 @@ public class CallTrees<T extends MethodNode> {
     /**
      * 添加一被调用棵树，重复添加时候影响节点的modifyNum
      * @param callNode 被调用树的根节点，当返回null时，则表示此调用树重复生成
+     * @return ture:树不存在，添加成功 false：树已存在，无需再生成此树
      */
-    public synchronized void addTree(T callNode){
-        trees.add(callNode);
-    }
-
-    /**
-     * 添加节点到节点索引集合
-     * @param callNode 节点信息
-     * @return false: 节点已经存在，未添加到索引集合中， 集合不存在，添加到索引集合中
-     */
-    public synchronized boolean addNode(T callNode){
-        // 如果节点不存在，假如到索引集合中
-        if (!nodeIndex.containsKey(callNode.getMethodHash())) {
-            this.nodeIndex.put(callNode.getMethodHash(), callNode);
+    public synchronized boolean addTree(T callNode){
+        // 如果根节点不存在，则加入到索引集合中
+        if (!rootIndex.containsKey(callNode.getMethodHash())) {
+            this.rootIndex.put(callNode.getMethodHash(), callNode);
+            trees.add(callNode);
             return true;
         }
-        T alreadyExistNode = nodeIndex.get(callNode.getMethodHash());
-        // 如果目标节点是根节点
-        if(callNode.isRoot){
-            // 增加链路存在次数
-            alreadyExistNode.incrementModifyNum();
-            // 将节点中的原始信息加入
-            alreadyExistNode.getOriginTextInfo().addAll(callNode.getOriginTextInfo());
-            return false;
-        }
-        // 目标节点非根节点
-        alreadyExistNode.incrementAffectedNum();
-        // 将输入方法节点连接到已存在的链路上
-        MethodNode before = callNode.getBefore();
-        before.addNext(alreadyExistNode);
+        T alreadyExistRoot = rootIndex.get(callNode.getMethodHash());
+        // 增加链路存在次数
+        alreadyExistRoot.incrementModifyNum();
+        // 将节点中的原始信息加入
+        alreadyExistRoot.getOriginTextInfo().addAll(callNode.getOriginTextInfo());
         return false;
+
     }
+
 
     public List<T> getTrees() {
         return trees;
@@ -125,11 +113,11 @@ public class CallTrees<T extends MethodNode> {
         this.errorMessages = errorMessages;
     }
 
-    public Map<String, T> getNodeIndex() {
-        return nodeIndex;
+    public Map<String, T> getRootIndex() {
+        return rootIndex;
     }
 
-    public void setNodeIndex(Map<String, T> nodeIndex) {
-        this.nodeIndex = nodeIndex;
+    public void setRootIndex(Map<String, T> rootIndex) {
+        this.rootIndex = rootIndex;
     }
 }

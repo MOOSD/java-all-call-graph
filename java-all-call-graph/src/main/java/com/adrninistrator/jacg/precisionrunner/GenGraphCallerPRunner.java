@@ -336,7 +336,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
 
         // 创建根节点
         CallerNode callerRoot = genCallerNode(entryCallerFullMethod, entryCallerMethodHash,  UNKNOWN_CALL_ID, UNKNOWN_CALL_FLAGS,
-                UNKNOWN_CALL_TYPE, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, 0,null,true);
+                UNKNOWN_CALL_TYPE, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START, 0,null, callerTaskInfo.getOrigText(),true);
 
         // 设置指定的起始行和结束行
         callerRoot.setStartLineNum(entryLineNumStart);
@@ -484,7 +484,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         callGraphNode4CallerStack.push(callGraphNode4CallerHead);
 
         // 输出结果数量
-        int recordNum = 0;
+        int nodeNum = 0;
 
         // 记录各个层级的调用方法中有被调用过的方法（包含方法注解、方法调用业务功能数据）
         ListAsStack<Set<CallerNode>> recordedCalleeStack = null;
@@ -526,11 +526,10 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                 methodNode = methodNode.getCallee();
                 continue;
             }
-            // 节点记录数+1
-            if(recordNum++ > 500){
-                String warningMessage = "调用树节点超过500,中断生成。可结合输出尝试优化忽略条件";
-                addWarningMessage(warningMessage);
-                logger.warn(warningMessage);
+            // 节点数量自增
+            if(cutDownByNodeNum(++nodeNum)){
+                logger.warn(root.getFullMethod()+"树节点数量过多,中断生成");
+                root.addGenMessage("当前树节点数量大于" + maxNodeGenNum +  ",中断生成");
                 return true;
             }
             String callerFullMethod = callGraphNode4Caller.getCallerFullMethod();
@@ -556,7 +555,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
             // 获取此方法调用的方法
             CallerNode caller = genCallerNode(calleeFullMethod, calleeMethodHash, methodCallId, calleeMethod.getCallFlags(),
                     callType, callGraphNode4CallerStack.getHead()+1, calleeMethod.getCallerLineNumber(),
-                    methodNode, false);
+                    methodNode, null, false);
             if (caller == null) {
                 return false;
             }
@@ -969,6 +968,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                                        int currentNodeLevel,
                                        int callerLineNumber,
                                        CallerNode callee,
+                                       String originText,
                                        boolean isRoot ) {
 
         String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
@@ -990,7 +990,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         callInfo.setCallType(callType);
         // 构建根节点
         if(isRoot){
-            caller.isRoot();
+            caller.isRoot(originText);
             callInfo.setCallerClassName(callee.getClassName());
         }
 

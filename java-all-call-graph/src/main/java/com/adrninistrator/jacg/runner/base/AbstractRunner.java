@@ -240,10 +240,10 @@ public abstract class AbstractRunner {
             configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, String.valueOf(taskNum));
         }
 
-        // 任务队列最大长度，设置为线程数2倍
-        taskQueueMaxSize = 500;
-        threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 10L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(taskQueueMaxSize), new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER));
+        // 任务队列最大长度，设置为线程数2倍 todo 此属性不使用
+        taskQueueMaxSize = threadNum * 2;
+        threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum * 2, 10L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(), new ThreadFactory4TPE(JACGConstants.THREAD_NAME_PREFIX_WORKER));
     }
 
     // 等待直到任务执行完毕
@@ -253,7 +253,7 @@ public abstract class AbstractRunner {
                 return;
             }
             logger.debug("{} wait4TPEDone ...", currentSimpleClassName);
-            JACGUtil.sleep(100L);
+            JACGUtil.sleep(1000L);
         }
     }
 

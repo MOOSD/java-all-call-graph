@@ -278,7 +278,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         callGraphNode4CalleeStack.push(callGraphNode4CalleeHead);
 
         // 输出结果数量
-        int recordNum = 0;
+        int genNodeNum = 0;
         while (true) {
             // 从栈顶获取当前正在处理的节点
             CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.peek();
@@ -306,11 +306,6 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                     methodNode = methodNode.getCaller();
                     continue;
                 }
-            }
-
-            // 查询到记录
-            if (++recordNum % JACGConstants.NOTICE_LINE_NUM == 0) {
-                logger.info("记录数达到 {} {}", recordNum, entryCalleeFullMethod);
             }
 
             String calleeFullMethod = callGraphNode4Callee.getCalleeFullMethod();
@@ -352,6 +347,12 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 methodNode = methodNode.getCaller();
                 continue;
             }
+            // 节点数量自增
+            if(cutDownByNodeNum(++genNodeNum)){
+                logger.warn(root.getFullMethod()+"树节点数量过多,中断生成");
+                root.addGenMessage("当前树节点数量大于" + maxNodeGenNum +  ",中断生成");
+                return true;
+            }
 
             // 记录可能出现一对多的方法调用
             if (!recordMethodCallMayBeMulti(methodCallId, callType)) {
@@ -372,6 +373,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             methodNode = callee;
         }
     }
+
+
 
     private boolean isControllerMethod(List<String> annotationList){
         return annotationList.stream().anyMatch(SpringMvcRequestMappingUtil::isControllerHandlerMethod);
@@ -443,16 +446,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         caller.setServiceName(serviceName);
         // 对根节点进行单独处理
         if(isRoot){
-            caller.isRoot();
-            caller.getOriginTextInfo().add(originText);
+            caller.isRoot(originText);
         }
-        // 引用添加到节点集合中
-        boolean addSuccess = calleeTrees.addNode(caller);
-        // 未添加成功，则表示此节点已经存在，无需生成后续节点
-        if (!addSuccess){
-            return null;
-        }
-
 
         // 获取方法上的注解信息
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = addMethodAnnotationInfo(caller);
