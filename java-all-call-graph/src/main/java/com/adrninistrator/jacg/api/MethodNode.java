@@ -19,6 +19,8 @@ import java.util.function.Consumer;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class MethodNode {
 
+    protected String id;
+
     @JsonIgnore
     protected String fullMethod;
 
@@ -63,7 +65,7 @@ public abstract class MethodNode {
     // 调用树重复出现的次数
     protected AtomicInteger repeatNum;
     // 下一个节点
-    protected List<MethodNode> nextNodes = new ArrayList<>();
+    protected List<MethodNode> children = new ArrayList<>();
 
     @JsonIgnore
     protected MethodNode before;
@@ -82,7 +84,7 @@ public abstract class MethodNode {
      * @return
      */
     public boolean hasNext(){
-        return nextNodes == null || nextNodes.size() != 0;
+        return children == null || children.size() != 0;
     }
 
     /**
@@ -91,7 +93,7 @@ public abstract class MethodNode {
     void forEach(Consumer<MethodNode> consumer){
         // 处理当前节点
         consumer.accept(this);
-        Queue<MethodNode> taskQueue = new LinkedList<>(this.getNextNodes());
+        Queue<MethodNode> taskQueue = new LinkedList<>(this.getChildren());
         // 广度遍历所有节点，执行消费程序
         while(!taskQueue.isEmpty()){
             // 出队
@@ -101,15 +103,15 @@ public abstract class MethodNode {
                 return;
             }
             // 将其子节点添加到队列
-            if (Objects.nonNull(node.getNextNodes()) && !node.getNextNodes().isEmpty()){
-                taskQueue.addAll(node.getNextNodes());
+            if (Objects.nonNull(node.getChildren()) && !node.getChildren().isEmpty()){
+                taskQueue.addAll(node.getChildren());
             }
         }
 
     }
 
     public void addNext(MethodNode methodNode){
-        nextNodes.add(methodNode);
+        children.add(methodNode);
     }
 
     /**
@@ -261,8 +263,8 @@ public abstract class MethodNode {
         this.repeatNum = repeatNum;
     }
 
-    public List<MethodNode> getNextNodes() {
-        return nextNodes;
+    public List<MethodNode> getChildren() {
+        return children;
     }
 
     public MethodNode getBefore() {
@@ -275,6 +277,14 @@ public abstract class MethodNode {
 
     public void setGenMessage(List<String> genMessage) {
         this.genMessage = genMessage;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.adrninistrator.jacg.common.JACGConstants.UNKNOWN_CALL_FLAGS;
 
@@ -37,6 +38,9 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
     // 是否跨基于OpenFeign的服务生成调用链路
     protected boolean crossServiceByOpenFeign;
 
+    // 生成节点时的id
+    protected AtomicInteger idNum = new AtomicInteger(0);
+
     // 保存各个方法已处理过的所有注解信息
     protected Map<String, Map<String, Map<String, BaseAnnotationAttribute>>> methodAllAnnotationInfoMap = new HashMap<>();
 
@@ -44,6 +48,11 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
     protected List<String> warningMessages = new ArrayList<>();
     protected List<String> errorMessages = new ArrayList<>();
 
+
+    protected String getIdNum(){
+        int nextId = idNum.getAndIncrement();
+        return String.valueOf(nextId);
+    }
 
     @Override
     protected boolean commonPreHandle() {

@@ -975,6 +975,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         String calleeMethodName = JACGClassMethodUtil.getMethodNameFromFull(calleeFullMethod);
         // 创建方法的调用节点,并且作为建立调用关系
         CallerNode caller = CallerNode.instantiate();
+        caller.setId(getIdNum());
         caller.setFullMethod(calleeFullMethod);
         caller.setMethodHash(calleeMethodHash);
         caller.setFQCN(calleeClassName);

@@ -119,10 +119,10 @@ public class WriteCallGraphFilePRunner extends AbstractPRunner {
         }
 
         // 调用java-callgraph2
-        logger.info("调用java-callgraph2生成jar包的方法调用关系");
+        logger.info("生成jar包的方法调用关系");
         boolean success = jCallGraph.run(javaCGConfigureWrapper);
         if (!success) {
-            logger.error("调用java-callgraph2生成jar包的方法调用关系失败");
+            logger.error("生成jar包的方法调用关系失败");
             return false;
         }
 
@@ -133,8 +133,8 @@ public class WriteCallGraphFilePRunner extends AbstractPRunner {
         // 打印当前使用的配置信息
         printAllConfigInfo();
 
-        // 打印java-callgraph2当前使用的配置信息
-        printJavaCGUsedConfigInfo();
+//        // 打印java-callgraph2当前使用的配置信息
+//        printJavaCGUsedConfigInfo();
         return true;
     }
 

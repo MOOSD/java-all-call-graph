@@ -426,6 +426,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
         // 实例化一个新节点（子节点）
         CalleeNode caller = CalleeNode.instantiate();
+        caller.setId(getIdNum());
         caller.setFullMethod(callerFullMethod);
         caller.setMethodHash(callerMethodHash);
         caller.setDepth(currentNodeLevel);
