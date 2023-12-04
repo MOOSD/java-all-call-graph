@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CallerNode extends MethodNode {
 
@@ -65,6 +66,7 @@ public class CallerNode extends MethodNode {
         this.depth = depth;
     }
 
+    @JsonProperty(value = "isEntrance")
     public boolean isEntrance() {
         return isEntrance;
     }

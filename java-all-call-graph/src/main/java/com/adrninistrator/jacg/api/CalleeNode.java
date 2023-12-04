@@ -2,6 +2,7 @@ package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 被调用者树的节点，即向上的调用树
@@ -63,6 +64,7 @@ public class CalleeNode extends MethodNode {
         this.depth = depth;
     }
 
+    @JsonProperty(value = "isEntrance")
     public boolean isEntrance() {
         return isEntrance;
     }
@@ -70,5 +72,4 @@ public class CalleeNode extends MethodNode {
     public void setEntrance(boolean entrance) {
         isEntrance = entrance;
     }
-
 }

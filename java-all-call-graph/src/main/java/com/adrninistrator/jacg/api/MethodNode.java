@@ -1,9 +1,6 @@
 package com.adrninistrator.jacg.api;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -33,6 +30,7 @@ public abstract class MethodNode {
     protected String className;
 
     //当前方法所在类的完全限定类名
+    @JsonProperty(value = "fqcn")
     protected String FQCN;
 
     //方法形参数
@@ -285,6 +283,15 @@ public abstract class MethodNode {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @JsonProperty(value = "isRoot")
+    public boolean isRoot() {
+        return isRoot;
+    }
+
+    public void setRoot(boolean root) {
+        isRoot = root;
     }
 
     @Override

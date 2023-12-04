@@ -5,6 +5,7 @@ import com.adrninistrator.jacg.api.CalleeNode;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.RunConfig;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
+import com.adrninistrator.jacg.util.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Test;
 
@@ -22,7 +23,7 @@ public class GenGraphCalleePRunnerTest {
         GenGraphCalleePRunner genGraphCalleePRunner = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.3 version");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
         runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"50");
@@ -35,7 +36,7 @@ public class GenGraphCalleePRunnerTest {
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
 
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-    "cn.newgrand.pm.pms.cz.rule.impl.CzActMRuleImpl#getWorkYear"
+    "cn.newgrand.pm.crm.zb.service.impl.TendReceiptServiceImpl:sendUIC"
         );
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
@@ -116,6 +117,7 @@ public class GenGraphCalleePRunnerTest {
         runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.3 version");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
+        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"50");
         //config_db.properties
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
@@ -139,7 +141,7 @@ public class GenGraphCalleePRunnerTest {
 
         CallTrees<CalleeNode> tree = genGraphCalleePRunner.getLink(runConfig);
 
-        System.out.println(JACGJsonUtil.getJsonStr(tree));
+        System.out.println(JSON.toJSONString(tree));
 
     }
 
