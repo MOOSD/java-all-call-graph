@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.dto.method_call.MethodCallInfo;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Map;
@@ -70,12 +71,13 @@ public class CallInfo {
         this.cycleCall = cycleCall;
     }
 
-
-    public boolean getAsync() {
+    @JsonProperty("isAsync")
+    public boolean isAsync() {
         return isAsync;
     }
 
-    public boolean getRpc() {
+    @JsonProperty("isRpc")
+    public boolean isRpc() {
         return isRpc;
     }
 
