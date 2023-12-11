@@ -33,13 +33,18 @@ public class CallTrees<T extends MethodNode> {
 
     @JsonIgnore
     // 所有方法节点的索引，索引值是节点名称
-    private Map<String, T> rootIndex;
+    private Map<String, T> rootMethodHashIndex;
+
+    @JsonIgnore
+    // 所有方法节点的索引，索引值是原始文本信息
+    private Map<String, T> rootOriginTextIndex;
 
     //实例化
     public static <T extends MethodNode> CallTrees<T> instantiate(){
         CallTrees<T> calleeTrees = new CallTrees<>();
         calleeTrees.trees = new ArrayList<>();
-        calleeTrees.rootIndex = new ConcurrentHashMap<>();
+        calleeTrees.rootMethodHashIndex = new ConcurrentHashMap<>();
+        calleeTrees.rootOriginTextIndex = new ConcurrentHashMap<>();
         return calleeTrees;
     }
 
@@ -66,12 +71,14 @@ public class CallTrees<T extends MethodNode> {
      */
     public synchronized boolean addTree(T callNode){
         // 如果根节点不存在，则加入到索引集合中
-        if (!rootIndex.containsKey(callNode.getMethodHash())) {
-            this.rootIndex.put(callNode.getMethodHash(), callNode);
+        if (!rootMethodHashIndex.containsKey(callNode.getMethodHash())) {
+            this.rootMethodHashIndex.put(callNode.getMethodHash(), callNode);
+            // 一个新的callNode，只可能有一个原始文本信息
+            this.rootOriginTextIndex.put(callNode.getOriginTextInfo().get(0), callNode);
             trees.add(callNode);
             return true;
         }
-        T alreadyExistRoot = rootIndex.get(callNode.getMethodHash());
+        T alreadyExistRoot = rootMethodHashIndex.get(callNode.getMethodHash());
         // 增加链路存在次数
         alreadyExistRoot.incrementModifyNum();
         // 将节点中的原始信息加入
@@ -80,6 +87,13 @@ public class CallTrees<T extends MethodNode> {
 
     }
 
+    public T getTreeByOriginText(String originText){
+        return rootOriginTextIndex.get(originText);
+    }
+
+    public T getTreeByMethodHash(String methodHash){
+        return rootMethodHashIndex.get(methodHash);
+    }
 
     public List<T> getTrees() {
         return trees;
@@ -113,11 +127,11 @@ public class CallTrees<T extends MethodNode> {
         this.errorMessages = errorMessages;
     }
 
-    public Map<String, T> getRootIndex() {
-        return rootIndex;
+    public Map<String, T> getRootMethodHashIndex() {
+        return rootMethodHashIndex;
     }
 
-    public void setRootIndex(Map<String, T> rootIndex) {
-        this.rootIndex = rootIndex;
+    public void setRootMethodHashIndex(Map<String, T> rootMethodHashIndex) {
+        this.rootMethodHashIndex = rootMethodHashIndex;
     }
 }
