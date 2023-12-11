@@ -44,7 +44,7 @@ public class CallTrees<T extends MethodNode> {
         CallTrees<T> calleeTrees = new CallTrees<>();
         calleeTrees.trees = new ArrayList<>();
         calleeTrees.rootMethodHashIndex = new ConcurrentHashMap<>();
-        calleeTrees.rootOriginTextIndex = new ConcurrentHashMap<>();
+//        calleeTrees.rootOriginTextIndex = new ConcurrentHashMap<>();
         return calleeTrees;
     }
 
@@ -74,7 +74,7 @@ public class CallTrees<T extends MethodNode> {
         if (!rootMethodHashIndex.containsKey(callNode.getMethodHash())) {
             this.rootMethodHashIndex.put(callNode.getMethodHash(), callNode);
             // 一个新的callNode，只可能有一个原始文本信息
-            this.rootOriginTextIndex.put(callNode.getOriginTextInfo().get(0), callNode);
+//            this.rootOriginTextIndex.put(callNode.getOriginTextInfo().get(0), callNode);
             trees.add(callNode);
             return true;
         }
