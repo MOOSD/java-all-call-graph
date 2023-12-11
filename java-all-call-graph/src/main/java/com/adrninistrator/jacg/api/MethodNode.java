@@ -88,7 +88,7 @@ public abstract class MethodNode {
     /**
      * @param consumer 消费行为
      */
-    void forEach(Consumer<MethodNode> consumer){
+    public void forEach(Consumer<MethodNode> consumer){
         // 处理当前节点
         consumer.accept(this);
         Queue<MethodNode> taskQueue = new LinkedList<>(this.getChildren());
