@@ -983,6 +983,8 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         caller.setMethodName(calleeMethodName);
         caller.setMethodFormalArguments(MethodUtil.genMethodArgTypeList(calleeFullMethod));
         caller.setDepth(currentNodeLevel);
+        // 新节点添加被调用者信息
+        caller.setCallee(callee);
         // 在生成向下调用节点的时候如果没有调用者，表示没有调用关系（或者当前正在生成的就是调用者），不生成调用信息
         CallInfo callInfo = caller.getCallInfo();
         callInfo.setCallerRow(callerLineNumber);
@@ -992,14 +994,15 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
         // 构建根节点
         if(isRoot){
             caller.isRoot(originText);
+        }
+        // 设置调用的类名
+        if(Objects.nonNull(callee)){
             callInfo.setCallerClassName(callee.getClassName());
         }
 
         if(ExtendCallTypeEnum.RPC.getType().equals(callType)){
             callInfo.setRpc(true);
         }
-        // 新节点添加被调用者信息
-        caller.setCallee(callee);
 
         // 判断被调用方法上是否有注解
         Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = addMethodAnnotationInfo(caller);
