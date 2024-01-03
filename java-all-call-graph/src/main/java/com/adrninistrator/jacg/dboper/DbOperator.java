@@ -83,6 +83,7 @@ public class DbOperator {
         dataSource.setTestOnBorrow(false);
         dataSource.setTestOnReturn(false);
         dataSource.setTestWhileIdle(false);
+        dataSource.setTimeBetweenEvictionRunsMillis(120000L);
 
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
         appVersionId = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID);

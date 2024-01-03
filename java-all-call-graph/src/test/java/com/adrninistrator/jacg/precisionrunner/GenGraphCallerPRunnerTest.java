@@ -17,7 +17,7 @@ public class GenGraphCallerPRunnerTest {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
         configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
         configureWrapper.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"false");
-
+        configureWrapper.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"100");
         //config_db.properties
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/precision_dev?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
@@ -159,6 +159,41 @@ public class GenGraphCallerPRunnerTest {
 
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,"cn.newgrand.pm.crm.zb.service.impl.CntAwardNoticeServiceImpl:saveCntAwardNotice(cn.newgrand.pm.crm.zb.domain.CntAwardNoticeModel,java.util.List,java.lang.String,boolean)");
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_CLASS_KEYWORD,"ApiResultUtil");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
+        );
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+                "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
+
+        CallTrees<CallerNode> tree = runnerGenAllGraph4Caller.getLink(configureWrapper);
+        System.out.println(JACGJsonUtil.getJsonStr(tree));
+    }
+
+
+    @Test
+    public void getLinkForPrecisionFrom172(){
+        GenGraphCallerPRunner runnerGenAllGraph4Caller = new GenGraphCallerPRunner();
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"hawkeye");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER,"true");
+        configureWrapper.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"100");
+
+        //config_db.properties
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/precision_dev?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+        //allow_class_prefix.properties
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
+
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLER,"cn.newgrand.ck.controller.PrecisionReportController#getReportApiList");
+//        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_IGNORE_CLASS_KEYWORD,"ApiResultUtil");
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
