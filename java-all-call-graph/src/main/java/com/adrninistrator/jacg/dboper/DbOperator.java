@@ -264,20 +264,26 @@ public class DbOperator {
             logger.info("表[{}],尚未查询到版本为[{}]的数据",tableName,appVersionId);
             return true;
         }
-        logger.debug("表[{}]预计清除数据条数:{},",tableName,idList.size());
+        logger.info("表[{}]预计清除数据条数:{},",tableName,idList.size());
         // 使用主键索引进行删除
         String deleteSql = JACGSqlUtil.replaceAppNameInSql("DELETE FROM " + tableName + " WHERE id in ( :idList )", appName);
         try {
-            HashMap<String, Object> paramMap = new HashMap<>();
-            paramMap.put("idList",idList);
-            NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-            int update = namedParameterJdbcTemplate.update(deleteSql, paramMap);
-            logger.debug("表[{}]清除数据条数:{},",tableName,update);
+            int batchSize = 2000;
+            int count = 0;
+            for (int i = 0; i < idList.size(); i += batchSize) {
+                int endIndex = Math.min(i + batchSize, idList.size());
+                List<Long> batchData = idList.subList(i, endIndex);
+                HashMap<String, Object> paramMap = new HashMap<>();
+                paramMap.put("idList",batchData);
+                NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+                count += namedParameterJdbcTemplate.update(deleteSql, paramMap);
+            }
+
+            logger.info("表[{}]清除数据条数:{},",tableName,count);
         }catch (Exception e){
             logger.error("清理表异常:",e);
             return false;
         }
-
         return true;
     }
 

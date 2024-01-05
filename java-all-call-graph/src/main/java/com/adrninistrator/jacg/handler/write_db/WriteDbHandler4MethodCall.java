@@ -95,7 +95,7 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
         if (writeDbData4MethodCall.getCallerMethodHash().equals(writeDbData4MethodCall.getCalleeMethodHash())) {
             // 对于递归调用，不写入数据库，防止查询时出现死循环
             if (logger.isDebugEnabled()) {
-                logger.debug("递归调用不写入数据库 {}", StringUtils.join(array, "\t"));
+                logger.info("递归调用不写入数据库 {}", StringUtils.join(array, "\t"));
             }
             return null;
         }
