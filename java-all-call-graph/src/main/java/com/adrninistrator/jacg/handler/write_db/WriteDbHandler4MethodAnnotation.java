@@ -226,7 +226,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                     writeDbData4SpringController.setRequestMethod(requestMethod);
                     writeDbData4SpringController.setVersionId(versionId);
                     controllerList.add(writeDbData4SpringController);
-                    logger.debug("找到Spring Controller信息 {}", writeDbData4SpringController);
+                    logger.debug("找到接口信息信息: {}", writeDbData4SpringController.getShowUri());
                     seq++;
                 }
             }
@@ -321,6 +321,7 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 writeDbData4FeignClientData.setVersionId(versionId);
                 //新增记录添加到对应List
                 feignClientDataList.add(writeDbData4FeignClientData);
+                logger.debug("找到RPC接口信息信息: {}", writeDbData4FeignClientData.getShowUri());
                 seq++;
             }
             //如果请求方法是空，则表示此纪录并不完整,暂存

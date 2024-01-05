@@ -19,7 +19,9 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     CROSS_SERVICE_BY_OPENFEIGN("call.graph.cs.openfeign", "基于OpenFeign的RPC框架是否跨微服务生成调用链路", Boolean.class),
     INCREMENT_UPDATE("increment.update","增量的更新数据库(非全删全插)",Boolean.class),
     APP_VERSION_ID("app.version.id", "当前项目的版本号id", String.class),
-    MAX_NODE_NUM("max.node.num","单颗树的最大节点数量",Integer.class)
+    MAX_NODE_NUM("max.node.num","单颗树的最大节点数量",Integer.class),
+    MDC_KEY("mdc.key","日志输出所用的MDC的键",String.class),
+    MDC_VALUE("mdc.value","日志输出所用的MDC的值",String.class)
     ;
 
     // 参数key

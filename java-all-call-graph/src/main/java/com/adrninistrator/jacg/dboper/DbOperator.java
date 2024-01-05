@@ -259,12 +259,13 @@ public class DbOperator {
     public boolean truncateTableById(String tableName) {
         // 查询要删除的主键信息
         String selectSql = JACGSqlUtil.replaceAppNameInSql("SELECT id FROM " + tableName + " WHERE version_id = ? ", appName);
+        String showTableName = tableName.replace(JACGConstants.APP_NAME_IN_SQL,appName);
         List<Long> idList = jdbcTemplate.queryForList(selectSql, Long.class, appVersionId);
         if (idList.isEmpty()){
-            logger.info("表[{}],尚未查询到版本为[{}]的数据",tableName,appVersionId);
+            logger.info("表[{}],尚未查询到版本为[{}]的数据",showTableName,appVersionId);
             return true;
         }
-        logger.info("表[{}]预计清除数据条数:{},",tableName,idList.size());
+        logger.info("表[{}]预计清除数据条数:{},",showTableName,idList.size());
         // 使用主键索引进行删除
         String deleteSql = JACGSqlUtil.replaceAppNameInSql("DELETE FROM " + tableName + " WHERE id in ( :idList )", appName);
         try {
@@ -279,7 +280,7 @@ public class DbOperator {
                 count += namedParameterJdbcTemplate.update(deleteSql, paramMap);
             }
 
-            logger.info("表[{}]清除数据条数:{},",tableName,count);
+            logger.info("表[{}]清除数据条数:{},",showTableName,count);
         }catch (Exception e){
             logger.error("清理表异常:",e);
             return false;

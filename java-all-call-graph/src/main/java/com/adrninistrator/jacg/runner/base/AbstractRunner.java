@@ -229,7 +229,7 @@ public abstract class AbstractRunner {
 
     /**
      * 创建线程池
-     *
+     * 创建线程，参数指定为null，不调小实际创建的线程数
      * @param taskNum 任务数量，非空时尝试根据任务数量调中实际创建的线程数
      */
     protected void createThreadPoolExecutor(Integer taskNum) {

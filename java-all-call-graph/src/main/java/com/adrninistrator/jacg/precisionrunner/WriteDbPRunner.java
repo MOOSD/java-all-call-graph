@@ -59,6 +59,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
 
     @Override
     public boolean preHandle() {
+
         // 读取其他配置文件
         allowedClassPrefixSet = configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, true);
         if (allowedClassPrefixSet.isEmpty()) {
@@ -77,7 +78,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
             }
         }
 
-        // 使用多线程，线程数固定为10
+        // todo 解除此限制 用多线程，线程数固定为10
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM, String.valueOf(10));
 
         // 批量写入数据库时每次插入的数量
@@ -277,7 +278,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
 
     // 创建数据库表
     private boolean createTables() {
-        logger.info("创建数据库表");
+        logger.info("创建/更新字节码数据库表");
         for (DbTableInfoEnum dbTableInfoEnum : DbTableInfoEnum.values()) {
             if (DbTableInfoEnum.DTIE_ILLEGAL == dbTableInfoEnum) {
                 continue;
@@ -315,7 +316,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
             stringBuilder.append(transformCreateTableSql(sql, useH2Db));
         }
         String createTableSql = stringBuilder.toString();
-        logger.debug("建表sql: {}", createTableSql);
+//        logger.debug("建表sql: {}", createTableSql);
         return createTableSql;
     }
 

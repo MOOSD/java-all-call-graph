@@ -93,7 +93,7 @@ public class WriteCallGraphFilePRunner extends AbstractPRunner {
     protected boolean callJavaCallGraph2() {
         List<String> jarPathList = getJarPathList();
         if (JavaCGUtil.isCollectionEmpty(jarPathList)) {
-            logger.error("请在配置文件 {} 中指定需要处理的jar包，或保存class、jar文件的目录", OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
+            logger.error("请指定需要处理的jar包，或保存class、jar文件的目录");
             return false;
         }
 
