@@ -65,7 +65,10 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         if (allowedClassPrefixSet.isEmpty()) {
             logger.info("所有包中的class文件都需要处理");
         } else {
-            logger.info("仅处理以下包中的class文件\n{}", StringUtils.join(allowedClassPrefixSet, "\n"));
+            logger.info("仅处理以下包中的class文件:");
+            for (String prefix : allowedClassPrefixSet) {
+                logger.info(prefix);
+            }
         }
 
         // 是否使用H2数据库
