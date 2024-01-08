@@ -1,4 +1,4 @@
-package test.call_graph.branch.composite;
+package test.composite;
 
 import com.adrninistrator.jacg.find_stack.FindCallStackTrace;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;

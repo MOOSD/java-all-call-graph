@@ -23,7 +23,6 @@ repositories {
     mavenCentral()
 }
 
-// 指定编码模式
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
@@ -80,6 +79,7 @@ List jdom = ['org.jdom:jdom2:2.0.6.1']
 List spring_jdbc = ['org.springframework:spring-jdbc:5.3.26']
 
 List log4j = [
+        'org.apache.logging.log4j:log4j-api:2.20.0',
         'org.apache.logging.log4j:log4j-core:2.20.0',
         'org.apache.logging.log4j:log4j-slf4j-impl:2.20.0'
 ]

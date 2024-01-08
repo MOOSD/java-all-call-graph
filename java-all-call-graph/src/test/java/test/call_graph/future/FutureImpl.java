@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
  * @description:
  */
 
-public class FutureImpl implements Future<Object> {
+public class FutureImpl implements Future {
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
         return false;

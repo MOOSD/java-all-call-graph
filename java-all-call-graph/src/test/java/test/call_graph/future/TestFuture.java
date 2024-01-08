@@ -1,5 +1,6 @@
 package test.call_graph.future;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -22,7 +23,12 @@ public class TestFuture {
     }
 
     public void test3() throws ExecutionException, InterruptedException {
-        FutureTaskChild futureTaskChild = new FutureTaskChild(() -> System.getProperty(""));
+        FutureTaskChild futureTaskChild = new FutureTaskChild(new Callable() {
+            @Override
+            public Object call() throws Exception {
+                return System.getProperty("");
+            }
+        });
         futureTaskChild.get();
     }
 

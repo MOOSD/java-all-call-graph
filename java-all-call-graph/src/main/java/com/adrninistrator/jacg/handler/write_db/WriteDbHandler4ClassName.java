@@ -46,7 +46,7 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
         }
 
         String simpleClassName = JACGClassMethodUtil.getSimpleClassNameFromFull(line);
-        return new WriteDbData4ClassName(line, simpleClassName, JavaCGYesNoEnum.NO.getIntValue(),versionId);
+        return new WriteDbData4ClassName(line, simpleClassName, JavaCGYesNoEnum.NO.getIntValue());
     }
 
     @Override
@@ -54,7 +54,6 @@ public class WriteDbHandler4ClassName extends AbstractWriteDbHandler<WriteDbData
         return new Object[]{
                 IdGenerateUtil.genId(),
                 genNextRecordId(),
-                data.getVersionId(),
                 data.getClassName(),
                 data.getSimpleClassName(),
                 data.getDuplicateClass()

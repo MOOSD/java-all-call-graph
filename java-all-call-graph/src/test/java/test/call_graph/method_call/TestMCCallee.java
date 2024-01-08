@@ -11,7 +11,7 @@ public class TestMCCallee {
 
     public static final String TEST_STRING = "test_string";
 
-//    @Deprecated
+    @Deprecated
     public static void test1(String str1) {
     }
 

@@ -3,32 +3,16 @@
 <Configuration status="info" monitorInterval="5">
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss:SSS} %highlight{%-5level}{STYLE=Logback} [%10.15thread] %-35.35logger{39} - %msg%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %C{1}.%M(%L) - %m%n"/>
         </Console>
-
-        <RollingFile name="file" fileName="log/jacg.log" filePattern="log/jacg.log.%d{yyyy-MM-dd}.%i.log.gz">
-            <PatternLayout pattern="%d{HH:mm:ss:SSS} %highlight{%-5level}{STYLE=Logback} [%10.15thread] %-35.35logger{39} - %msg%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="1024 MB"/>
-            </Policies>
-            <DefaultRolloverStrategy max="512"/>
-        </RollingFile>
-
-        <Async name="async" bufferSize="512" includeLocation="true">
-            <AppenderRef ref="file"/>
-        </Async>
-
     </Appenders>
     <Loggers>
         <Root level="info">
             <AppenderRef ref="console"/>
-            <AppenderRef ref="async"/>
         </Root>
 
         <Logger name="com.adrninistrator" level="debug" additivity="false">
             <AppenderRef ref="console" />
-            <AppenderRef ref="async" />
         </Logger>
 
         <Logger name="com.adrninistrator.jacg.dboper.JdbcTemplateQuiet" level="info" additivity="false">

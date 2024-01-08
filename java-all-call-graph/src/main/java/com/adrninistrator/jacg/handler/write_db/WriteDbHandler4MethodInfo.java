@@ -110,8 +110,7 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
         for (int i = 0; i < argTypeList.size(); i++) {
             String argType = argTypeList.get(i);
             String simpleArgType = dbOperWrapper.getSimpleClassName(argType);
-            WriteDbData4MethodArgType writeDbData4MethodArgType = new WriteDbData4MethodArgType(methodHash, i,
-                    simpleArgType, argType, simpleClassName, fullMethod, versionId);
+            WriteDbData4MethodArgType writeDbData4MethodArgType = new WriteDbData4MethodArgType(methodHash, i, simpleArgType, argType, simpleClassName, fullMethod);
             writeDbData4MethodArgTypeList.add(writeDbData4MethodArgType);
             // 尝试写入方法的参数类型
             writeDbHandler4MethodArgType.tryInsertDb(writeDbData4MethodArgTypeList);

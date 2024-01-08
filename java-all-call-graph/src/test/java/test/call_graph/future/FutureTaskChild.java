@@ -9,9 +9,9 @@ import java.util.concurrent.FutureTask;
  * @description:
  */
 
-public class FutureTaskChild extends FutureTask<Object> {
+public class FutureTaskChild extends FutureTask {
 
-    public FutureTaskChild(Callable<Object> callable) {
+    public FutureTaskChild(Callable callable) {
         super(callable);
     }
 

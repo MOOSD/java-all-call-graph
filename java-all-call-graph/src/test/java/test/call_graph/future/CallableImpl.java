@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
  * @description:
  */
 
-public class CallableImpl implements Callable<Object> {
+public class CallableImpl implements Callable {
 
     @Override
     public Object call() throws Exception {
