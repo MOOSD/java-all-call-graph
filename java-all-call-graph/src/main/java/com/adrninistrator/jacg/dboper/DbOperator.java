@@ -1,6 +1,5 @@
 package com.adrninistrator.jacg.dboper;
 
-import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
@@ -208,7 +207,7 @@ public class DbOperator {
      * @return
      */
     private boolean checkTableExistsH2(String tableName) {
-        List<String> list = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
+        List<String> list = queryListOneColumn("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?",
                 String.class, JACGConstants.H2_SCHEMA, tableName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
@@ -224,7 +223,7 @@ public class DbOperator {
      * @return
      */
     private boolean checkTableExistsNonH2(String tableName) {
-        List<String> list = jdbcTemplate.queryForList("show tables like ?", String.class, tableName);
+        List<String> list = queryListOneColumn("show tables like ?", String.class, tableName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
             return false;
@@ -243,7 +242,7 @@ public class DbOperator {
         sql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
         logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
         try {
-            Integer update = jdbcTemplate.update(sql, appVersionId);
+            Integer update = update(sql, appVersionId);
             logger.debug("表[{}]清除数据条数:{},",tableName,update);
         }catch (Exception e){
             logger.error("清理表异常:",e);
@@ -326,7 +325,7 @@ public class DbOperator {
      */
     public Integer update(String sql, Object... arguments) {
         try {
-            return jdbcTemplate.update(addCommonCondition(sql), arguments);
+            return jdbcTemplate.update(sql, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] ", sql, e);
@@ -388,7 +387,7 @@ public class DbOperator {
      */
     public <T> List<T> queryListOneColumn(String sql, Class<T> type, Object... arguments) {
         try {
-            return jdbcTemplate.queryForList(addCommonCondition(sql), type, arguments);
+            return jdbcTemplate.queryForList(sql, type, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
@@ -410,7 +409,7 @@ public class DbOperator {
         try {
             BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
                     k -> new BeanPropertyRowMapper<>(type));
-            return jdbcTemplate.query(addCommonCondition(sql), (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
+            return jdbcTemplate.query(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
@@ -429,7 +428,7 @@ public class DbOperator {
      */
     public <T> T queryObjectOneColumn(String sql, Class<T> type, Object... arguments) {
         try {
-            return jdbcTemplate.queryForObject(addCommonCondition(sql), type, arguments);
+            return jdbcTemplate.queryForObject(sql, type, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
@@ -451,7 +450,7 @@ public class DbOperator {
         try {
             BeanPropertyRowMapper<?> beanPropertyRowMapper = beanPropertyRowMapperMap.computeIfAbsent(type.getName(),
                     k -> new BeanPropertyRowMapper<>(type));
-            return jdbcTemplate.queryForObject(addCommonCondition(sql), (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
+            return jdbcTemplate.queryForObject(sql, (BeanPropertyRowMapper<T>) beanPropertyRowMapper, arguments);
         } catch (Exception e) {
             if (!noticeDropTable(e, sql)) {
                 logger.error("error [{}] [{}] ", sql, StringUtils.join(arguments, " "), e);
@@ -482,46 +481,6 @@ public class DbOperator {
         return false;
     }
 
-    public String addCommonCondition(String sql){
-        String SQL_WHERE = "WHERE";
-        String SQL_FROM = "FROM";
-        String SQL_JOIN = "JOIN";
-        String strVersionId = "\""+appVersionId+"\"";
-        int whereIndex = -1;
-        int fromIndex = -1;
-        String[] sqlElements = StringUtils.splitByWholeSeparator(sql,null);
-        // 查找sql中第一次出现WHERE和FROM的下标位置
-        for (int i = 0, elementArrayLength = sqlElements.length; i < elementArrayLength; i++) {
-            String s = sqlElements[i].toUpperCase();
-            if(SQL_JOIN.equals(s)){
-                // 多表查询不处理,仅处理单表查询
-                return sql;
-            }
-            if (whereIndex == -1 && SQL_WHERE.equals(s)) {
-                whereIndex = i;
-            }
-            if(fromIndex == -1 && SQL_FROM.equals(s)){
-                fromIndex = i;
-            }
-            if(whereIndex != -1 && fromIndex != -1){
-                break;
-            }
-        }
-
-        if(whereIndex == -1){
-            if(fromIndex == -1){
-                // 无where无from的DML，抛出异常
-                throw new RuntimeException("请检查执行sql");
-            }
-            // 默认将where写在from子句后
-            sqlElements[fromIndex+1] = StringUtils.joinWith(" ",sqlElements[fromIndex+1],SQL_WHERE,
-                    DC.COMMON_VERSION_ID,"=",strVersionId);
-            return StringUtils.join(sqlElements," ");
-        }
-        sqlElements[whereIndex] = StringUtils.joinWith(" ",sqlElements[whereIndex],DC.COMMON_VERSION_ID,
-                "=",strVersionId,"AND");
-        return StringUtils.join(sqlElements," ");
-    }
     public String getAppName() {
         return appName;
     }

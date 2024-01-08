@@ -64,7 +64,7 @@ public class AnnotationHandler extends BaseHandler {
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
         // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
-        return dbOperator.queryListOneColumn(sql, String.class, new Object[]{annotationClassNames});
+        return dbOperator.queryListOneColumn(sql, String.class, annotationClassNames);
     }
 
     /**

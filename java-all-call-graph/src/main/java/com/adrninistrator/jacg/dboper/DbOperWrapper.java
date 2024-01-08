@@ -198,7 +198,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
         // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
-        return dbOperator.queryList(sql, WriteDbData4MethodAnnotation.class, new Object[]{annotationClassNames});
+        return dbOperator.queryList(sql, WriteDbData4MethodAnnotation.class, annotationClassNames);
     }
 
     /**
@@ -252,7 +252,7 @@ public class DbOperWrapper {
             sql = cacheSql(sqlKeyEnum, sql, annotationClassNames.length);
         }
         // IDEA的提示忽略 Confusing argument 'xxx', unclear if a varargs or non-varargs call is desired
-        return dbOperator.queryListOneColumn(sql, String.class, new Object[]{annotationClassNames});
+        return dbOperator.queryListOneColumn(sql, String.class, annotationClassNames);
     }
 
     /**
