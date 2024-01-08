@@ -235,9 +235,9 @@ public class DbOperator {
      * @return
      */
     public boolean truncateTable(String tableName) {
+        logger.info("[{}] 清理表数据: [{}]", objSeq, tableName.replace(JACGConstants.APP_NAME_IN_SQL,appName));
         String sql = "truncate table " + tableName;
         sql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
-        logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
         return executeDDLSql(sql);
     }
 
