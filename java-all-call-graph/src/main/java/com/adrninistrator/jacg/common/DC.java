@@ -7,8 +7,6 @@ package com.adrninistrator.jacg.common;
  */
 
 public class DC {
-    public static final String COMMON_ID = "id";
-    public static final String COMMON_VERSION_ID = "version_id";
     public static final String COMMON_CLASS_NAME = "class_name";
     public static final String COMMON_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String COMMON_METHOD_HASH = "method_hash";

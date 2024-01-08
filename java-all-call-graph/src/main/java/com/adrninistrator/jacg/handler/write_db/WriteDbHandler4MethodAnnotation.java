@@ -8,7 +8,6 @@ import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4FeignClientData;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodAnnotation;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringController;
-import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.jacg.util.spring.MappingType;
@@ -115,16 +114,13 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         writeDbData4MethodAnnotation.setSimpleClassName(simpleClassName);
         writeDbData4MethodAnnotation.setSpringMappingAnnotation(JavaCGYesNoEnum.parseIntValue(isSpringMappingAnnotation));
         writeDbData4MethodAnnotation.setIsFeignClient(JavaCGYesNoEnum.parseIntValue(isFeignClient));
-        writeDbData4MethodAnnotation.setVersionId(versionId);
         return writeDbData4MethodAnnotation;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MethodAnnotation data) {
         return new Object[]{
-                IdGenerateUtil.genId(),
                 genNextRecordId(),
-                data.getVersionId(),
                 data.getMethodHash(),
                 data.getAnnotationName(),
                 data.getAttributeName(),
@@ -224,7 +220,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                     writeDbData4SpringController.setSimpleClassName(simpleClassName);
                     writeDbData4SpringController.setFullMethod(fullMethod);
                     writeDbData4SpringController.setRequestMethod(requestMethod);
-                    writeDbData4SpringController.setVersionId(versionId);
                     controllerList.add(writeDbData4SpringController);
                     logger.debug("找到接口信息信息: {}", writeDbData4SpringController.getShowUri());
                     seq++;
@@ -318,7 +313,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 writeDbData4FeignClientData.setShowUri(SpringMvcRequestMappingUtil.genShowUri(classAttrPath, methodPath));
                 writeDbData4FeignClientData.setMethodHash(methodHash);
                 writeDbData4FeignClientData.setRequestMethod(requestMethod);
-                writeDbData4FeignClientData.setVersionId(versionId);
                 //新增记录添加到对应List
                 feignClientDataList.add(writeDbData4FeignClientData);
                 logger.debug("找到RPC接口信息信息: {}", writeDbData4FeignClientData.getShowUri());

@@ -82,7 +82,7 @@ public class TestRunnerWriteDb {
     }
 
     /**
-     * 增量更新数据库。（非全删全插）(暂无法执行)
+     * 增量更新数据库。（非全删全插）
      * 代码的修改意味着，新增，修改，删除 但是针对代码删除的情况无法同步删除记录的。
      */
     @Test
@@ -93,7 +93,7 @@ public class TestRunnerWriteDb {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
         // 增量更新配置为true
-        configureWrapper.setMainConfig(ConfigKeyEnum.INCREMENT_UPDATE,"false");
+        configureWrapper.setMainConfig(ConfigKeyEnum.INCREMENT_UPDATE,"true");
         //config_db.propertis
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");

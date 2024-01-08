@@ -25,17 +25,6 @@ public class WriteDbData4MethodCallInfo extends AbstractWriteDbData {
         this.theValue = theValue;
     }
 
-    public WriteDbData4MethodCallInfo(int callId, int objArgsSeq, int seq, String type, int arrayFlag, String theValue,
-                                      String versionId) {
-        super.versionId = versionId;
-        this.callId = callId;
-        this.objArgsSeq = objArgsSeq;
-        this.seq = seq;
-        this.type = type;
-        this.arrayFlag = arrayFlag;
-        this.theValue = theValue;
-    }
-
     public int getCallId() {
         return callId;
     }

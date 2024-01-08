@@ -90,7 +90,6 @@ public class WriteDbHandler4MethodCall extends AbstractWriteDbHandler<WriteDbDat
                 callerJarNum,
                 calleeJarNum
         );
-        writeDbData4MethodCall.setVersionId(versionId);
 
         if (writeDbData4MethodCall.getCallerMethodHash().equals(writeDbData4MethodCall.getCalleeMethodHash())) {
             // 对于递归调用，不写入数据库，防止查询时出现死循环

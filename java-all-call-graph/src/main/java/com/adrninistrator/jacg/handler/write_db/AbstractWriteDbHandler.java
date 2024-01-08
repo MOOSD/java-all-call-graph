@@ -85,9 +85,6 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
     // 是否增量更新数据库
     private boolean incrementUpdate;
 
-    // 数据版本号
-    protected String versionId;
-
     public AbstractWriteDbHandler() {
         JACGWriteDbHandler jacgWriteDbHandler = this.getClass().getAnnotation(JACGWriteDbHandler.class);
         if (jacgWriteDbHandler == null) {
@@ -413,14 +410,6 @@ public abstract class AbstractWriteDbHandler<T extends AbstractWriteDbData> {
      */
     protected int genNextRecordId() {
         return ++recordId;
-    }
-
-    public String getVersionId() {
-        return versionId;
-    }
-
-    public void setVersionId(String versionId) {
-        this.versionId = versionId;
     }
 
     //

@@ -19,13 +19,6 @@ public class WriteDbData4ClassInfo extends AbstractWriteDbData {
         this.className = className;
     }
 
-    public WriteDbData4ClassInfo(String simpleClassName, int accessFlags, String className,String versionId) {
-        this.versionId = versionId;
-        this.simpleClassName = simpleClassName;
-        this.accessFlags = accessFlags;
-        this.className = className;
-    }
-
     public String getSimpleClassName() {
         return simpleClassName;
     }

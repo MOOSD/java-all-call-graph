@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4ExtendsImpl;
-import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
@@ -58,16 +57,13 @@ public class WriteDbHandler4ExtendsImpl extends AbstractWriteDbHandler<WriteDbDa
         writeDbData4ExtendsImpl.setExistsDownwardClasses(existsDownwardClasses);
         writeDbData4ExtendsImpl.setUpwardSimpleClassName(dbOperWrapper.getSimpleClassName(upwardClassName));
         writeDbData4ExtendsImpl.setUpwardClassName(upwardClassName);
-        writeDbData4ExtendsImpl.setVersionId(versionId);
         return writeDbData4ExtendsImpl;
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4ExtendsImpl data) {
         return new Object[]{
-                IdGenerateUtil.genId(),
                 genNextRecordId(),
-                data.getVersionId(),
                 data.getSimpleClassName(),
                 data.getClassName(),
                 data.getAccessFlags(),

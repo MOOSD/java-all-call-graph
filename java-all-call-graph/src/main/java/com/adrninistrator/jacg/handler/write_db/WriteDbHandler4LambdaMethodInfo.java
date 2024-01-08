@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
-import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGStreamUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
@@ -51,7 +50,7 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
         writeDbData4LambdaMethodInfo.setLambdaNextIsStream(JACGStreamUtil.isStreamClass(lambdaNextClassName));
         writeDbData4LambdaMethodInfo.setLambdaNextIsIntermediate(JACGStreamUtil.isStreamIntermediateMethod(lambdaNextMethodName));
         writeDbData4LambdaMethodInfo.setLambdaNextIsTerminal(JACGStreamUtil.isStreamTerminalMethod(lambdaNextMethodName));
-        writeDbData4LambdaMethodInfo.setVersionId(versionId);
+
         return writeDbData4LambdaMethodInfo;
     }
 
@@ -73,9 +72,7 @@ public class WriteDbHandler4LambdaMethodInfo extends AbstractWriteDbHandler<Writ
         }
 
         return new Object[]{
-                IdGenerateUtil.genId(),
                 data.getCallId(),
-                data.getVersionId(),
                 data.getLambdaCalleeClassName(),
                 data.getLambdaCalleeMethodName(),
                 data.getLambdaCalleeFullMethod(),

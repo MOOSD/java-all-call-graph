@@ -1,13 +1,11 @@
 CREATE TABLE if not exists jar_info_{appName} (
-  id bigint NOT NULL COMMENT '主键',
   jar_num int NOT NULL COMMENT 'Jar包序号',
-  version_id varchar(50) NOT NULL DEFAULT 'snapshot'  COMMENT '版本号',
   jar_type varchar(5) NOT NULL COMMENT 'Jar包类型，J: jar包，D: 目录',
   jar_path_hash varchar(30) NOT NULL COMMENT 'Jar包路径HASH+字节数',
   jar_full_path text NOT NULL COMMENT 'Jar包完整路径',
   jar_file_name varchar(255) NOT NULL COMMENT 'Jar包文件名',
   last_modified varchar(15) NOT NULL COMMENT 'Jar包完整路径',
   jar_hash varchar(30) NOT NULL COMMENT 'Jar包文件HASH',
-  PRIMARY KEY (id),
-  UNIQUE INDEX uni_ji_jph_{appName}(version_id , jar_path_hash)
+  PRIMARY KEY (jar_num),
+  UNIQUE INDEX idx_ji_jph_{appName}(jar_path_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='jar包信息表';

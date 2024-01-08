@@ -19,13 +19,6 @@ public class WriteDbData4SpringBean extends AbstractWriteDbData {
         this.className = className;
     }
 
-    public WriteDbData4SpringBean(String springBeanName, int seq, String className, String versionId) {
-        super.versionId = versionId;
-        this.springBeanName = springBeanName;
-        this.seq = seq;
-        this.className = className;
-    }
-
     public String getSpringBeanName() {
         return springBeanName;
     }

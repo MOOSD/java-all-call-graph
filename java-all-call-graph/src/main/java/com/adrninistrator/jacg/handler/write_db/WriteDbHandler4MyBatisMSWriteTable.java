@@ -4,7 +4,6 @@ import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MyBatisMSWriteTable;
 import com.adrninistrator.jacg.extensions.code_parser.jar_entry_other_file.MyBatisMySqlWriteSqlInfoCodeParser;
-import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 
 import java.util.Set;
@@ -46,17 +45,14 @@ public class WriteDbHandler4MyBatisMSWriteTable extends AbstractWriteDbHandler<W
                 mapperMethodName,
                 sqlStatement,
                 tableName,
-                mapperClassName,
-                versionId
+                mapperClassName
         );
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4MyBatisMSWriteTable data) {
         return new Object[]{
-                IdGenerateUtil.genId(),
                 genNextRecordId(),
-                data.getVersionId(),
                 data.getMapperSimpleClassName(),
                 data.getMapperMethodName(),
                 data.getSqlStatement(),

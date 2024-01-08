@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4SpringBean;
-import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
 import java.util.Map;
@@ -41,15 +40,13 @@ public class WriteDbHandler4SpringBean extends AbstractWriteDbHandler<WriteDbDat
             return null;
         }
         springBeanMap.put(springBeanName, className);
-        return new WriteDbData4SpringBean(springBeanName, Integer.parseInt(seq), className, versionId);
+        return new WriteDbData4SpringBean(springBeanName, Integer.parseInt(seq), className);
     }
 
     @Override
     protected Object[] genObjectArray(WriteDbData4SpringBean data) {
         return new Object[]{
-                IdGenerateUtil.genId(),
                 genNextRecordId(),
-                data.getVersionId(),
                 data.getSpringBeanName(),
                 data.getSeq(),
                 data.getClassName()

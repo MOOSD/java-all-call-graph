@@ -3,7 +3,6 @@ package com.adrninistrator.jacg.handler.write_db;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4FeignClientData;
-import com.adrninistrator.jacg.util.IdGenerateUtil;
 
 /**
  * feignClient数据写入数据库
@@ -18,8 +17,6 @@ public class WriteDbHandler4FeignClient extends AbstractWriteDbHandler<WriteDbDa
     @Override
     protected Object[] genObjectArray(WriteDbData4FeignClientData data) {
         return new Object[]{
-                IdGenerateUtil.genId(),
-                data.getVersionId(),
                 data.getMethodHash(),
                 data.getSeq(),
                 data.getServiceName(),
