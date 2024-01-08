@@ -114,7 +114,7 @@ public abstract class AbstractRunner {
             this.configureWrapper = configureWrapper;
             if (handleDb()) {
                 // 初始化版本号
-                versionId = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID);
+                versionId = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION);
                 // 需要操作数据库时执行的操作
                 // 指定项目名
                 appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);

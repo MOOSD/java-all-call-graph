@@ -44,8 +44,6 @@ public class DbOperator {
 
     private final String appName;
 
-    private final String appVersionId;
-
     private final String objSeq;
 
     // 记录当前入口类的类名
@@ -85,7 +83,7 @@ public class DbOperator {
         dataSource.setTimeBetweenEvictionRunsMillis(120000L);
 
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
-        appVersionId = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID);
+
         appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
         logger.info("[{}] 创建数据库操作对象 {}", objSeq, entrySimpleClassName);

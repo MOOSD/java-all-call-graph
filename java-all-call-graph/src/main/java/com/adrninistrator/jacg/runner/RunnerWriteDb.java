@@ -122,7 +122,7 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
         }
 
         // 清理数据库表
-        if (!truncateTablesByVersion()) {
+        if (!truncateTables()) {
             return false;
         }
 
@@ -348,18 +348,6 @@ public class RunnerWriteDb extends RunnerWriteCallGraphFile {
                     .replace("COLLATE utf8mb4_bin", "");
         }
         return sql;
-    }
-
-    // 按照版本号清理数据库表
-    private boolean truncateTablesByVersion() {
-        logger.info("清理数据库表");
-        for (DbTableInfoEnum dbTableInfoEnum : DbTableInfoEnum.values()) {
-            if (DbTableInfoEnum.DTIE_ILLEGAL != dbTableInfoEnum &&
-                    !dbOperator.truncateTableByVersion(dbTableInfoEnum.getTableName())) {
-                return false;
-            }
-        }
-        return true;
     }
 
     // 清理数据库表
