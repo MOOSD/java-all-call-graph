@@ -83,6 +83,10 @@ public class JACGSqlUtil {
         return sql.replace(JACGConstants.APP_NAME_IN_SQL, appName);
     }
 
+    public static String getTableSuffix(String appName, String versionId){
+        return appName+"_"+versionId;
+    }
+
     private JACGSqlUtil() {
         throw new IllegalStateException("illegal");
     }

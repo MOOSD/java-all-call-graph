@@ -629,7 +629,7 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
     }
 
     private FeignAndControllerInfo getControllerInfoByFeignMethodHash(String feignMethodHash){
-        // todo 应该新增按照服务名过滤
+        // todo 应该新增按照服务名过滤 去重点测试！！！！
         SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_RPC2;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if(sql == null){
@@ -644,11 +644,10 @@ public class GenGraphCallerPRunner extends AbstractGenCallGraphPRunner {
                     " inner join " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName() + " as s " +
                     " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI + " COLLATE utf8mb4_general_ci" +
                     " and (s." + DC.SPC_REQUEST_METHOD +" = f."+ DC.FC_REQUEST_METHOD + " or s." + DC.SPC_REQUEST_METHOD + " is null)" +
-                    " and s." + DC.COMMON_VERSION_ID + " = f." + DC.COMMON_VERSION_ID +
-                    " where " + " f."+DC.COMMON_VERSION_ID+ " = ? AND " + " f." + DC.FC_METHOD_HASH + " = ?";
+                    " where " +  " f." + DC.FC_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<FeignAndControllerInfo> resultList = dbOperator.queryList(sql, FeignAndControllerInfo.class, versionId, feignMethodHash);
+        List<FeignAndControllerInfo> resultList = dbOperator.queryList(sql, FeignAndControllerInfo.class, feignMethodHash);
 
         logger.info("sql:"+sql +"入参:" + feignMethodHash);
         logger.info("根据feign查询对应controller的结果为:"+resultList);

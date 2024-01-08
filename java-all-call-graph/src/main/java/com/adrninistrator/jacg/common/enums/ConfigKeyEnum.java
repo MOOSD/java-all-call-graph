@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.common.enums.interfaces.MainConfigInterface;
  */
 public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_APP_NAME("app.name", "当前应用的调用关系写入数据库里的表名后缀", String.class),
+    APP_VERSION_SUFFIX("app.version.suffix", "当前项目的版本号id", String.class),
     CKE_CALL_GRAPH_OUTPUT_DETAIL("call.graph.output.detail", "生成调用链时的详细程度，1: 最详细，2: 中等，3: 最简单", String.class),
     CKE_THREAD_NUM("thread.num", "并发处理线程数量/数据源连接池数量", Integer.class),
     CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER("ignore.dup.callee.in.one.caller", "生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略", Boolean.class),

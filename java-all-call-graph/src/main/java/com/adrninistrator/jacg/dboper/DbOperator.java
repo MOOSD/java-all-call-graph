@@ -13,11 +13,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.Connection;
 import java.sql.SQLSyntaxErrorException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,7 +82,8 @@ public class DbOperator {
 
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
 
-        appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
+        appName = JACGSqlUtil.getTableSuffix(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME),
+                configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID));
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
         logger.info("[{}] 创建数据库操作对象 {}", objSeq, entrySimpleClassName);
 
@@ -224,62 +223,6 @@ public class DbOperator {
         List<String> list = queryListOneColumn("show tables like ?", String.class, tableName);
         if (JavaCGUtil.isCollectionEmpty(list)) {
             logger.error("数据库表创建失败 [{}]", tableName);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 清空数据库表中指定版本号的数据
-     *
-     * @param tableName
-     * @return
-     */
-    public boolean truncateTableByVersion(String tableName) {
-        String sql = "DELETE FROM "+tableName+" WHERE version_id = ?" ;
-        sql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
-        logger.info("[{}] truncate table sql: [{}]", objSeq, sql);
-        try {
-            Integer update = update(sql, appVersionId);
-            logger.debug("表[{}]清除数据条数:{},",tableName,update);
-        }catch (Exception e){
-            logger.error("清理表异常:",e);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * 使用主键索引删除数据，防止锁表的情况
-     */
-    public boolean truncateTableById(String tableName) {
-        // 查询要删除的主键信息
-        String selectSql = JACGSqlUtil.replaceAppNameInSql("SELECT id FROM " + tableName + " WHERE version_id = ? ", appName);
-        String showTableName = tableName.replace(JACGConstants.APP_NAME_IN_SQL,appName);
-        List<Long> idList = jdbcTemplate.queryForList(selectSql, Long.class, appVersionId);
-        if (idList.isEmpty()){
-            logger.info("表[{}],尚未查询到版本为[{}]的数据",showTableName,appVersionId);
-            return true;
-        }
-        logger.info("表[{}]预计清除数据条数:{},",showTableName,idList.size());
-        // 使用主键索引进行删除
-        String deleteSql = JACGSqlUtil.replaceAppNameInSql("DELETE FROM " + tableName + " WHERE id in ( :idList )", appName);
-        try {
-            int batchSize = 2000;
-            int count = 0;
-            for (int i = 0; i < idList.size(); i += batchSize) {
-                int endIndex = Math.min(i + batchSize, idList.size());
-                List<Long> batchData = idList.subList(i, endIndex);
-                HashMap<String, Object> paramMap = new HashMap<>();
-                paramMap.put("idList",batchData);
-                NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-                count += namedParameterJdbcTemplate.update(deleteSql, paramMap);
-            }
-
-            logger.info("表[{}]清除数据条数:{},",showTableName,count);
-        }catch (Exception e){
-            logger.error("清理表异常:",e);
             return false;
         }
         return true;

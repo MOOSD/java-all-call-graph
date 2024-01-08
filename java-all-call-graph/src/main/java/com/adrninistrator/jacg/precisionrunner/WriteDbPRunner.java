@@ -5,7 +5,6 @@ import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.extensions.manual_add_method_call.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodCallHandler;
 import com.adrninistrator.jacg.handler.write_db.*;
-import com.adrninistrator.jacg.util.IdGenerateUtil;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
@@ -272,7 +271,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         List<String> allowedClassPrefixList = new ArrayList<>(allowedClassPrefixSet);
         Collections.sort(allowedClassPrefixList);
         for (int i = 0; i < allowedClassPrefixList.size(); i++) {
-            if (!dbOperator.insert(sql, IdGenerateUtil.genId(), i, versionId, allowedClassPrefixList.get(i))) {
+            if (!dbOperator.insert(sql, i, allowedClassPrefixList.get(i))) {
                 return false;
             }
         }
@@ -363,7 +362,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         for (DbTableInfoEnum dbTableInfoEnum : DbTableInfoEnum.values()) {
             long beginTime = System.currentTimeMillis();
             if (DbTableInfoEnum.DTIE_ILLEGAL != dbTableInfoEnum &&
-                    !dbOperator.truncateTableById(dbTableInfoEnum.getTableName())) {
+                    !dbOperator.truncateTable(dbTableInfoEnum.getTableName())) {
                 return false;
             }
             logger.warn("清除数据库耗时:{}",System.currentTimeMillis() - beginTime);
@@ -387,7 +386,6 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     private void initWriteDbHandler(AbstractWriteDbHandler<?> writeDbHandler) {
         writeDbHandlerMap.put(writeDbHandler.getCurrentSimpleClassName(), writeDbHandler);
 
-        writeDbHandler.setVersionId(versionId);
         writeDbHandler.setDbOperWrapper(dbOperWrapper);
         writeDbHandler.setDbOperator(dbOperator);
         writeDbHandler.setBatchSize(dbInsertBatchSize);

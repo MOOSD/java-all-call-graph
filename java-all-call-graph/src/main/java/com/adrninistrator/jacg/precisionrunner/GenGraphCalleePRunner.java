@@ -646,11 +646,10 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                     " inner join " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableName() + " as f " +
                     " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI + " COLLATE utf8mb4_general_ci" +
                     " and ( s." + DC.SPC_REQUEST_METHOD +" = f."+ DC.FC_REQUEST_METHOD +" or s."+DC.SPC_REQUEST_METHOD +" is null)" +
-                    " and s." + DC.COMMON_VERSION_ID + " = f." + DC.COMMON_VERSION_ID +
-                    " where " + " s." + DC.COMMON_VERSION_ID + " = ? AND " + " s." + DC.SPC_METHOD_HASH + " = ?";
+                    " where " + " s." + DC.SPC_METHOD_HASH + " = ?";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
-        List<FeignAndControllerInfo> resultList = dbOperator.queryList(sql, FeignAndControllerInfo.class, versionId,controllerHash);
+        List<FeignAndControllerInfo> resultList = dbOperator.queryList(sql, FeignAndControllerInfo.class, controllerHash);
         //假设一个feignClient对应多个接口的情况不存在。
         logger.info("sql:"+sql +"入参:"+controllerHash);
         logger.info("根据controller查询对应feign结果:"+resultList);

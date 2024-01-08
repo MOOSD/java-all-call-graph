@@ -12,7 +12,7 @@ public class sqlTest {
                 " inner join " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableName() + " as f " +
                 " on " + "s." + DC.SPC_SHOW_URI+ " = f." + DC.FC_SHOW_URI +
                 " and ( s." + DC.SPC_REQUEST_METHOD +" = f."+ DC.FC_REQUEST_METHOD +" or s."+DC.SPC_REQUEST_METHOD +" is null)" +
-                " where " + " s."+DC.COMMON_VERSION_ID+ " = ? AND " + " s." + DC.SPC_METHOD_HASH + " = ?";
+                " where " + " s." + DC.SPC_METHOD_HASH + " = ?";
 
         System.out.println(sql);
     }
