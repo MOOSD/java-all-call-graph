@@ -185,13 +185,17 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
         if(calleeFullMethodList.isEmpty()){
             // 未查找到匹配的方法
-            logger.error("未查询到方法[{}:{}]的相关信息",calleeSimpleClassName,methodInfoInTask);
+            String errorMessage = "未查询到方法["+calleeSimpleClassName+":"+methodInfoInTask+"]的相关信息";
+            logger.error(errorMessage);
+            addErrorMessage(errorMessage);
             return false;
         }
 
         if (calleeFullMethodList.size() > 1) {
             // 查找到匹配的方法多于1个，返回处理失败
-            logger.error("方法 {} 匹配到了多于一个的方法，请指定更精确的方法信息\n{}", origTaskText, StringUtils.join(calleeFullMethodList, "\n"));
+            String errorMessage = "方法 "+origTaskText+" 匹配到了多于一个的方法，请指定更精确的方法信息\n匹配到的方法信息:"+StringUtils.join(calleeFullMethodList, "\n");
+            logger.error(errorMessage);
+            addErrorMessage(errorMessage);
             return false;
         }
 
@@ -247,7 +251,9 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
         // 判断配置文件中是否已指定忽略当前方法
         if (ignoreCurrentMethod(null, entryCalleeFullMethod)) {
+            String errorMessage = "配置文件中已指定忽略当前方法，不处理 " + entryCalleeFullMethod;
             logger.info("配置文件中已指定忽略当前方法，不处理 {}", entryCalleeFullMethod);
+            addWarningMessage(errorMessage);
             return true;
         }
         // 创建根节点，调用关系使用默认值
