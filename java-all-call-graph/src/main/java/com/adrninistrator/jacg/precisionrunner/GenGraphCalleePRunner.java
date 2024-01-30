@@ -1,9 +1,6 @@
 package com.adrninistrator.jacg.precisionrunner;
 
-import com.adrninistrator.jacg.api.CallInfo;
-import com.adrninistrator.jacg.api.CallTrees;
-import com.adrninistrator.jacg.api.CalleeNode;
-import com.adrninistrator.jacg.api.FeignAndControllerInfo;
+import com.adrninistrator.jacg.api.*;
 import com.adrninistrator.jacg.common.DC;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.*;
@@ -49,7 +46,12 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         return "向上调用树生成Runner";
     }
 
-    // 生成指定方法向上的调用链路
+
+    /**
+     * 生成指定方法向上的调用链路
+     * @param config
+     * @return
+     */
     public CallTrees<CalleeNode> getLink(ConfigureWrapper config){
         //运行方法，结果收集到指定对象中。
         run(config);
@@ -61,6 +63,17 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         return calleeTrees;
     }
 
+    public CallTrees<CalleeNode> getLink(ConfigureWrapper config, RunnerController runnerController){
+        this.runnerController = runnerController;
+        //运行方法，结果收集到指定对象中。
+        run(config);
+        //错误处理记录抛出
+        calleeTrees.setFailTaskList(failTaskList);
+        calleeTrees.setWarningMessages(warningMessages);
+        calleeTrees.setErrorMessages(errorMessages);
+
+        return calleeTrees;
+    }
 
     /**
      * 1.初始化
@@ -226,7 +239,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
      */
     private void handleOneCalleeMethod(SimpleMethodCallDTO methodCallDTO,
                                        String origTaskText) {
-
+        // 设置中断点
+        setBreakPoint();
         String fullMethod = methodCallDTO.getFullMethod();
         threadPoolExecutor.execute(() -> {
             try {

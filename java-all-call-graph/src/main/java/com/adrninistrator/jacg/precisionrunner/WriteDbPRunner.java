@@ -1,7 +1,9 @@
 package com.adrninistrator.jacg.precisionrunner;
 
+import com.adrninistrator.jacg.api.RunnerController;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.*;
+import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.extensions.manual_add_method_call.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodCallHandler;
 import com.adrninistrator.jacg.handler.write_db.*;
@@ -50,6 +52,12 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
 
     // 是否增量更新数据库
     private boolean incrementUpdate;
+
+    public boolean run(ConfigureWrapper configureWrapper, RunnerController runnerController) {
+        this.runnerController = runnerController;
+        run(configureWrapper);
+        return true;
+    }
 
     @Override
     public String setRunnerName(){
@@ -123,98 +131,98 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     // 执行实际处理
     private boolean operate() {
         // 创建数据库表
+        setBreakPoint();
         if (!createTables()) {
             return false;
         }
-
+        setBreakPoint();
         // 清理数据库表
         if (!truncateTablesByVersion()) {
             return false;
         }
-
+        setBreakPoint();
         // 添加用于人工添加方法调用关系的处理类
         if (!addManualAddMethodCallExtensions()) {
             return false;
         }
-
+        setBreakPoint();
         // 在数据库中写入允许处理的类名前缀
         if (!writeAllowedClassPrefix()) {
             return false;
         }
-
+        setBreakPoint();
         // 调用java-callgraph2生成jar包的方法调用关系
         if (!callJavaCallGraph2()) {
             return false;
         }
-
+        setBreakPoint();
         // 创建线程，参数指定为null，不调小实际创建的线程数
         createThreadPoolExecutor(null);
-
+        setBreakPoint();
         // 处理引用的类信息，需要首先处理
         if (!handleClassName()) {
             return false;
         }
-
+        setBreakPoint();
         // 处理jar包信息
         if (!handleJarInfo()) {
             return false;
         }
-
         Set<String> springControllerMethodHashSet = new HashSet<>();
         Set<String> withAnnotationMethodHashSet = new HashSet<>();
         // 处理注解信息
+        setBreakPoint();
         handleAnnotations(springControllerMethodHashSet, withAnnotationMethodHashSet);
-
+        setBreakPoint();
         Set<String> withGenericsTypeMethodHash = new HashSet<>();
         Set<Integer> withInfoCallIdSet = new HashSet<>();
         // 处理方法
         if (!handleMethod(withGenericsTypeMethodHash, withInfoCallIdSet)) {
             return false;
         }
-
+        setBreakPoint();
         // 处理类的信息
         if (!handleClassInfo()) {
             return false;
         }
-
+        setBreakPoint();
         // 处理继承与实现相关信息
         if (!handleExtendsImpl()) {
             return false;
         }
-
+        setBreakPoint();
         // 处理Lambda表达式方法信息
         if (!handleLambdaMethodInfo()) {
             return false;
         }
-
+        setBreakPoint();
         // 处理Spring Bean信息
         if (!handleSpringInfo()) {
             return false;
         }
-
         Set<String> myBatisMapperSet = new HashSet<>();
         Set<String> myBatisMapperMethodWriteSet = new HashSet<>();
+        setBreakPoint();
         // 处理MyBatis信息
         if (!handleMyBatisInfo(myBatisMapperSet, myBatisMapperMethodWriteSet)) {
             return false;
         }
-
+        setBreakPoint();
         // 类的签名中涉及继承与实现的信息1
         if (!handleClassSignatureEi1()) {
             return false;
         }
-
+        setBreakPoint();
         // 处理方法调用关系文件（需要在后面处理）
         if (!handleMethodCall(springControllerMethodHashSet, withAnnotationMethodHashSet, withInfoCallIdSet, withGenericsTypeMethodHash, myBatisMapperSet,
                 myBatisMapperMethodWriteSet)) {
             return false;
         }
-
+        setBreakPoint();
         // 人工添加方法调用关系（需要在方法调用关系文件处理完毕后执行）
         if (!manualAddMethodCall()) {
             return false;
         }
-
         // 检查执行结果
         if (!checkResult()) {
             return false;

@@ -1,5 +1,6 @@
 package com.adrninistrator.jacg.runner.base;
 
+import com.adrninistrator.jacg.api.RunnerController;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.ConfigDbKeyEnum;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
@@ -7,6 +8,7 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
+import com.adrninistrator.jacg.exception.RunnerBreakException;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -23,6 +25,7 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +41,8 @@ public abstract class AbstractRunner {
     // 是否有检查过数据库文件是否可写
     protected static boolean CHECK_H2_DB_FILE_WRITEABLE = false;
 
+    // 流程控制器
+    protected RunnerController runnerController;
     // 配置信息包装类
     protected ConfigureWrapper configureWrapper;
 
@@ -174,6 +179,10 @@ public abstract class AbstractRunner {
             logger.info("{} 执行完毕，耗时: {} S", currentSimpleClassName, spendTime / 1000.0D);
             return true;
         } catch (Exception e) {
+            if(e instanceof RunnerBreakException){
+                logger.warn("runner执行中断");
+                return false;
+            }
             logger.error("error {} ", currentSimpleClassName, e);
             return false;
         } finally {
@@ -332,5 +341,15 @@ public abstract class AbstractRunner {
      */
     public List<String> getFailTaskList() {
         return failTaskList;
+    }
+
+    /**
+     * 流程中设置中断点
+     */
+    protected void setBreakPoint(){
+        if (Objects.isNull(this.runnerController)) {
+            return;
+        }
+        this.runnerController.setBreakPoint();
     }
 }
