@@ -3,6 +3,7 @@ package com.adrninistrator.jacg.precisionrunner.base;
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.exception.RunnerBreakException;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -55,7 +56,7 @@ public abstract class AbstractPRunner extends AbstractRunner {
      * @return
      */
     @Override
-    public boolean run(ConfigureWrapper configureWrapper) {
+    public boolean run(ConfigureWrapper configureWrapper) throws RunnerBreakException {
         // 记录入口简单类名
         configureWrapper.addEntryClass(currentSimpleClassName);
 
@@ -91,6 +92,11 @@ public abstract class AbstractPRunner extends AbstractRunner {
             logger.info("{} 执行完毕，耗时: {} S", currentSimpleClassName, spendTime / 1000.0D);
             return true;
         } catch (Exception e) {
+            // 如果为中断异常，则输出日志后正常返回
+            if(e instanceof RunnerBreakException){
+                logger.warn("runner执行中断");
+                throw e;
+            }
             // 异常直接抛出
             throw new RuntimeException(currentSimpleClassName+ "执行异常",e);
         } finally {

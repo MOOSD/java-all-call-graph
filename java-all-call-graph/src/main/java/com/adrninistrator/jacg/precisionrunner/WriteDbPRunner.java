@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.api.RunnerController;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.exception.RunnerBreakException;
 import com.adrninistrator.jacg.extensions.manual_add_method_call.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodCallHandler;
 import com.adrninistrator.jacg.handler.write_db.*;
@@ -53,7 +54,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     // 是否增量更新数据库
     private boolean incrementUpdate;
 
-    public boolean run(ConfigureWrapper configureWrapper, RunnerController runnerController) {
+    public boolean run(ConfigureWrapper configureWrapper, RunnerController runnerController) throws RunnerBreakException {
         this.runnerController = runnerController;
         run(configureWrapper);
         return true;

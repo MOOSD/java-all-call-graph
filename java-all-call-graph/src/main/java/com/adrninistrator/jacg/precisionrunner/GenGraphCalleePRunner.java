@@ -13,6 +13,7 @@ import com.adrninistrator.jacg.dto.method.MethodFullInfo;
 import com.adrninistrator.jacg.dto.method.SimpleMethodCallDTO;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
+import com.adrninistrator.jacg.exception.RunnerBreakException;
 import com.adrninistrator.jacg.precisionrunner.base.AbstractGenCallGraphPRunner;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.util.*;
@@ -52,7 +53,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
      * @param config
      * @return
      */
-    public CallTrees<CalleeNode> getLink(ConfigureWrapper config){
+    public CallTrees<CalleeNode> getLink(ConfigureWrapper config) throws RunnerBreakException{
         //运行方法，结果收集到指定对象中。
         run(config);
         //错误处理记录抛出
@@ -63,7 +64,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         return calleeTrees;
     }
 
-    public CallTrees<CalleeNode> getLink(ConfigureWrapper config, RunnerController runnerController){
+    public CallTrees<CalleeNode> getLink(ConfigureWrapper config, RunnerController runnerController) throws RunnerBreakException {
         this.runnerController = runnerController;
         //运行方法，结果收集到指定对象中。
         run(config);

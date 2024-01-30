@@ -8,7 +8,6 @@ import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.dboper.DbOperator;
-import com.adrninistrator.jacg.exception.RunnerBreakException;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.thread.ThreadFactory4TPE;
 import com.adrninistrator.jacg.util.JACGFileUtil;
@@ -179,10 +178,6 @@ public abstract class AbstractRunner {
             logger.info("{} 执行完毕，耗时: {} S", currentSimpleClassName, spendTime / 1000.0D);
             return true;
         } catch (Exception e) {
-            if(e instanceof RunnerBreakException){
-                logger.warn("runner执行中断");
-                return false;
-            }
             logger.error("error {} ", currentSimpleClassName, e);
             return false;
         } finally {

@@ -28,7 +28,7 @@ public class RunnerController {
      */
     public void setBreakPoint() {
         if(isBreak){
-            throw new RunnerBreakException();
+            throw new RunnerBreakException("runner执行中断");
         }
     }
 
