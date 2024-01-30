@@ -106,7 +106,7 @@ public class WriteDbPRunnerNewTest {
         // 10秒后任务取消
         Thread.sleep(10 * 1000);
         System.out.println("任务取消");
-        runnerController.setBreak(true);
+        runnerController.stop();
         Boolean b = booleanFutureTask.get();
         System.out.println("执行结束"+b);
 

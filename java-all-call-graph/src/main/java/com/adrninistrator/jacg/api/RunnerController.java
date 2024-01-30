@@ -8,15 +8,30 @@ import com.adrninistrator.jacg.exception.RunnerBreakException;
 
 public class RunnerController {
     private transient boolean isBreak;
+
+
+    /**
+     * 停止runner
+     * @return 是否停止成功
+     */
+    public boolean stop(){
+        // 已经中断则无法继续中断
+        if(isBreak){
+            return false;
+        }
+        this.isBreak = true;
+        return true;
+    }
+
+    /**
+     * 设置中断点
+     */
     public void setBreakPoint() {
         if(isBreak){
             throw new RunnerBreakException();
         }
     }
 
-    public void setBreak(boolean aBreak) {
-        isBreak = aBreak;
-    }
 
 
 }
