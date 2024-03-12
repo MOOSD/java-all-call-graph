@@ -98,7 +98,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
 
         // 记录有注解的方法HASH+长度
         withAnnotationMethodHashSet.add(methodHash);
-
         // 处理Spring Controller相关注解
         boolean isSpringMappingAnnotation = handleSpringControllerAnnotation(methodHash, fullMethod, simpleClassName, annotationName, attributeName, attributeValue);
         // 处理FeignClient相关注解
@@ -204,7 +203,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 methodPathList = Collections.singletonList("");
             }
 
-            int seq = 0;
             List<WriteDbData4SpringController> controllerList = new ArrayList<>();
             for (String classRequestMappingPath : classRequestMappingPathList) {
                 for (String methodPath : methodPathList) {
@@ -212,7 +210,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
 
                     WriteDbData4SpringController writeDbData4SpringController = new WriteDbData4SpringController();
                     writeDbData4SpringController.setMethodHash(methodHash);
-                    writeDbData4SpringController.setSeq(seq);
                     writeDbData4SpringController.setShowUri(showUri);
                     writeDbData4SpringController.setClassPath(classRequestMappingPath);
                     writeDbData4SpringController.setMethodPath(methodPath);
@@ -222,7 +219,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                     writeDbData4SpringController.setRequestMethod(requestMethod);
                     controllerList.add(writeDbData4SpringController);
                     logger.debug("找到接口信息信息: {}", writeDbData4SpringController.getShowUri());
-                    seq++;
                 }
             }
             //如果请求方法是空，则表示此纪录并不完整,暂存
@@ -294,8 +290,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 methodPathList = AnnotationAttributesParseUtil.parseListStringAttribute(attributeValue);
             }
 
-            //可能会有一个接口多个路径的情况
-            int seq = 0;
             List<WriteDbData4FeignClientData> feignClientDataList = new ArrayList<>();
             for (String methodPath : methodPathList) {
                 //实例化DO
@@ -304,7 +298,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 writeDbData4FeignClientData.setServiceName(classAttrName);
                 writeDbData4FeignClientData.setClassPath(classAttrPath);
 
-                writeDbData4FeignClientData.setSeq(seq);
                 writeDbData4FeignClientData.setClassName(className); //todo:className目测多余，simpleClassName已经是唯一的了
                 writeDbData4FeignClientData.setAnnotationName(annotationName);
                 writeDbData4FeignClientData.setSimpleClassName(simpleClassName);
@@ -316,7 +309,6 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
                 //新增记录添加到对应List
                 feignClientDataList.add(writeDbData4FeignClientData);
                 logger.debug("找到RPC接口信息信息: {}", writeDbData4FeignClientData.getShowUri());
-                seq++;
             }
             //如果请求方法是空，则表示此纪录并不完整,暂存
             if(Objects.isNull(requestMethod)){

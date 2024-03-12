@@ -834,6 +834,7 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
         WriteDbData4MethodLineNumber methodAndHash = dbOperator.queryObject(sql, WriteDbData4MethodLineNumber.class, simpleClassName, methodLineNum, methodLineNum);
         if (methodAndHash == null) {
             String warnMessage = "指定类的代码行号未查找到方法"+simpleClassName + ":" + methodLineNum+"，可能原因如下\n" +
+                    "1. 请确定此类是项目中唯一的类\n" +
                     "2. 指定的方法是接口中未实现的方法\n" +
                     "3. 指定的方法是抽象方法\n";
             logger.warn(warnMessage);
