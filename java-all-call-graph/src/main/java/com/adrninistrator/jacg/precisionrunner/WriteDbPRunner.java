@@ -243,7 +243,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     private boolean addManualAddMethodCallExtensions() {
         List<String> manualAddMethodCallClassList = configureWrapper.getOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1, true);
         if (JavaCGUtil.isCollectionEmpty(manualAddMethodCallClassList)) {
-            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1.getKey());
+//            logger.info("未指定用于人工添加方法调用关系的处理类，跳过 {}", OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_MANUAL_ADD_METHOD_CALL1.getKey());
             manualAddMethodCall1List = Collections.emptyList();
             return true;
         }

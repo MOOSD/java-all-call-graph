@@ -171,16 +171,18 @@ public class DbOperator {
      * @return
      */
     public boolean createTable(String sql) {
-        if (!executeDDLSql(sql)) {
-            return false;
-        }
-
+        // 获取表名
         String tableName = StringUtils.substringBetween(sql, JACGConstants.SQL_CREATE_TABLE_HEAD, JavaCGConstants.FLAG_LEFT_BRACKET);
         if (StringUtils.isBlank(tableName)) {
             logger.error("建表SQL语句中未找到表名 {}", sql);
             return false;
         }
         tableName = tableName.trim();
+
+        if (!executeDDLSql(sql)) {
+            logger.warn("数据库表创建失败[{}]",tableName);
+            return false;
+        }
 
         // 检查数据库表是否创建成功，可能出现上述建表语句执行失败但未抛出异常的情况
         if (useH2Db) {
@@ -189,11 +191,12 @@ public class DbOperator {
             }
         } else {
             if (!checkTableExistsNonH2(tableName)) {
+                logger.warn("数据库表创建失败[{}]",tableName);
                 return false;
             }
         }
 
-        logger.info("[{}] 数据库表创建成功 [{}]", objSeq, tableName);
+//        logger.info("[{}] 数据库表创建成功 [{}]", objSeq, tableName);
         return true;
     }
 
