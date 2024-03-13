@@ -10,7 +10,7 @@ import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
-import com.adrninistrator.jacg.handler.dto.method_arg_generics_type.MethodArgGenericsTypeInfo;
+import com.adrninistrator.jacg.handler.dto.generics_type.MethodArgGenericsTypeInfo;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -256,8 +256,8 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
     protected boolean addMethodArgGenericsTypeInfo(int callFlags, String methodHash, MethodNode node) {
         // 如果是未知的方法标识，则直接查询。
         if(!(UNKNOWN_CALL_FLAGS == callFlags ||
-                (order4ee && MethodCallFlagsEnum.MCFE_ER_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
-                (!order4ee && MethodCallFlagsEnum.MCFE_EE_WITH_GENERICS_TYPE.checkFlag(callFlags))
+                (order4ee && MethodCallFlagsEnum.MCFE_ER_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags)) ||
+                (!order4ee && MethodCallFlagsEnum.MCFE_EE_ARGS_WITH_GENERICS_TYPE.checkFlag(callFlags))
             )
         ){
             /*
@@ -275,7 +275,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
         // 遍历所有的方法泛型信息
         List<MethodArgument> methodArguments = node.getMethodFormalArguments();
         // 为节点添加方法泛型信息
-        methodArgGenericsTypeInfo.forEach((argSeq,genInfo)-> methodArguments.get(argSeq).setGenericsInfo(genInfo.getArgGenericsTypeList()));
+        methodArgGenericsTypeInfo.forEach((argSeq,genInfo)-> methodArguments.get(argSeq).setGenericsInfo(genInfo.getGenericsTypeList()));
         return true;
     }
 
