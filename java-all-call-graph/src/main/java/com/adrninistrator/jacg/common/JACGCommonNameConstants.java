@@ -19,6 +19,11 @@ public class JACGCommonNameConstants {
     public static final String SPRING_MVC_POST_MAPPING = "org.springframework.web.bind.annotation.PostMapping";
     public static final String SPRING_MVC_PUT_MAPPING = "org.springframework.web.bind.annotation.PutMapping";
 
+    public static final String[] SPRING_MVC_CONTROLLER_ANNOTATIONS = new String[]{
+            "org.springframework.stereotype.Controller",
+            "org.springframework.web.bind.annotation.RestController"
+    };
+
     public static final String[] SPRING_MVC_MAPPING_ANNOTATIONS = new String[]{
             SPRING_MVC_REQUEST_MAPPING,
             SPRING_MVC_DELETE_MAPPING,

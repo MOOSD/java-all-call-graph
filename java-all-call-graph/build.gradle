@@ -6,7 +6,7 @@ apply from: 'unittest.gradle'
 apply from: 'publish-private.gradle'
 
 group 'com.github.adrninistrator'
-version = "1.0.12"
+version = "1.0.15"
 def projectName = "java-all-call-graph"
 description = "${projectName}"
 sourceCompatibility = 1.8
