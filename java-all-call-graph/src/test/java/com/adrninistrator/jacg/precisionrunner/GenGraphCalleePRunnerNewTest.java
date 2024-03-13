@@ -206,4 +206,46 @@ public class GenGraphCalleePRunnerNewTest {
         System.out.println(JACGJsonUtil.getJsonStr(tree));
 
     }
+
+
+    /**
+     * 灭霸项目测试类2
+     */
+    @Test
+    public void getAllGraph4CalleeForBK2(){
+        GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
+        RunConfig runConfig = new RunConfig();
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"hawkeye");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
+        runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
+        //config_db.properties
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/precision_dev?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+        //allow_class_prefix.properties
+//        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
+
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                "cn.newgrand.ck.service.impl.GetDiffTest:52",
+                "cn.newgrand.ck.service.impl.GitInfoServiceImpl:416",
+                "cn.newgrand.ck.util.JGitUtil:662",
+                "cn.newgrand.ck.service.impl.GitInfoServiceImpl:386",
+                "cn.newgrand.ck.service.impl.GitInfoServiceImpl:176"
+        );
+
+
+
+        runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+                "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
+
+
+        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+
+        System.out.println(JACGJsonUtil.getJsonStr(tree));
+
+    }
 }
