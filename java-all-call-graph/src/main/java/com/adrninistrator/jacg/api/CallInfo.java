@@ -45,6 +45,7 @@ public class CallInfo {
     //是否是rpc调用
     private boolean isRpc;
     // dao层操作信息
+    private boolean unreliableInvocation;
     private DaoOperateInfo daoOperateInfo;
 
     /**
@@ -148,5 +149,13 @@ public class CallInfo {
 
     public void setDaoOperateInfo(DaoOperateInfo daoOperateInfo) {
         this.daoOperateInfo = daoOperateInfo;
+    }
+
+    public boolean isUnreliableInvocation() {
+        return unreliableInvocation;
+    }
+
+    public void setUnreliableInvocation(boolean unreliableInvocation) {
+        this.unreliableInvocation = unreliableInvocation;
     }
 }

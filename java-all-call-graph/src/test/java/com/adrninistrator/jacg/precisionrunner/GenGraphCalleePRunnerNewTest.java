@@ -8,6 +8,8 @@ import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JSON;
 import org.junit.Test;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class GenGraphCalleePRunnerNewTest {
@@ -212,14 +214,14 @@ public class GenGraphCalleePRunnerNewTest {
      * 灭霸项目测试类2
      */
     @Test
-    public void getAllGraph4CalleeForBK2(){
+    public void getAllGraph4CalleeForBK2() throws IOException {
         GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"bugkiller");
         runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"1");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
-        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"50");
+        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"500000");
         //config_db.properties
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
@@ -241,8 +243,12 @@ public class GenGraphCalleePRunnerNewTest {
 
 
         CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        String jsonStr = JACGJsonUtil.getJsonStr(tree);
+        FileWriter file = new FileWriter("C:\\Users\\77064\\Desktop\\calleeTreeJson");
+        BufferedWriter bufferedWriter = new BufferedWriter(file);
+        bufferedWriter.write(jsonStr);
+        bufferedWriter.close();
 
-        System.out.println(JACGJsonUtil.getJsonStr(tree));
 
     }
 }

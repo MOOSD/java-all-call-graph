@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD_OVERRIDE;
+
 /**
  * 生成java对象的向上调用链的runner
  */
@@ -457,11 +459,14 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         // 检查是否为远程过程调用
         CallInfo callInfo = caller.getCallInfo();
         callInfo.setCallId(methodCallId);
-        callInfo.setCallType(callType);
         callInfo.setRpc(ExtendCallTypeEnum.RPC.getType().equals(callType));
         callInfo.setCallFlags(callFlags);
         callInfo.setCallerRow(callerLineNum);
         callInfo.setCallerClassName(callerSimpleClassName);
+        callInfo.setCallType(callType);
+        if ((Objects.nonNull(callee) && callee.getCallInfo().isUnreliableInvocation()) || CTE_SUPER_CALL_CHILD_OVERRIDE.getType().equals(callType)) {
+            callInfo.setUnreliableInvocation(true);
+        }
         // 调用方更新调用列表
         caller.setCaller(callee);
         caller.setClassName(callerSimpleClassName);
