@@ -97,9 +97,6 @@ public abstract class MethodNode {
             // 出队
             MethodNode node = taskQueue.poll();
             consumer.accept(node);
-            if (node.getCallInfo().getCycleCall() != -1) {
-                return;
-            }
             // 将其子节点添加到队列
             if (Objects.nonNull(node.getChildren()) && !node.getChildren().isEmpty()){
                 taskQueue.addAll(node.getChildren());
@@ -267,6 +264,10 @@ public abstract class MethodNode {
 
     public MethodNode getBefore() {
         return before;
+    }
+
+    public void setBefore(MethodNode before) {
+        this.before = before;
     }
 
     public List<String> getGenMessage() {
