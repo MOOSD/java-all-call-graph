@@ -58,12 +58,27 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
     public CallTrees<CalleeNode> getLink(ConfigureWrapper config) throws RunnerBreakException{
         //运行方法，结果收集到指定对象中。
         run(config);
-        //错误处理记录抛出
+        // 错误处理记录抛出
+        // 压缩树
+//        vCompressTrees();
         calleeTrees.setFailTaskList(failTaskList);
         calleeTrees.setWarningMessages(warningMessages);
         calleeTrees.setErrorMessages(errorMessages);
 
         return calleeTrees;
+    }
+
+    private void hCompressTrees() {
+        for (CalleeNode tree : calleeTrees.getTrees()) {
+            hCompressTree(tree);
+        }
+    }
+
+
+    private void vCompressTrees() {
+        for (CalleeNode tree : calleeTrees.getTrees()) {
+            vCompressTree(tree);
+        }
     }
 
     public CallTrees<CalleeNode> getLink(ConfigureWrapper config, RunnerController runnerController) throws RunnerBreakException {
@@ -395,6 +410,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             callGraphNode4CalleeStack.push(nextCallGraphNode4Callee);
             methodNode = callee;
         }
+
     }
 
 

@@ -19,6 +19,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +48,92 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
     // 保存执行过程中的错误以及警告信息。
     protected List<String> warningMessages = new ArrayList<>();
     protected List<String> errorMessages = new ArrayList<>();
+
+    /**
+     * 横向压缩 and 纵向压缩
+     * @param root 树的根节点
+     */
+    protected void hCompressTree(MethodNode root) {
+        MethodNode fristNode = null;
+        Stack<MethodNode> methodNodeStack = new Stack<>();
+        methodNodeStack.push(root);
+        while(!methodNodeStack.isEmpty()){
+            // 出栈
+            MethodNode methodNode = methodNodeStack.pop();
+            // 当前节点非叶子节点
+            if (Objects.nonNull(methodNode.getChildren())) {
+                // 无额外子节点
+                if(methodNode.getChildren().size() == 1){
+                    // 记录此节点
+                    if (Objects.isNull(fristNode)) {
+                        fristNode = methodNode;
+                    }
+                    methodNodeStack.push(methodNode.getChildren().get(0));
+                // 子节点只有一个
+                }else {
+                    // 当前非叶子节点，且有多个子节点
+                    if(fristNode!= null){
+                        fristNode.getChildren().set(0,methodNode);
+                        methodNode.setBefore(fristNode);
+                        fristNode = null;
+                    }
+                    // 有分支节点
+                    for (int i = 0; i < methodNode.getChildren().size(); i++) {
+                        methodNodeStack.push(methodNode.getChildren().get(i));
+                    }
+                }
+            }
+            // 当前节点是叶子节点
+            if(Objects.isNull(methodNode.getChildren())){
+                if(fristNode!= null){
+                    fristNode.getChildren().set(0,methodNode);
+                    methodNode.setBefore(fristNode);
+                    fristNode = null;
+                }
+            }
+        }
+
+    }
+    /**
+     * 纵向压缩树
+     * @param root 树的根节点
+     */
+    protected void vCompressTree(MethodNode root) {
+        // 声明需要移出的子树。
+        ArrayList<MethodNode> removeSubTree = new ArrayList<MethodNode>();
+
+
+    }
+
+    /**
+     * 判断此树是否完全不包含Controller节点，
+     * @param root
+     * @return 所有不含有Controller子树的集合
+     */
+    private List<MethodNode> hasController(MethodNode root){
+        ArrayList<MethodNode> removeMethod = new ArrayList<MethodNode>();
+        List<MethodNode> childrenNodes = root.getChildren();
+        if (Objects.nonNull(childrenNodes)) {
+            for (MethodNode childrenNode : childrenNodes) {
+                List<MethodNode> targetSubTrees = hasController(childrenNode);
+                // 如果所有子树都不含Controller
+                if(targetSubTrees.size() == childrenNodes.size()){
+
+                }
+
+            }
+        }else {
+            // 如果当前节点是一个controller节点
+            if(!CollectionUtils.isEmpty(root.getControllerInfo())){
+                ArrayList<MethodNode> singleMethodNodes = new ArrayList<>(1);
+                singleMethodNodes.add(root);
+                return singleMethodNodes;
+            }
+        }
+
+        return null;
+    }
+
 
 
     protected String getIdNum(){

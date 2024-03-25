@@ -11,6 +11,7 @@ import org.junit.Test;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GenGraphCalleePRunnerNewTest {
 
@@ -242,8 +243,17 @@ public class GenGraphCalleePRunnerNewTest {
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
 
-        CallTrees tree = runnerGenAllGraph4Callee.getLink(runConfig);
+        CallTrees<CalleeNode> tree = runnerGenAllGraph4Callee.getLink(runConfig);
+
         String jsonStr = JACGJsonUtil.getJsonStr(tree);
+
+        // 输出节点数量
+        CalleeNode calleeNode = tree.getTrees().get(0);
+        AtomicInteger num = new AtomicInteger();
+        calleeNode.forEach(methodNode -> num.getAndIncrement());
+        System.out.println("节点总数:"+num.get());
+
+
         FileWriter file = new FileWriter("C:\\Users\\77064\\Desktop\\calleeTreeJson");
         BufferedWriter bufferedWriter = new BufferedWriter(file);
         bufferedWriter.write(jsonStr);
