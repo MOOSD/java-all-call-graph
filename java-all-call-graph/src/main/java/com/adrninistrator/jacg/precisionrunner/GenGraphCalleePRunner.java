@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD_OVERRIDE;
+import static com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum.*;
 
 /**
  * 生成java对象的向上调用链的runner
@@ -322,7 +322,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.peek();
 
             // 查询当前节点的一个上层调用方法
-            WriteDbData4MethodCall callerMethod = queryOneByCalleeMethod(callGraphNode4Callee);
+            WriteDbData4MethodCall callerMethod = queryOneByCalleeMethod(callGraphNode4Callee,methodNode.getCallInfo().getCallType());
             String serviceName = null;
             if (Objects.isNull(callerMethod)) {
                 //如果开启跨微服务生成,且当前为方法是一个controller
@@ -480,7 +480,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         callInfo.setCallerRow(callerLineNum);
         callInfo.setCallerClassName(callerSimpleClassName);
         callInfo.setCallType(callType);
-        if ((Objects.nonNull(callee) && callee.getCallInfo().isUnreliableInvocation()) || CTE_SUPER_CALL_CHILD_OVERRIDE.getType().equals(callType)) {
+        if ((Objects.nonNull(callee) && callee.getCallInfo().isUnreliableInvocation()) || CTE_SUPER_CALL_CHILD_OVERRIDE.getType().equals(callType)
+        || CTE_SUPER_CALL_CHILD_INTERFACE_OVERRIDE.getType().equals(callType)) {
             callInfo.setUnreliableInvocation(true);
         }
         // 调用方更新调用列表
@@ -640,16 +641,22 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
 
     // 查询当前节点的一个上层调用方法
-    private WriteDbData4MethodCall queryOneByCalleeMethod(CallGraphNode4Callee callGraphNode4Callee) {
+    private WriteDbData4MethodCall queryOneByCalleeMethod(CallGraphNode4Callee callGraphNode4Callee,String callType) {
+        // 计算排除的方法
+        String excludeCallType = excludeCallType(callType);
         // 确定通过调用方法进行查询使用的SQL语句
-        String sql = chooseQueryByCalleeMethodSql(callGraphNode4Callee.getCallerMethodHash());
-
-        if (callGraphNode4Callee.getCallerMethodHash() == null) {
-            // 第一次查询
-            return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, callGraphNode4Callee.getCalleeMethodHash());
-        }
+        String sql = chooseQueryByCalleeMethodSql(callGraphNode4Callee.getCallerMethodHash(), excludeCallType);
+        ArrayList<Object> arguments = new ArrayList<>();
+        arguments.add(callGraphNode4Callee.getCalleeMethodHash());
         // 不是第一次查询
-        return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, callGraphNode4Callee.getCalleeMethodHash(), callGraphNode4Callee.getCallerMethodHash());
+        if (callGraphNode4Callee.getCallerMethodHash() != null) {
+            arguments.add( callGraphNode4Callee.getCallerMethodHash());
+        }
+        // 有排除的调用类型
+        if(excludeCallType != null){
+            arguments.add(excludeCallType);
+        }
+        return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, arguments.toArray());
     }
 
 
@@ -830,17 +837,34 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
     }
 
 
-    // 确定通过调用方法进行查询使用的SQL语句
-    protected String chooseQueryByCalleeMethodSql(String callerMethodHash) {
+    // 确定通过调用方法进行查询使用的SQL语句,查询结果和调用者的调用类型有关
+    protected String chooseQueryByCalleeMethodSql(String callerMethodHash,String excludeCallType) {
+        // 根据被调用方法的调用类型，过滤掉一部分调用关系，确定要排除的调用关系
+        // 第一次查询
         if (callerMethodHash == null) {
-            // 第一次查询
-            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_CALLER1;
+            if(excludeCallType == null){
+                SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_CALLER1;
+                String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+                if (sql == null) {
+                    // 确定查询被调用关系时所需字段
+                    sql = "select " + chooseCallerColumns() +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                            " where " + DC.MC_CALLEE_METHOD_HASH + " = ? " +
+                            " order by " + DC.MC_CALLER_METHOD_HASH +
+                            " limit 1";
+                    sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+                }
+                return sql;
+            }
+            // 若排除的sql不空
+            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_EXCLUDED_CALLER1;
             String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
             if (sql == null) {
                 // 确定查询被调用关系时所需字段
                 sql = "select " + chooseCallerColumns() +
                         " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                        " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
+                        " where " + DC.MC_CALLEE_METHOD_HASH + " = ? " +
+                        " and " + DC.MC_CALL_TYPE + " != ? " +
                         " order by " + DC.MC_CALLER_METHOD_HASH +
                         " limit 1";
                 sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
@@ -849,7 +873,23 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         }
 
         // 不是第一次查询
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_CALLER2;
+        if(excludeCallType == null){
+            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_CALLER2;
+            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+            if (sql == null) {
+                // 确定查询被调用关系时所需字段
+                sql = "select " + chooseCallerColumns() +
+                        " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                        " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
+                        " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
+                        " order by " + DC.MC_CALLER_METHOD_HASH +
+                        " limit 1";
+                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+            }
+            return sql;
+        }
+
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_EXCLUDE_CALLER2;
         String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
         if (sql == null) {
             // 确定查询被调用关系时所需字段
@@ -857,11 +897,21 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                     " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                     " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
                     " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
+                    " and " + DC.MC_CALL_TYPE + " != ? " +
                     " order by " + DC.MC_CALLER_METHOD_HASH +
                     " limit 1";
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return sql;
+    }
+    private String excludeCallType(String calleeCallType){
+        if (CTE_SUPER_CALL_CHILD_INTERFACE_OVERRIDE.getType().equals(calleeCallType)) {
+            return CTE_CHILD_CALL_SUPER_INTERFACE.getType();
+        }
+        if (CTE_CHILD_CALL_SUPER_INTERFACE.getType().equals(calleeCallType)) {
+            return CTE_SUPER_CALL_CHILD_INTERFACE_OVERRIDE.getType();
+        }
+        return null;
     }
     // 确定查询被调用关系时所需字段
     private String chooseCallerColumns() {

@@ -100,7 +100,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      */
     protected void vCompressTree(MethodNode root) {
         // 声明需要移出的子树。
-        ArrayList<MethodNode> removeSubTree = new ArrayList<MethodNode>();
+        ArrayList<MethodNode> removeSubTree = new ArrayList<>();
 
 
     }

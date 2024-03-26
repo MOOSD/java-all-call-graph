@@ -17,7 +17,7 @@ public class WriteDbPRunnerTest {
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.3 version");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
 
@@ -29,7 +29,7 @@ public class WriteDbPRunnerTest {
 
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("D:\\Data\\TestData\\microservice\\i8");
+        otherConfigList.add("D:\\work\\jar\\100011\\dev");
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow
