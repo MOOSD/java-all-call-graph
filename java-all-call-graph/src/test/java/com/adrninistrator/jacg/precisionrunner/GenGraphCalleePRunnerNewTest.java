@@ -271,7 +271,7 @@ public class GenGraphCalleePRunnerNewTest {
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"1");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
         runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"500000");
         //config_db.properties

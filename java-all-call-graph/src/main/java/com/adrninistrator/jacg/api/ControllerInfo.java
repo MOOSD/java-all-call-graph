@@ -17,6 +17,21 @@ public class ControllerInfo {
     private String simpleClassName;
     private String fullMethod;
 
+
+    public ControllerInfo(){
+
+    }
+
+    public ControllerInfo(ControllerInfo controllerInfo){
+        this.showUri = controllerInfo.showUri;
+        this.requestMethod = controllerInfo.requestMethod;
+        this.classPath = controllerInfo.classPath;
+        this.methodPath = controllerInfo.methodPath;
+        this.annotationName = controllerInfo.annotationName;
+        this.simpleClassName = controllerInfo.simpleClassName;
+        this.fullMethod = controllerInfo.fullMethod;
+    }
+
     public String getShowUri() {
         return showUri;
     }

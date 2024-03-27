@@ -147,7 +147,7 @@ public class WriteDbPRunnerTest {
 
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("D:\\work\\jar\\i8\\dev");
+        otherConfigList.add("D:\\work\\jar\\100011\\dev");
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow

@@ -236,8 +236,32 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
                 continue;
             }
             // 查询controller信息
-            node.setControllerInfo(getControllerInfoDOByFullMethod(node.getFullMethod()));
+            List<ControllerInfo> controllerInfoDOByFullMethod = getControllerInfoDOByFullMethod(node.getFullMethod());
+            // 如果接口包含多种请求方式、则将其拆分
+            node.setControllerInfo(splitController(controllerInfoDOByFullMethod));
         }
+    }
+
+    private List<ControllerInfo> splitController(List<ControllerInfo> controllerInfoList){
+        ArrayList<ControllerInfo> newControllerInfoList = new ArrayList<>();
+        for (ControllerInfo controllerInfo : controllerInfoList) {
+            String requestMethod = controllerInfo.getRequestMethod();
+            if (requestMethod == null) {
+                continue;
+            }
+            String[] requestMethodArray = StringUtils.split(requestMethod,",");
+            if(requestMethodArray.length > 1){
+                // 将原本的请求方式重新赋值
+                controllerInfo.setRequestMethod(requestMethodArray[0]);
+                for (int i = 1; i < requestMethodArray.length; i++) {
+                    ControllerInfo newControllerinfo = new ControllerInfo(controllerInfo);
+                    newControllerinfo.setRequestMethod(requestMethodArray[i]);
+                    newControllerInfoList.add(newControllerinfo);
+                }
+            }
+        }
+        controllerInfoList.addAll(newControllerInfoList);
+        return controllerInfoList;
     }
 
     /**
