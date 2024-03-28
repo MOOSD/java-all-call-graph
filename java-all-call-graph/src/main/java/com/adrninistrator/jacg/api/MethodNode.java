@@ -268,6 +268,10 @@ public class MethodNode {
         return children;
     }
 
+    public void setChildren(List<MethodNode> children) {
+        this.children = children;
+    }
+
     public MethodNode getBefore() {
         return before;
     }
