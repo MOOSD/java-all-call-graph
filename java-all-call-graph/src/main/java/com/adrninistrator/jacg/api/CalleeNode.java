@@ -2,7 +2,6 @@ package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 被调用者树的节点，即向上的调用树
@@ -12,10 +11,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CalleeNode extends MethodNode {
 
-    // 当前节点深度
-    private int depth;
-    // 是否方法入口
-    private boolean isEntrance;
 
 
     /**
@@ -52,24 +47,6 @@ public class CalleeNode extends MethodNode {
         return (CalleeNode) this.before;
     }
 
-    public CallInfo getCallInfo() {
-        return callInfo;
-    }
 
-    public int getDepth() {
-        return depth;
-    }
 
-    public void setDepth(int depth) {
-        this.depth = depth;
-    }
-
-    @JsonProperty(value = "isEntrance")
-    public boolean isEntrance() {
-        return isEntrance;
-    }
-
-    public void setEntrance(boolean entrance) {
-        isEntrance = entrance;
-    }
 }

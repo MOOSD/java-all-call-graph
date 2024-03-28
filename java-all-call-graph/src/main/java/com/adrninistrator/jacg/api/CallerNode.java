@@ -1,15 +1,10 @@
 package com.adrninistrator.jacg.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CallerNode extends MethodNode {
 
-    //当前节点深度
-    private int depth;
 
-    //是否为出口
-    private boolean isEntrance;
 
     private Integer startLineNum;
 
@@ -58,22 +53,7 @@ public class CallerNode extends MethodNode {
         return callInfo;
     }
 
-    public int getDepth() {
-        return depth;
-    }
 
-    public void setDepth(int depth) {
-        this.depth = depth;
-    }
-
-    @JsonProperty(value = "isEntrance")
-    public boolean isEntrance() {
-        return isEntrance;
-    }
-
-    public void setEntrance(boolean entrance) {
-        isEntrance = entrance;
-    }
 
     public Integer getStartLineNum() {
         return startLineNum;

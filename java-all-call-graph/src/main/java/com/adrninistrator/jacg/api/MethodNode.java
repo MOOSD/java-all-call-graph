@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 @JsonTypeInfo(use= JsonTypeInfo.Id.CLASS,property = "@class")
 @JsonSubTypes({@JsonSubTypes.Type(value = CallerNode.class),@JsonSubTypes.Type(value = CalleeNode.class)})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public abstract class MethodNode {
+public class MethodNode {
 
     protected String id;
 
@@ -70,6 +70,12 @@ public abstract class MethodNode {
 
     // 节点生成时候的数据信息
     protected List<String> genMessage;
+
+    //当前节点深度
+    protected int depth;
+
+    //是否为出口
+    protected boolean isEntrance;
 
     // 根节点创建的时候，必然是一个被修改的节点
     public void isRoot(String originText){
@@ -280,6 +286,23 @@ public abstract class MethodNode {
 
     public String getId() {
         return id;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    @JsonProperty(value = "isEntrance")
+    public boolean isEntrance() {
+        return isEntrance;
+    }
+
+    public void setEntrance(boolean entrance) {
+        isEntrance = entrance;
     }
 
     public void setId(String id) {
