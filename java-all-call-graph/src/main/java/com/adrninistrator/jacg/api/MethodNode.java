@@ -60,6 +60,8 @@ public class MethodNode {
     protected boolean isRoot;
     // 修改的方法信息
     protected List<String> originTextInfo;
+
+
     // 调用树重复出现的次数
     protected AtomicInteger repeatNum;
     // 下一个节点
@@ -76,6 +78,9 @@ public class MethodNode {
 
     //是否为出口
     protected boolean isEntrance;
+
+    // 方法节点的扩展信息
+    protected Map<String,String> extendMethodNodeInfo;
 
     // 根节点创建的时候，必然是一个被修改的节点
     public void isRoot(String originText){
@@ -320,6 +325,14 @@ public class MethodNode {
 
     public void setRoot(boolean root) {
         isRoot = root;
+    }
+
+    public Map<String, String> getExtendMethodNodeInfo() {
+        return extendMethodNodeInfo;
+    }
+
+    public void setExtendMethodNodeInfo(Map<String, String> extendMethodNodeInfo) {
+        this.extendMethodNodeInfo = extendMethodNodeInfo;
     }
 
     @Override
