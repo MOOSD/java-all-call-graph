@@ -21,6 +21,7 @@ public class MethodNode {
     @JsonIgnore
     protected String fullMethod;
 
+    @JsonIgnore
     protected String methodHash;
 
     //方法名
