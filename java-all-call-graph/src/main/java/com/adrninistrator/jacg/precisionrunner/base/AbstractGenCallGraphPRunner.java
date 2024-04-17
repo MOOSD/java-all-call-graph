@@ -120,7 +120,6 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
                 if(targetSubTrees.size() == childrenNodes.size()){
 
                 }
-
             }
         }else {
             // 如果当前节点是一个controller节点
@@ -175,20 +174,21 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
      * @return 当前方法上的注解信息
      */
     protected  Map<String, Map<String, BaseAnnotationAttribute>> getMethodAnnotationInfo(String fullMethod, String methodHash ,List<String> annotationList) {
+        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap;
         //注解缓存
         Map<String, Map<String, BaseAnnotationAttribute>> existedAnnotationInfo = methodAllAnnotationInfoMap.get(methodHash);
         if (existedAnnotationInfo != null) {
             // 当前方法对应的注解信息已查询过，直接使用
-            return existedAnnotationInfo;
+            methodAnnotationMap = existedAnnotationInfo;
+        }else{
+            // 根据完整方法HASH+长度获取对应的注解信息
+            methodAnnotationMap = annotationHandler.queryAnnotationMap4FullMethod(fullMethod);
+            if (methodAnnotationMap == null) {
+                // 当前方法上没有注解
+                return null;
+            }
+            methodAllAnnotationInfoMap.putIfAbsent(methodHash, methodAnnotationMap);
         }
-
-        // 根据完整方法HASH+长度获取对应的注解信息
-        Map<String, Map<String, BaseAnnotationAttribute>> methodAnnotationMap = annotationHandler.queryAnnotationMap4FullMethod(fullMethod);
-        if (methodAnnotationMap == null) {
-            // 当前方法上没有注解
-            return null;
-        }
-        methodAllAnnotationInfoMap.putIfAbsent(methodHash, methodAnnotationMap);
 
         // 当前方法上有注解
         // 当前方法对应的注解信息未查询过

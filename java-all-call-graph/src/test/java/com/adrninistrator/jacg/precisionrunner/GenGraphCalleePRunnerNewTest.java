@@ -270,20 +270,91 @@ public class GenGraphCalleePRunnerNewTest {
         GenGraphCalleePRunner runnerGenAllGraph4Callee = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
-        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"1");
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"100017");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
-        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"500000");
+        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"100");
         //config_db.properties
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
-        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/bytecode_dev?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
         //allow_class_prefix.properties
-//        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
 
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                "cn.newgrand.msgfi.bdf.client.impl.FgEntGroupClientImpl#getEntGroupList"
+            "cn.newgrand.msgfi.gc.common.helper.ReportQueryManager:471",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:94",
+            "cn.newgrand.msgfi.gc.api.accbook.service.impl.ExtendAccoMultDetailedAccountServiceImpl:445",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataUnitProClientImpl:43",
+            "cn.newgrand.msgfi.constant.enums.EnumDataBean:85",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:79",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataFeetypeClientImpl:43",
+            "cn.newgrand.msgfi.gc.api.bookvoucher.service.impl.FinanceVoucherServiceImpl:1344",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:105",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:147",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrReclassOffsetController:51",
+            "cn.newgrand.msgfi.data.DataProcessor:62",
+            "cn.newgrand.msgfi.gc.api.accbook.service.impl.AccoExtendTrialBalanceAccountServiceImpl:903",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataSimpleDataClientImpl:40",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:57",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:107",
+            "cn.newgrand.msgfi.gc.api.bookvoucher.helper.BookVoucherHelper:2330",
+            "cn.newgrand.msgfi.gc.api.accbook.service.impl.EmpDetailedAccountServiceImpl:422",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataBankSysClientImpl:39",
+            "cn.newgrand.msgfi.gc.common.helper.CashflowFuncHelper:88",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataTeamsGroupClientImpl:43",
+            "cn.newgrand.msgfi.gc.api.accbook.service.impl.EmpJournalServiceImpl:189",
+            "cn.newgrand.msgfi.gc.common.helper.GlFuncHelper:210",
+            "cn.newgrand.msgfi.frc.api.cr.service.impl.FrInterOffsetEntryServiceImpl:203",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:40",
+            "cn.newgrand.msgfi.gc.api.accbook.service.impl.AccoExtendTrialBalanceAccountServiceImpl:217",
+            "cn.newgrand.msgfi.gc.api.voucher.service.impl.ImportTempServiceImpl$2:793",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrReclassOffsetController:64",
+            "cn.newgrand.msgfi.gc.common.helper.VoucherNumGenerateHelper:170",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataUserClientImpl:36",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataCbsClientImpl:42",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:69",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:119",
+            "cn.newgrand.msgfi.frc.common.supcan.util.FuncUtls:33",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataCustomerClientImpl:42",
+            "cn.newgrand.msgfi.frc.api.report.service.impl.FrReportServiceImpl:419",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataResBsClientImpl:39",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:54",
+            "cn.newgrand.msgfi.gc.api.accbook.service.impl.EmpJournalServiceImpl:158",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:131",
+            "cn.newgrand.msgfi.gc.api.endterm.service.impl.MonthlyExchageServiceImpl:182",
+            "cn.newgrand.msgfi.constant.enums.EnumDataBean:62",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataEnterpriseClientImpl:40",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrReclassOffsetController:36",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrReclassOffsetController:77",
+            "cn.newgrand.msgfi.data.DataProcessor:80",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:92",
+            "cn.newgrand.msgfi.gc.common.helper.GlFuncHelper:98",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataComeGoProjectClientImpl:40",
+            "cn.newgrand.msgfi.gc.api.bookvoucher.helper.BookVoucherHelper:4453",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataOutCntMClientImpl:42",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataItemDataClientImpl:39",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:43",
+            "cn.newgrand.msgfi.gc.api.bookvoucher.helper.BookVoucherHelper:1168",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:81",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:66",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataRegionClientImpl:40",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataSupplyFzrClientImpl:37",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataOuterAccClientImpl:47",
+            "cn.newgrand.msgfi.gc.api.voucher.service.impl.ImportTempServiceImpl:754",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataPcClientImpl:43",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataRoleClientImpl:37",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataWbsClientImpl:42",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrAdjustPlanController:118",
+            "cn.newgrand.msgfi.gc.common.helper.VoucherNumGenerateHelper:359",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataSecuserClientImpl:39",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataSupplyClientImpl:42",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataVehicleClientImpl:42",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrReclassOffsetController:43",
+            "cn.newgrand.msgfi.frc.api.cr.controller.FrMergePlanController:133",
+            "cn.newgrand.msgfi.data.client.biz.impl.DataInCntMClientImpl:42",
+            "cn.newgrand.msgfi.gc.api.accbook.service.impl.ExtendAccoTrialBalanceAccountServiceImpl:191"
         );
 
 
