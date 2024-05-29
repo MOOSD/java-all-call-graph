@@ -9,6 +9,7 @@ import com.adrninistrator.jacg.markdown.JACGMarkdownConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
 import com.adrninistrator.javacg.util.JavaCGUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -443,6 +444,18 @@ public class JACGCallGraphFileUtil {
      */
     public static boolean isCallGraphLevel0(String line) {
         return StringUtils.startsWith(line, CALL_FLAG_LEVEL_0);
+    }
+
+    public static String[] getFieldNameAndFullClassName(String fullFieldName){
+        return StringUtils.split(fullFieldName,JavaCGConstants.FLAG_HASHTAG);
+    }
+
+    public static String getFullClassNameByFullFieldName(String fullFieldName){
+        String[] split = StringUtils.split(fullFieldName, JavaCGConstants.FLAG_HASHTAG);
+        if(ArrayUtils.isNotEmpty(split)){
+            return split[0];
+        }
+        return "";
     }
 
     private JACGCallGraphFileUtil() {

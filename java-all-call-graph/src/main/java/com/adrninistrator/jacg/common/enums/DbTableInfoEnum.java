@@ -228,6 +228,26 @@ public enum DbTableInfoEnum {
             DC.SPT_CLASS_NAME,
             DC.SPT_METHOD_NAME,
     }),
+    DTIE_BEAN_FIELD_ANNOTATION("bean_field_annotation", new String[]{
+            DC.BFA_RECORD_ID,
+            DC.BFA_SIMPLE_CLASS_NAME,
+            DC.BFA_FIELD_HASH,
+            DC.BFA_ANNOTATION_NAME,
+            DC.BFA_ATTRIBUTE_NAME,
+            DC.BFA_ATTRIBUTE_TYPE,
+            DC.BFA_ATTRIBUTE_VALUE,
+            DC.BFA_FULL_FIELD_NAME,
+    }),
+    DTIE_BEAN_FIELD_INFO("bean_field_info", new String[]{
+            DC.BFI_FIELD_HASH ,
+            DC.BFI_SIMPLE_CLASS_NAME,
+            DC.BFI_ACCESS_FLAGS,
+            DC.BFI_FIELD_NAME,
+            DC.BFI_FULL_FIELD_NAME,
+            DC.BFI_FIELD_TYPE,
+            DC.BFI_HAS_GETTER,
+            DC.BFI_HAS_SETTER,
+    }),
     DTIE_ILLEGAL("illegal", null),
     ;
 

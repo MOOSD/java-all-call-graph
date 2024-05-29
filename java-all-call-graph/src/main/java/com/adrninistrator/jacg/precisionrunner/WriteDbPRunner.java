@@ -227,7 +227,11 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         if (!manualAddMethodCall()) {
             return false;
         }
-        // 检查执行结果
+
+        // 处理bean field
+        if (!handleBeanField()) {
+            return false;
+        }
         if (!checkResult()) {
             return false;
         }
@@ -508,6 +512,19 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         initWriteDbHandler(writeDbHandler4MethodCallInfo);
         return writeDbHandler4MethodCallInfo.handle(javaCGOutputInfo);
     }
+    private boolean handleBeanField() {
+        // 处理bean field
+        WriteDbHandler4BeanFieldAnnotation writeDbHandler4BeanFieldAnnotation = new WriteDbHandler4BeanFieldAnnotation();
+        initWriteDbHandler(writeDbHandler4BeanFieldAnnotation);
+        if (!writeDbHandler4BeanFieldAnnotation.handle(javaCGOutputInfo)) {
+            return false;
+        }
+        // 处理bean filed中的注解
+        WriteDbHandler4BeanFieldInfo writeDbHandler4BeanFieldInfo = new WriteDbHandler4BeanFieldInfo();
+        initWriteDbHandler(writeDbHandler4BeanFieldInfo);
+        return writeDbHandler4BeanFieldInfo.handle(javaCGOutputInfo);
+    }
+
 
     // 处理类的信息
     private boolean handleClassInfo() {

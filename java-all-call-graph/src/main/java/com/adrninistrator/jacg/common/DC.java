@@ -213,6 +213,25 @@ public class DC {
     public static final String FC_ANNOTATION_NAME = COMMON_ANNOTATION_ANNOTATION_NAME;
     public static final String FC_REQUEST_METHOD = "request_method";
 
+    public static final String BFA_RECORD_ID = "record_id";
+    public static final String BFA_FIELD_HASH = "field_hash";
+    public static final String BFA_ANNOTATION_NAME = "annotation_name";
+    public static final String BFA_ATTRIBUTE_NAME = "attribute_name";
+    public static final String BFA_ATTRIBUTE_TYPE = "attribute_type";
+    public static final String BFA_ATTRIBUTE_VALUE = "attribute_value";
+    public static final String BFA_FULL_FIELD_NAME = "full_field_name";
+    public static final String BFA_SIMPLE_CLASS_NAME = "simple_class_name";
+
+
+
+    public static final String BFI_FIELD_HASH = "field_hash";
+    public static final String BFI_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String BFI_ACCESS_FLAGS = "access_flags";
+    public static final String BFI_FIELD_NAME = "field_name";
+    public static final String BFI_FULL_FIELD_NAME = "full_field_name";
+    public static final String BFI_FIELD_TYPE = "field_type";
+    public static final String BFI_HAS_GETTER = "has_getter";
+    public static final String BFI_HAS_SETTER = "has_setter";
 
     private DC() {
         throw new IllegalStateException("illegal");
