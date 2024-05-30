@@ -226,6 +226,7 @@ public class DC {
 
     public static final String BFI_FIELD_HASH = "field_hash";
     public static final String BFI_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String BFI_FQCN = "fqcn";
     public static final String BFI_ACCESS_FLAGS = "access_flags";
     public static final String BFI_FIELD_NAME = "field_name";
     public static final String BFI_FULL_FIELD_NAME = "full_field_name";
@@ -233,6 +234,15 @@ public class DC {
     public static final String BFI_HAS_GETTER = "has_getter";
     public static final String BFI_HAS_SETTER = "has_setter";
 
+
+    public static final String MAA_RECORD_ID = "record_id";
+    public static final String MAA_METHOD_HASH = "method_hash";
+    public static final String MAA_ARG_SEQ = "arg_seq";
+    public static final String MAA_ANNOTATION_NAME = "annotation_name";
+    public static final String MAA_ATTRIBUTE_NAME = "attribute_name";
+    public static final String MAA_ATTRIBUTE_TYPE = "attribute_type";
+    public static final String MAA_ATTRIBUTE_VALUE = "attribute_value";
+    public static final String MAA_FULL_METHOD = "full_method";
     private DC() {
         throw new IllegalStateException("illegal");
     }

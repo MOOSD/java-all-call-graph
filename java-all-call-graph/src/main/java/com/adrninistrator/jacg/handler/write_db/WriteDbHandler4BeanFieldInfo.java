@@ -44,7 +44,7 @@ public class WriteDbHandler4BeanFieldInfo extends AbstractWriteDbHandler<WriteDb
             className = split[0];
         }
 
-        return new WriteDbData4BeanFieldInfo(fieldHash, dbOperWrapper.getSimpleClassName(className),Integer.parseInt(accessFlags)
+        return new WriteDbData4BeanFieldInfo(fieldHash, dbOperWrapper.getSimpleClassName(className),className,Integer.parseInt(accessFlags)
                 ,fieldName, fullFieldName, type, Boolean.parseBoolean(hasGetter), Boolean.parseBoolean(hasSetter));
     }
 
@@ -53,6 +53,7 @@ public class WriteDbHandler4BeanFieldInfo extends AbstractWriteDbHandler<WriteDb
         return new Object[]{
                 data.getFieldHash(),
                 data.getSimpleClassName(),
+                data.getFqcn(),
                 data.getAccessFlags(),
                 data.getFieldName(),
                 data.getFullFieldName(),

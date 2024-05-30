@@ -4,11 +4,11 @@ import com.adrninistrator.jacg.annotation.util.AnnotationAttributesParseUtil;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.annotations.JACGWriteDbHandler;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
-import com.adrninistrator.jacg.dto.write_db.WriteDbData4BeanFieldAnnotation;
+import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodArgAnnotation;
 import com.adrninistrator.jacg.util.JACGUtil;
 import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 
-import static com.adrninistrator.jacg.util.JACGCallGraphFileUtil.getFullClassNameByFullFieldName;
+import static com.adrninistrator.jacg.util.JACGClassMethodUtil.getClassNameFromMethod;
 
 
 /**
@@ -19,61 +19,63 @@ import static com.adrninistrator.jacg.util.JACGCallGraphFileUtil.getFullClassNam
 @JACGWriteDbHandler(
         readFile = true,
         mainFile = true,
-        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_BEAN_FIELD_ANNOTATION,
-        minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE,
-        maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE,
-        dbTableInfoEnum = DbTableInfoEnum.DTIE_BEAN_FIELD_ANNOTATION
+        mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_ARG_ANNOTATION,
+        minColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE+1,
+        maxColumnNum = JACGConstants.ANNOTATION_COLUMN_NUM_WITH_ATTRIBUTE+1,
+        dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_ARGS_ANNOTATION
 )
-public class WriteDbHandler4BeanFieldAnnotation extends AbstractWriteDbHandler<WriteDbData4BeanFieldAnnotation> {
+public class WriteDbHandler4MethodArgAnnotation extends AbstractWriteDbHandler<WriteDbData4MethodArgAnnotation> {
+
 
     @Override
-    protected WriteDbData4BeanFieldAnnotation genData(String[] array) {
+    protected WriteDbData4MethodArgAnnotation genData(String[] array) {
         // 拆分时限制列数，最后一列注解属性中可能出现空格
-        String fullFieldName = array[0];
-        String className = getFullClassNameByFullFieldName(fullFieldName);
-        String fieldHash = JACGUtil.genHashWithLen(fullFieldName);
+        String fullMethod = array[0];
+        String argSeq = array[1];
+        String methodHash = JACGUtil.genHashWithLen(fullMethod);
+
 
         // 根据类名前缀判断是否需要处理
+        String className = getClassNameFromMethod(fullMethod);
         if (!isAllowedClassPrefix(className)) {
             return null;
         }
-
-        String simpleClassName = dbOperWrapper.getSimpleClassName(className);
-        String annotationName = array[1];
+        String annotationName = array[2];
         // 假如当前行的注解信息无属性，注解属性名称设为空字符串
         String attributeName = "";
         String attributeType = null;
         String attributeValue = null;
-        if (array.length > JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE) {
+        if (array.length > JACGConstants.ANNOTATION_COLUMN_NUM_WITHOUT_ATTRIBUTE+1) {
             // 当前行的注解信息有属性
-            attributeName = array[2];
-            attributeType = array[3];
+            attributeName = array[3];
+            attributeType = array[4];
             // 从文件记录解析注解属性
-            attributeValue = AnnotationAttributesParseUtil.parseFromFile(attributeType, array[4]);
+            attributeValue = AnnotationAttributesParseUtil.parseFromFile(attributeType, array[5]);
         }
 
-        return new WriteDbData4BeanFieldAnnotation(simpleClassName, fieldHash, annotationName, attributeName, attributeType, attributeValue, fullFieldName);
+        return new WriteDbData4MethodArgAnnotation(fullMethod, methodHash, argSeq,annotationName,attributeName,attributeType,attributeValue);
     }
 
     @Override
-    protected Object[] genObjectArray(WriteDbData4BeanFieldAnnotation data) {
+    protected Object[] genObjectArray(WriteDbData4MethodArgAnnotation data) {
         return new Object[]{
             genNextRecordId(),
-            data.getSimpleClassName(),
-            data.getFieldHash(),
+            data.getFullMethod(),
+            data.getMethodHash(),
+            data.getArgSeq(),
             data.getAnnotationName(),
             data.getAttributeName(),
             data.getAttributeType(),
             data.getAttributeValue(),
-            data.getFullFieldName()
         };
     }
 
     @Override
     public String[] chooseFileColumnDesc() {
         return new String[]{
-                "完整属性名",
-                "注解类名",
+                "完整方法名",
+                "参数顺序",
+                "注解名称",
                 "注解属性名称，空字符串代表无注解属性",
                 "注解属性类型，s:字符串；bs:包含回车换行的字符串；m:JSON字符串，Map；ls:JSON字符串，List+String；lm:JSON字符串，List+Map",
                 "注解属性值"
@@ -88,6 +90,5 @@ public class WriteDbHandler4BeanFieldAnnotation extends AbstractWriteDbHandler<W
                 "若注解有属性值，则每个属性值占一行"
         };
     }
-
 
 }

@@ -241,12 +241,23 @@ public enum DbTableInfoEnum {
     DTIE_BEAN_FIELD_INFO("bean_field_info", new String[]{
             DC.BFI_FIELD_HASH ,
             DC.BFI_SIMPLE_CLASS_NAME,
+            DC.BFI_FQCN,
             DC.BFI_ACCESS_FLAGS,
             DC.BFI_FIELD_NAME,
             DC.BFI_FULL_FIELD_NAME,
             DC.BFI_FIELD_TYPE,
             DC.BFI_HAS_GETTER,
             DC.BFI_HAS_SETTER,
+    }),
+    DTIE_METHOD_ARGS_ANNOTATION("method_arg_annotation", new String[]{
+            DC.MAA_RECORD_ID,
+            DC.MAA_FULL_METHOD,
+            DC.MAA_METHOD_HASH,
+            DC.MAA_ARG_SEQ,
+            DC.MAA_ANNOTATION_NAME,
+            DC.MAA_ATTRIBUTE_NAME,
+            DC.MAA_ATTRIBUTE_TYPE,
+            DC.MAA_ATTRIBUTE_VALUE,
     }),
     DTIE_ILLEGAL("illegal", null),
     ;

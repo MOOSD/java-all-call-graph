@@ -8,6 +8,7 @@ package com.adrninistrator.jacg.dto.write_db;
 public class WriteDbData4BeanFieldInfo extends AbstractWriteDbData {
     private String fieldHash;
     private String simpleClassName;
+    private String fqcn;
     private int accessFlags;
     private String fieldName;
 
@@ -18,9 +19,10 @@ public class WriteDbData4BeanFieldInfo extends AbstractWriteDbData {
 
     private boolean hasSetter;
 
-    public WriteDbData4BeanFieldInfo(String fieldHash, String simpleClassName, int accessFlags, String fieldName, String fullFieldName, String fieldType, boolean hasGetter, boolean hasSetter) {
+    public WriteDbData4BeanFieldInfo(String fieldHash, String simpleClassName,String fqcn, int accessFlags, String fieldName, String fullFieldName, String fieldType, boolean hasGetter, boolean hasSetter) {
         this.fieldHash = fieldHash;
         this.simpleClassName = simpleClassName;
+        this.fqcn = fqcn;
         this.accessFlags = accessFlags;
         this.fieldName = fieldName;
         this.fullFieldName = fullFieldName;
@@ -91,5 +93,13 @@ public class WriteDbData4BeanFieldInfo extends AbstractWriteDbData {
 
     public void setHasSetter(boolean hasSetter) {
         this.hasSetter = hasSetter;
+    }
+
+    public String getFqcn() {
+        return fqcn;
+    }
+
+    public void setFqcn(String fqcn) {
+        this.fqcn = fqcn;
     }
 }

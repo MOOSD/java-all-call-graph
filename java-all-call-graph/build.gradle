@@ -69,7 +69,7 @@ List h2database = ["com.h2database:h2:2.1.214"]
 
 List slf4j = ['org.slf4j:slf4j-api:1.7.36']
 
-List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.16-private-SNAPSHOT']
+List java_callgraph = ['com.github.adrninistrator:java-callgraph2:1.0.16-private-20240530.015506-22']
 
 List mybatis_parser = ['com.github.adrninistrator:mybatis-mysql-table-parser:0.0.5']
 

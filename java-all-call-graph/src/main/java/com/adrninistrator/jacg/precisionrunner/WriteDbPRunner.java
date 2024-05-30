@@ -497,6 +497,12 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         if (!writeDbHandler4MethodArgGenericsType.handle(javaCGOutputInfo)) {
             return false;
         }
+        // 处理方法参数的注解
+        WriteDbHandler4MethodArgAnnotation writeDbHandler4MethodArgAnnotation = new WriteDbHandler4MethodArgAnnotation();
+        initWriteDbHandler(writeDbHandler4MethodArgAnnotation);
+        if (!writeDbHandler4MethodArgAnnotation.handle(javaCGOutputInfo)) {
+            return false;
+        }
 
         // 处理方法返回泛型类型
         WriteDbHandler4MethodReturnGenericsType writeDbHandler4MethodReturnGenericsType = new WriteDbHandler4MethodReturnGenericsType();
