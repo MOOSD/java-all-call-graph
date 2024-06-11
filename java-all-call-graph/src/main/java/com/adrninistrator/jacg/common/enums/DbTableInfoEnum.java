@@ -115,6 +115,7 @@ public enum DbTableInfoEnum {
             DC.MAT_ARG_SEQ,
             DC.MAT_SIMPLE_ARG_TYPE,
             DC.MAT_ARG_TYPE,
+            DC.MAT_ARG_NAME,
             DC.MAT_SIMPLE_CLASS_NAME,
             DC.MAT_FULL_METHOD
     }),

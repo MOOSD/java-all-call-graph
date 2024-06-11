@@ -10,19 +10,21 @@ public class WriteDbData4MethodArgType extends AbstractWriteDbData {
     private Integer argSeq;
     private String simpleArgType;
     private String argType;
+    private String argName;
     private String simpleClassName;
     private String fullMethod;
 
     public WriteDbData4MethodArgType() {
     }
 
-    public WriteDbData4MethodArgType(String methodHash, Integer argSeq, String simpleArgType, String argType, String simpleClassName, String fullMethod) {
+    public WriteDbData4MethodArgType(String methodHash, Integer argSeq, String simpleArgType, String argType, String argName, String simpleClassName, String fullMethod) {
         this.methodHash = methodHash;
         this.argSeq = argSeq;
         this.simpleArgType = simpleArgType;
         this.argType = argType;
         this.simpleClassName = simpleClassName;
         this.fullMethod = fullMethod;
+        this.argName = argName;
     }
 
     public String getMethodHash() {
@@ -71,5 +73,13 @@ public class WriteDbData4MethodArgType extends AbstractWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getArgName() {
+        return argName;
+    }
+
+    public void setArgName(String argName) {
+        this.argName = argName;
     }
 }

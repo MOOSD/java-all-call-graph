@@ -182,6 +182,7 @@ public class DC {
     public static final String MAT_ARG_SEQ = "arg_seq";
     public static final String MAT_SIMPLE_ARG_TYPE = "simple_arg_type";
     public static final String MAT_ARG_TYPE = "arg_type";
+    public static final String MAT_ARG_NAME = "arg_name";
     public static final String MAT_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String MAT_FULL_METHOD = "full_method";
 

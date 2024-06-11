@@ -22,6 +22,7 @@ public class WriteDbHandler4MethodArgType extends AbstractWriteDbHandler<WriteDb
                 data.getArgSeq(),
                 data.getSimpleArgType(),
                 data.getArgType(),
+                data.getArgName(),
                 data.getSimpleClassName(),
                 data.getFullMethod()
         };

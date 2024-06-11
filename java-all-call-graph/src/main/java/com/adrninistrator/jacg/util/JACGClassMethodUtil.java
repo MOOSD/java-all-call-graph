@@ -178,6 +178,15 @@ public class JACGClassMethodUtil {
         return Arrays.asList(methodDetail.getArgs());
     }
 
+    public static List<String> genMethodArgTypeNameList(String argStrings) {
+        String[] args = StringUtils.splitPreserveAllTokens(argStrings, JavaCGConstants.FLAG_COMMA);
+        return Arrays.asList(args);
+    }
+
+    public static String[] splitMethodArgTypeAndName(String argString) {
+        return StringUtils.splitPreserveAllTokens(argString);
+    }
+
     /**
      * 拼接类名与方法名
      * 格式：类名:方法名

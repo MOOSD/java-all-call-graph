@@ -20,8 +20,8 @@ import java.util.List;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_INFO,
-        minColumnNum = 3,
-        maxColumnNum = 3,
+        minColumnNum = 4,
+        maxColumnNum = 4,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_INFO
 )
 public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbData4MethodInfo> {
@@ -39,17 +39,17 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
         if (!isAllowedClassPrefix(fullMethod)) {
             return null;
         }
-
+        String parameters = array[1];
         String methodHash = JACGUtil.genHashWithLen(fullMethod);
-        String accessFlags = array[1];
+        String accessFlags = array[2];
         String className = JACGClassMethodUtil.getClassNameFromMethod(fullMethod);
         String simpleClassName = dbOperWrapper.getSimpleClassName(className);
         String methodName = JACGClassMethodUtil.getMethodNameFromFull(fullMethod);
-        String returnType = array[2];
+        String returnType = array[3];
         String simpleReturnType = dbOperWrapper.getSimpleClassName(returnType);
 
         // 处理方法的参数类型
-        handleMethodArgType(fullMethod, methodHash, simpleClassName);
+        handleMethodArgType(fullMethod, methodHash, simpleClassName, parameters);
 
         return new WriteDbData4MethodInfo(methodHash,
                 simpleClassName,
@@ -77,6 +77,7 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
     public String[] chooseFileColumnDesc() {
         return new String[]{
                 "完整方法（类名+方法名+参数）",
+                "方法参数",
                 "方法的access_flags",
                 "返回类型类名"
         };
@@ -97,16 +98,24 @@ public class WriteDbHandler4MethodInfo extends AbstractWriteDbHandler<WriteDbDat
     }
 
     // 处理方法的参数类型
-    private void handleMethodArgType(String fullMethod, String methodHash, String simpleClassName) {
-        List<String> argTypeList = JACGClassMethodUtil.genMethodArgTypeList(fullMethod);
-        if (argTypeList.isEmpty()) {
+    private void handleMethodArgType(String fullMethod, String methodHash, String simpleClassName, String parameters) {
+        List<String> argTypeNameList = JACGClassMethodUtil.genMethodArgTypeNameList(parameters);
+        if (argTypeNameList.isEmpty()) {
             // 方法无参数
             return;
         }
-        for (int i = 0; i < argTypeList.size(); i++) {
-            String argType = argTypeList.get(i);
+        for (int i = 0; i < argTypeNameList.size(); i++) {
+            String argTypeName = argTypeNameList.get(i);
+            // 按照空格分隔参数类型和名称
+            String[] argArray = JACGClassMethodUtil.splitMethodArgTypeAndName(argTypeName);
+            String argType = argArray[0];
+            String argName = "";
+            if(argArray.length>1){
+                argName = argArray[1];
+            }
+
             String simpleArgType = dbOperWrapper.getSimpleClassName(argType);
-            WriteDbData4MethodArgType writeDbData4MethodArgType = new WriteDbData4MethodArgType(methodHash, i, simpleArgType, argType, simpleClassName, fullMethod);
+            WriteDbData4MethodArgType writeDbData4MethodArgType = new WriteDbData4MethodArgType(methodHash, i, simpleArgType, argType, argName, simpleClassName, fullMethod);
             writeDbData4MethodArgTypeList.add(writeDbData4MethodArgType);
             // 尝试写入方法的参数类型
             writeDbHandler4MethodArgType.tryInsertDb(writeDbData4MethodArgTypeList);
