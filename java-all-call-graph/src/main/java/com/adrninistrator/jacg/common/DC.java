@@ -174,6 +174,7 @@ public class DC {
     public static final String MAGT_ARG_SEQ = "arg_seq";
     public static final String MAGT_TYPE = "type";
     public static final String MAGT_TYPE_SEQ = "type_seq";
+    public static final String MAGT_GENERICS_PATH = "generics_path";
     public static final String MAGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
     public static final String MAGT_GENERICS_TYPE = "generics_type";
     public static final String MAGT_FULL_METHOD = "full_method";
@@ -191,6 +192,7 @@ public class DC {
     public static final String MRGT_SIMPLE_CLASS_NAME = "simple_class_name";
     public static final String MRGT_TYPE = "type";
     public static final String MRGT_TYPE_SEQ = "type_seq";
+    public static final String MRGT_GENERICS_PATH = "generics_path";
     public static final String MRGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
     public static final String MRGT_GENERICS_TYPE = "generics_type";
     public static final String MRGT_FULL_METHOD = "full_method";

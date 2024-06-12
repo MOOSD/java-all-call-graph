@@ -106,6 +106,7 @@ public enum DbTableInfoEnum {
             DC.MAGT_ARG_SEQ,
             DC.MAGT_TYPE,
             DC.MAGT_TYPE_SEQ,
+            DC.MAGT_GENERICS_PATH,
             DC.MAGT_SIMPLE_GENERICS_TYPE,
             DC.MAGT_GENERICS_TYPE,
             DC.MAGT_FULL_METHOD
@@ -185,6 +186,7 @@ public enum DbTableInfoEnum {
             DC.MRGT_SIMPLE_CLASS_NAME,
             DC.MRGT_TYPE,
             DC.MRGT_TYPE_SEQ,
+            DC.MRGT_GENERICS_PATH,
             DC.MRGT_SIMPLE_GENERICS_TYPE,
             DC.MRGT_GENERICS_TYPE,
             DC.MRGT_FULL_METHOD

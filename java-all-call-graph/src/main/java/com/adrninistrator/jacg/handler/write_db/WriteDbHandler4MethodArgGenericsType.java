@@ -18,8 +18,8 @@ import java.util.Set;
         readFile = true,
         mainFile = true,
         mainFileTypeEnum = JavaCGOutPutFileTypeEnum.OPFTE_METHOD_ARG_GENERICS_TYPE,
-        minColumnNum = 5,
-        maxColumnNum = 5,
+        minColumnNum = 6,
+        maxColumnNum = 6,
         dbTableInfoEnum = DbTableInfoEnum.DTIE_METHOD_ARG_GENERICS_TYPE
 )
 public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler<WriteDbData4MethodArgGenericsType> {
@@ -41,6 +41,7 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
         String type = array[2];
         int typeSeq = Integer.parseInt(array[3]);
         String genericsType = array[4];
+        String genericsPath = array[5];
 
         withArgsGenericsTypeMethodHash.add(methodHash);
         return new WriteDbData4MethodArgGenericsType(methodHash,
@@ -50,7 +51,8 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
                 typeSeq,
                 dbOperWrapper.getSimpleClassName(genericsType),
                 genericsType,
-                fullMethod);
+                fullMethod,
+                genericsPath);
     }
 
     @Override
@@ -62,9 +64,10 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
                 data.getArgSeq(),
                 data.getType(),
                 data.getTypeSeq(),
+                data.getGenericsPath(),
                 data.getSimpleGenericsType(),
                 data.getGenericsType(),
-                data.getFullMethod()
+                data.getFullMethod(),
         };
     }
 
@@ -75,7 +78,8 @@ public class WriteDbHandler4MethodArgGenericsType extends AbstractWriteDbHandler
                 "参数序号，从0开始",
                 "类型，t:参数类型，gt:参数泛型类型",
                 "类型序号，参数类型固定为0，参数泛型类型从0开始",
-                "泛型类型或参数类型类名"
+                "泛型类型或参数类型类名",
+                "描述泛型的层级结构所用路径"
         };
     }
 

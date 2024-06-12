@@ -15,11 +15,13 @@ public class WriteDbData4MethodArgGenericsType extends AbstractWriteDbData {
     private String genericsType;
     private String fullMethod;
 
+    private String genericsPath;
+
     public WriteDbData4MethodArgGenericsType() {
     }
 
     public WriteDbData4MethodArgGenericsType(String methodHash, String simpleClassName, int argSeq, String type, int typeSeq, String simpleGenericsType, String genericsType,
-                                             String fullMethod) {
+                                             String fullMethod, String genericsPath) {
         this.methodHash = methodHash;
         this.simpleClassName = simpleClassName;
         this.argSeq = argSeq;
@@ -28,6 +30,7 @@ public class WriteDbData4MethodArgGenericsType extends AbstractWriteDbData {
         this.simpleGenericsType = simpleGenericsType;
         this.genericsType = genericsType;
         this.fullMethod = fullMethod;
+        this.genericsPath = genericsPath;
     }
 
     public String getMethodHash() {
@@ -92,5 +95,13 @@ public class WriteDbData4MethodArgGenericsType extends AbstractWriteDbData {
 
     public void setFullMethod(String fullMethod) {
         this.fullMethod = fullMethod;
+    }
+
+    public String getGenericsPath() {
+        return genericsPath;
+    }
+
+    public void setGenericsPath(String genericsPath) {
+        this.genericsPath = genericsPath;
     }
 }
