@@ -30,7 +30,7 @@ public class WriteDbHandler4BeanFieldInfo extends AbstractWriteDbHandler<WriteDb
         String fullFieldName = array[1];
         String fieldHash = JACGUtil.genHashWithLen(fullFieldName);
         String fieldName = array[2];
-        String type = array[3];
+        String fieldType = array[3];
         String hasGetter = array[4];
         String hasSetter = array[5];
 
@@ -45,7 +45,7 @@ public class WriteDbHandler4BeanFieldInfo extends AbstractWriteDbHandler<WriteDb
         }
 
         return new WriteDbData4BeanFieldInfo(fieldHash, dbOperWrapper.getSimpleClassName(className),className,Integer.parseInt(accessFlags)
-                ,fieldName, fullFieldName, type, Boolean.parseBoolean(hasGetter), Boolean.parseBoolean(hasSetter));
+                ,fieldName, fullFieldName, fieldType, dbOperWrapper.getSimpleClassName(fieldType) , Boolean.parseBoolean(hasGetter), Boolean.parseBoolean(hasSetter));
     }
 
     @Override
@@ -58,6 +58,7 @@ public class WriteDbHandler4BeanFieldInfo extends AbstractWriteDbHandler<WriteDb
                 data.getFieldName(),
                 data.getFullFieldName(),
                 data.getFieldType(),
+                data.getFieldSimpleType(),
                 data.isHasGetter(),
                 data.isHasSetter()
         };

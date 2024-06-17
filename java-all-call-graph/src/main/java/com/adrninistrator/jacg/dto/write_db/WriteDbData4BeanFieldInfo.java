@@ -14,12 +14,13 @@ public class WriteDbData4BeanFieldInfo extends AbstractWriteDbData {
 
     private String fullFieldName;
     private String fieldType;
+    private String fieldSimpleType;
 
     private boolean hasGetter;
 
     private boolean hasSetter;
 
-    public WriteDbData4BeanFieldInfo(String fieldHash, String simpleClassName,String fqcn, int accessFlags, String fieldName, String fullFieldName, String fieldType, boolean hasGetter, boolean hasSetter) {
+    public WriteDbData4BeanFieldInfo(String fieldHash, String simpleClassName, String fqcn, int accessFlags, String fieldName, String fullFieldName, String fieldType, String fieldSimpleType, boolean hasGetter, boolean hasSetter) {
         this.fieldHash = fieldHash;
         this.simpleClassName = simpleClassName;
         this.fqcn = fqcn;
@@ -27,6 +28,7 @@ public class WriteDbData4BeanFieldInfo extends AbstractWriteDbData {
         this.fieldName = fieldName;
         this.fullFieldName = fullFieldName;
         this.fieldType = fieldType;
+        this.fieldSimpleType = fieldSimpleType;
         this.hasGetter = hasGetter;
         this.hasSetter = hasSetter;
     }
@@ -101,5 +103,13 @@ public class WriteDbData4BeanFieldInfo extends AbstractWriteDbData {
 
     public void setFqcn(String fqcn) {
         this.fqcn = fqcn;
+    }
+
+    public String getFieldSimpleType() {
+        return fieldSimpleType;
+    }
+
+    public void setFieldSimpleType(String fieldSimpleType) {
+        this.fieldSimpleType = fieldSimpleType;
     }
 }

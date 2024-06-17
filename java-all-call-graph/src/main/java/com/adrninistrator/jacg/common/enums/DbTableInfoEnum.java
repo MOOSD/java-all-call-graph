@@ -249,6 +249,7 @@ public enum DbTableInfoEnum {
             DC.BFI_FIELD_NAME,
             DC.BFI_FULL_FIELD_NAME,
             DC.BFI_FIELD_TYPE,
+            DC.BFI_FIELD_SIMPLE_TYPE,
             DC.BFI_HAS_GETTER,
             DC.BFI_HAS_SETTER,
     }),

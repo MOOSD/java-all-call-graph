@@ -5,6 +5,7 @@ CREATE TABLE if not exists bean_field_info_{appName} (
   access_flags int NOT NULL COMMENT '属性的access_flags',
   field_name varchar(300) NOT NULL COMMENT '属性名',
   full_field_name text NOT NULL COMMENT '完整属性（类名+方法名+参数）',
+  field_simple_type varchar(500) NOT NULL COMMENT '简单属性类型',
   field_type varchar(500) NOT NULL COMMENT '属性类型',
   has_getter tinyint NOT NULL COMMENT '属性是否存在getter',
   has_setter tinyint NOT NULL COMMENT '属性是否存在setter',

@@ -234,6 +234,8 @@ public class DC {
     public static final String BFI_FIELD_NAME = "field_name";
     public static final String BFI_FULL_FIELD_NAME = "full_field_name";
     public static final String BFI_FIELD_TYPE = "field_type";
+    public static final String BFI_FIELD_SIMPLE_TYPE = "field_simple_type";
+
     public static final String BFI_HAS_GETTER = "has_getter";
     public static final String BFI_HAS_SETTER = "has_setter";
 
