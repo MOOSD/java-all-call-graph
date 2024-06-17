@@ -237,6 +237,15 @@ public class DC {
     public static final String BFI_HAS_GETTER = "has_getter";
     public static final String BFI_HAS_SETTER = "has_setter";
 
+    public static final String BFGT_RECORD_ID = "record_id";
+    public static final String BFGT_FIELD_HASH = "field_hash";
+    public static final String BFGT_SIMPLE_CLASS_NAME = "simple_class_name";
+    public static final String BFGT_TYPE = "type";
+    public static final String BFGT_GENERICS_PATH = "generics_path";
+    public static final String BFGT_SIMPLE_GENERICS_TYPE = "simple_generics_type";
+    public static final String BFGT_GENERICS_TYPE = "generics_type";
+    public static final String BFGT_FULL_FIELD = "full_field_name";
+
 
     public static final String MAA_RECORD_ID = "record_id";
     public static final String MAA_METHOD_HASH = "method_hash";

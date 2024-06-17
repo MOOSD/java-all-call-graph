@@ -525,10 +525,19 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         if (!writeDbHandler4BeanFieldAnnotation.handle(javaCGOutputInfo)) {
             return false;
         }
+        // 处理bean的泛型信息
+        WriteDbHandler4BeanFieldGenericsType writeDbHandler4BeanFieldGenericsType = new WriteDbHandler4BeanFieldGenericsType();
+        initWriteDbHandler(writeDbHandler4BeanFieldGenericsType);
+        if(! writeDbHandler4BeanFieldGenericsType.handle(javaCGOutputInfo)){
+            return false;
+        }
+
         // 处理bean filed中的注解
         WriteDbHandler4BeanFieldInfo writeDbHandler4BeanFieldInfo = new WriteDbHandler4BeanFieldInfo();
         initWriteDbHandler(writeDbHandler4BeanFieldInfo);
         return writeDbHandler4BeanFieldInfo.handle(javaCGOutputInfo);
+
+
     }
 
 

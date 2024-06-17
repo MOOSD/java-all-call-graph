@@ -252,6 +252,16 @@ public enum DbTableInfoEnum {
             DC.BFI_HAS_GETTER,
             DC.BFI_HAS_SETTER,
     }),
+    DTIE_BEAN_FIELD_GENERICS_INFO("bean_field_generics_type", new String[]{
+            DC.BFGT_RECORD_ID,
+            DC.BFGT_FIELD_HASH,
+            DC.BFGT_SIMPLE_CLASS_NAME,
+            DC.BFGT_TYPE,
+            DC.BFGT_GENERICS_PATH,
+            DC.BFGT_SIMPLE_GENERICS_TYPE,
+            DC.BFGT_GENERICS_TYPE,
+            DC.BFGT_FULL_FIELD
+    }),
     DTIE_METHOD_ARGS_ANNOTATION("method_arg_annotation", new String[]{
             DC.MAA_RECORD_ID,
             DC.MAA_FULL_METHOD,
