@@ -28,7 +28,7 @@ public class DBTest {
 
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("D:\\Data\\IdeaProject\\newgrand\\precision\\precision-static\\target\\precision-static-1.0.2.jar");
+        otherConfigList.add("D:\\Data\\IdeaProject\\newgrand\\precision\\precision-static\\target\\precision-static-1.0.3.jar");
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow

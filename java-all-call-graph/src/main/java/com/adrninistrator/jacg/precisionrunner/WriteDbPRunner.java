@@ -157,7 +157,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
             return false;
         }
         setBreakPoint();
-        // 创建线程，参数指定为null，不调小实际创建的线程数
+        // 创建线程池，参数指定为null，不调小实际创建的线程数
         createThreadPoolExecutor(null);
         setBreakPoint();
         // 处理引用的类信息，需要首先处理
@@ -216,7 +216,10 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
             return false;
         }
         setBreakPoint();
-        // 处理方法调用关系文件（需要在后面处理）
+        // 处理bean field
+        if (!handleBeanField()) {
+            return false;
+        }
         // 处理方法调用关系文件（需要在后面处理）
         if (!handleMethodCall(springControllerMethodHashSet, withAnnotationMethodHashSet, withInfoCallIdSet, withArgsGenericsTypeMethodHash, withReturnGenericsTypeMethodHash,
                 myBatisMapperClassNameSet, myBatisMapperMethodWriteSet)) {
@@ -227,11 +230,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         if (!manualAddMethodCall()) {
             return false;
         }
-
-        // 处理bean field
-        if (!handleBeanField()) {
-            return false;
-        }
+        setBreakPoint();
         if (!checkResult()) {
             return false;
         }
