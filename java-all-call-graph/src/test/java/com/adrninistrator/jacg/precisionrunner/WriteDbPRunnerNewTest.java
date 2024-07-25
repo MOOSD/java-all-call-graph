@@ -20,7 +20,7 @@ public class WriteDbPRunnerNewTest {
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.3 version");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
 
@@ -32,7 +32,7 @@ public class WriteDbPRunnerNewTest {
 
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("D:\\Data\\TestData\\microservice\\i8");
+        otherConfigList.add("D:\\Data\\TestData\\i8\\dev 24-7-25");
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow
@@ -49,7 +49,7 @@ public class WriteDbPRunnerNewTest {
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"d6c");
-        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"master");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
 
@@ -61,7 +61,7 @@ public class WriteDbPRunnerNewTest {
 
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("D:\\Data\\TestData\\D6G");
+        otherConfigList.add("D:\\Data\\TestData\\D6G\\7-25 172\\dcs-platform-business");
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow

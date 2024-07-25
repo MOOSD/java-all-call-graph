@@ -4,6 +4,8 @@ import com.adrninistrator.jacg.common.JACGCommonNameConstants;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -70,6 +72,11 @@ public class SpringMvcRequestMappingUtil {
      */
     public static String getRequestMethodFromAnnoAttribute(String annoAttributeValue){
         return annoAttributeValue.substring(1, annoAttributeValue.length() - 1).replace("\"", "");
+    }
+    public static List<String> getRequestArrayMethodFromAnnoAttribute(String annoAttributeValue){
+        String requestMethodFromAnnoAttribute = getRequestMethodFromAnnoAttribute(annoAttributeValue);
+        String[] split = StringUtils.split(requestMethodFromAnnoAttribute, ",");
+        return Arrays.asList(split);
     }
     public static MappingType getMappingType(String annotationName) {
         for (int i = 0; i < JACGCommonNameConstants.SPRING_MVC_MAPPING_ANNOTATIONS.length; i++) {
