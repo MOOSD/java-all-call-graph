@@ -16,6 +16,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -260,13 +261,18 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         if (incompleteController.containsKey(methodHash) && controllerReqMethodMap.containsKey(methodHash)) {
             List<String> requestMethods = controllerReqMethodMap.get(methodHash);
             List<WriteDbData4SpringController> controllerList = incompleteController.get(methodHash);
+            // 存储复制后的接口信息
+            LinkedList<WriteDbData4SpringController> targetList = new LinkedList<>();
             for (WriteDbData4SpringController writeDbData4SpringController : controllerList) {
                 for (String requestMethod : requestMethods) {
-                    writeDbData4SpringController.setRequestMethod(requestMethod);
+                    WriteDbData4SpringController newWriteDbData4SpringController = new WriteDbData4SpringController();
+                    BeanUtils.copyProperties(writeDbData4SpringController, newWriteDbData4SpringController);
+                    newWriteDbData4SpringController.setRequestMethod(requestMethod);
+                    targetList.add(newWriteDbData4SpringController);
                 }
             }
             //记录组装完成，添加到记录新增列表
-            writeDbData4SpringControllerList.addAll(controllerList);
+            writeDbData4SpringControllerList.addAll(targetList);
             //释放记录
             controllerReqMethodMap.remove(methodHash);
             incompleteController.remove(methodHash);
@@ -382,13 +388,17 @@ public class WriteDbHandler4MethodAnnotation extends AbstractWriteDbHandler<Writ
         if (incompleteFeignClient.containsKey(methodHash) && feignClientReqMethodMap.containsKey(methodHash)) {
             List<String> requestMethods = feignClientReqMethodMap.get(methodHash);
             List<WriteDbData4FeignClientData> feignClientList = incompleteFeignClient.get(methodHash);
+            LinkedList<WriteDbData4FeignClientData> targetList = new LinkedList<>();
             for (WriteDbData4FeignClientData writeDbData4FeignClientData : feignClientList) {
                 for (String requestMethod : requestMethods) {
-                    writeDbData4FeignClientData.setRequestMethod(requestMethod);
+                    WriteDbData4FeignClientData newWriteDbData4FeignClientData = new WriteDbData4FeignClientData();
+                    BeanUtils.copyProperties(writeDbData4FeignClientData,newWriteDbData4FeignClientData);
+                    newWriteDbData4FeignClientData.setRequestMethod(requestMethod);
+                    targetList.add(newWriteDbData4FeignClientData);
                 }
             }
             //记录组装完成，添加到记录新增列表
-            writeDbData4FeignClientList.addAll(feignClientList);
+            writeDbData4FeignClientList.addAll(targetList);
             //释放记录
             feignClientReqMethodMap.remove(methodHash);
             incompleteFeignClient.remove(methodHash);
