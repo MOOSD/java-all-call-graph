@@ -79,6 +79,7 @@ public class DbOperator {
         dataSource.setTestOnReturn(false);
         dataSource.setTestWhileIdle(false);
         dataSource.setTimeBetweenEvictionRunsMillis(120000L);
+        dataSource.setMinEvictableIdleTimeMillis(300000L);
 
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
 
