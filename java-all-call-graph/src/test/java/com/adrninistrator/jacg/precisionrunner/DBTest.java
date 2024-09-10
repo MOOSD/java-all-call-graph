@@ -5,6 +5,8 @@ import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dto.write_db.WriteDBResult;
+import com.adrninistrator.jacg.util.JSON;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -33,11 +35,12 @@ public class DBTest {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow
         HashSet<String> otherConfigSet= new HashSet<>();
-        otherConfigSet.add("cn.newgrand");
+        otherConfigSet.add("abc");
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,otherConfigSet);
         WriteDbPRunner writeDbPRunner = new WriteDbPRunner();
         long beginTime = System.currentTimeMillis();
-        writeDbPRunner.run(configureWrapper);
+        WriteDBResult writeDBResult = writeDbPRunner.runWithResult(configureWrapper, null);
+        System.out.println(JSON.toJSONString(writeDBResult));
         long nowTime = System.currentTimeMillis();
         System.out.println("执行耗时: " + (nowTime - beginTime));
 

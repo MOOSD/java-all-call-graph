@@ -164,7 +164,7 @@ public class DbOperator {
     public void closeDs() {
         if (dataSource != null) {
             logger.info("[{}] 关闭数据源", objSeq);
-            rootLogger.info("插入数据量", insertCount.get());
+            rootLogger.info("入库数据{}条", insertCount.get());
             dataSource.close();
             dataSource = null;
             closed = true;

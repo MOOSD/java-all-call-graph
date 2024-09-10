@@ -68,8 +68,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
 
     private boolean run(ConfigureWrapper configureWrapper, RunnerController runnerController) throws RunnerBreakException {
         this.runnerController = runnerController;
-        run(configureWrapper);
-        return true;
+        return run(configureWrapper);
     }
 
     @Override
@@ -703,7 +702,8 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
                 success = false;
             }
         }
-        if(totalRecordNum < 500){
+
+        if(success && totalRecordNum < 500){
             showWarningMessage.add("入库的记录数过少");
         }
         return success;
