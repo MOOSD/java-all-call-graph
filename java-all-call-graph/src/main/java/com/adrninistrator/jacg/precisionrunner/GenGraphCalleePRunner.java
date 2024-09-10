@@ -956,7 +956,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             // 获取唯一类名（简单类名或完整类名）
             String simpleClassName = getSimpleClassName(className);
             if (simpleClassName == null) {
-                addWarningMessage("字节码信息库中不存在类，跳过其链路生成:"+className);
+                addWarningMessage("字节码信息库中不存在类 "+ className +" 跳过链路生成");
                 continue;
             }
 

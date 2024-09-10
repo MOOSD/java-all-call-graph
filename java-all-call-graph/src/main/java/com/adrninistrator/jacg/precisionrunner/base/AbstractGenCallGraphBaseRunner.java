@@ -238,8 +238,8 @@ public abstract class AbstractGenCallGraphBaseRunner extends AbstractPRunner {
 
             String simpleClassName = dbOperator.queryObjectOneColumn(sql, String.class, className);
             if (simpleClassName == null) {
-                logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定",
-                        className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
+//                logger.error("指定的完整类名 {} 不存在，请检查，可能因为指定的类所在的jar包未在配置文件 {}中指定",
+//                        className, OtherConfigFileUseListEnum.OCFULE_JAR_DIR.getKey());
             }
             return simpleClassName;
         }

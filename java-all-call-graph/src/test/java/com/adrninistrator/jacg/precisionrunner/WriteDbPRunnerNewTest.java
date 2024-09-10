@@ -6,6 +6,7 @@ import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseListEnum;
 import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dto.write_db.WriteDBResult;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -99,16 +100,16 @@ public class WriteDbPRunnerNewTest {
         configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,otherConfigSet);
         WriteDbPRunner writeDbPRunner = new WriteDbPRunner();
         RunnerController runnerController = new RunnerController();
-        FutureTask<Boolean> booleanFutureTask = new FutureTask<>(() -> writeDbPRunner.run(configureWrapper, runnerController));
+        FutureTask<WriteDBResult> writeDBResultFutureTask = new FutureTask<>(() -> writeDbPRunner.runWithResult(configureWrapper, runnerController));
         // 任务执行
-        new Thread(booleanFutureTask).start();
+        new Thread(writeDBResultFutureTask).start();
 
         // 10秒后任务取消
         Thread.sleep(10 * 1000);
         System.out.println("任务取消");
         runnerController.stop();
-        Boolean b = booleanFutureTask.get();
-        System.out.println("执行结束"+b);
+        WriteDBResult writeDBResult = writeDBResultFutureTask.get();
+        System.out.println("执行结束"+writeDBResult);
 
     }
     @Test

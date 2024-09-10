@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.api.RunnerController;
 import com.adrninistrator.jacg.common.JACGConstants;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
+import com.adrninistrator.jacg.dto.write_db.WriteDBResult;
 import com.adrninistrator.jacg.exception.RunnerBreakException;
 import com.adrninistrator.jacg.extensions.manual_add_method_call.AbstractManualAddMethodCall1;
 import com.adrninistrator.jacg.handler.method.MethodCallHandler;
@@ -11,7 +12,6 @@ import com.adrninistrator.jacg.handler.write_db.*;
 import com.adrninistrator.jacg.util.JACGFileUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGOutPutFileTypeEnum;
 import com.adrninistrator.javacg.util.JavaCGUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,7 +54,19 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     // 是否增量更新数据库
     private boolean incrementUpdate;
 
-    public boolean run(ConfigureWrapper configureWrapper, RunnerController runnerController) throws RunnerBreakException {
+    // 警告信息
+    private final ArrayList<String> showWarningMessage = new ArrayList<>();
+    private final ArrayList<String> showErrorMessage = new ArrayList<>();
+
+    public WriteDBResult runWithResult(ConfigureWrapper configureWrapper, RunnerController runnerController){
+        boolean runResult = run(configureWrapper, runnerController);
+        WriteDBResult writeDBResult = new WriteDBResult();
+        writeDBResult.setRunResult(runResult);
+        writeDBResult.setShowWarningMessage(showWarningMessage);
+        return writeDBResult;
+    }
+
+    private boolean run(ConfigureWrapper configureWrapper, RunnerController runnerController) throws RunnerBreakException {
         this.runnerController = runnerController;
         run(configureWrapper);
         return true;
@@ -673,19 +685,24 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         Set<String> writeDbHandlerNameSet = writeDbHandlerMap.keySet();
         List<String> writeDbHandlerNameList = new ArrayList<>(writeDbHandlerNameSet);
         Collections.sort(writeDbHandlerNameList);
+        long totalRecordNum = 0;
         for (String writeDbHandlerName : writeDbHandlerNameList) {
             AbstractWriteDbHandler<?> writeDbHandler = writeDbHandlerMap.get(writeDbHandlerName);
             logger.info("{} 执行状态 {} 写入数据库记录数 {}", writeDbHandlerName,writeDbHandler.checkFailed(), writeDbHandler.getWriteRecordNum());
-
+            totalRecordNum += writeDbHandler.getWriteRecordNum();
             if (writeDbHandler instanceof WriteDbHandler4ClassName && writeDbHandler.getWriteRecordNum() == 0) {
-                logger.warn("未向数据库写入数据，请检查文件\n{}\n以及写入数据库时需要处理的类名前缀配置 {}", javaCGOutputInfo.getMainFilePath(JavaCGOutPutFileTypeEnum.OPFTE_METHOD_CALL),
-                        OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX.getKey());
+                showWarningMessage.add("没有入库任何类信息，请检查配置");
+                logger.warn("没有入库任何类信息，请检查配置");
+                success = false;
             }
 
             if (writeDbHandler.checkFailed()) {
                 // 存在读文件写数据库失败
                 success = false;
             }
+        }
+        if(totalRecordNum < 500){
+            showWarningMessage.add("入库的记录数过少");
         }
         return success;
     }

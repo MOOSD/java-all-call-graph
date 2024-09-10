@@ -313,7 +313,7 @@ public class DbOperator {
             return false;
         }finally {
             long insertTime = System.currentTimeMillis() - insertStartTime;
-            if(insertTime > 1000 * 5){
+            if(insertTime > 1000 * 3){
                 rootLogger.error("慢插入sql:{} {} {}",thisCount ,insertTime ,sql);
             }
         }

@@ -61,7 +61,7 @@ public abstract class AbstractPRunner extends AbstractRunner {
         configureWrapper.addEntryClass(currentSimpleClassName);
 
         try {
-            logger.info("{} 开始执行", currentSimpleClassName);
+            logger.info("开始执行");
             long startTime = System.currentTimeMillis();
             someTaskFail = false;
 
