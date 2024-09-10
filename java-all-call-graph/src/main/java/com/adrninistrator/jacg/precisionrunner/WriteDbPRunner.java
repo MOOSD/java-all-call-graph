@@ -693,6 +693,8 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
             if (writeDbHandler instanceof WriteDbHandler4ClassName && writeDbHandler.getWriteRecordNum() == 0) {
                 showWarningMessage.add("没有入库任何类信息，请检查配置");
                 logger.warn("没有入库任何类信息，请检查配置");
+                // 视作任务执行失败
+                recordTaskFail();
                 success = false;
             }
 
