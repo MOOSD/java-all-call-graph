@@ -35,7 +35,7 @@ public class TestRunnerWriteDb {
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"i8");
-        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.3 version");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
         //config_db.propertis
@@ -46,7 +46,7 @@ public class TestRunnerWriteDb {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_CHECK_JAR_FILE_UPDATED,"true");
         //jar_dir.properties
         ArrayList<String> otherConfigList = new ArrayList<>();
-        otherConfigList.add("D:\\work\\jar\\i8\\dev");
+        otherConfigList.add("D:\\work\\jar\\100015\\dev");
 
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow

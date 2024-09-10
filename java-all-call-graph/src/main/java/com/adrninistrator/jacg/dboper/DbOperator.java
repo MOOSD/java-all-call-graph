@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author adrninistrator
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DbOperator {
     private static final Logger logger = LoggerFactory.getLogger(DbOperator.class);
+    Logger rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 
     private static final AtomicInteger ATOMIC_INTEGER = new AtomicInteger(0);
 
@@ -50,6 +52,8 @@ public class DbOperator {
     private boolean useH2Db = false;
 
     private boolean closed = false;
+
+    private AtomicLong insertCount = new AtomicLong(0);
 
     public static DbOperator genInstance(ConfigureWrapper configureWrapper, String entrySimpleClassName) {
         try {
@@ -82,6 +86,7 @@ public class DbOperator {
         dataSource.setMinEvictableIdleTimeMillis(300000L);
 
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
+
 
         appName = JACGSqlUtil.getTableSuffix(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME),
                 configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID));
@@ -159,6 +164,7 @@ public class DbOperator {
     public void closeDs() {
         if (dataSource != null) {
             logger.info("[{}] 关闭数据源", objSeq);
+            rootLogger.info("插入数据量", insertCount.get());
             dataSource.close();
             dataSource = null;
             closed = true;
@@ -287,21 +293,29 @@ public class DbOperator {
      * @return
      */
     public boolean batchInsert(String sql, List<Object[]> argumentList) {
+        long insertStartTime = System.currentTimeMillis();
+        long thisCount = insertCount.incrementAndGet();
         try {
             jdbcTemplate.batchUpdate(sql, argumentList);
             return true;
         } catch (Exception e) {
-            logger.error("批量插入失败sql:"+sql+",插入失败数据:"+argumentList.size(),e);
+            logger.error("批量插入失败sql:"+sql+",插入失败数据:"+argumentList.size());
+            rootLogger.error("批量插入的错误堆栈:",e);
             if (!noticeDropTable(e, sql)) {
                 if (argumentList.size() == 1) {
                     // 打印插入失败的数据
                     logger.error("error\nsql: [{}]\n数据: [{}]", sql, StringUtils.join(argumentList.get(0), JACGConstants.FLAG_COMMA_WITH_SPACE), e);
                 } else {
-                    logger.error("error 为了打印插入失败的数据，可将{} {}参数值设置为1\nsql: [{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(),
-                            ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(), sql, e);
+//                    logger.error("error 为了打印插入失败的数据，可将{} {}参数值设置为1\nsql: [{}]", ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getFileName(),
+//                            ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE.getKey(), sql, e);
                 }
             }
             return false;
+        }finally {
+            long insertTime = System.currentTimeMillis() - insertStartTime;
+            if(insertTime > 1000 * 5){
+                rootLogger.error("慢插入sql:{} {} {}",thisCount ,insertTime ,sql);
+            }
         }
     }
 
