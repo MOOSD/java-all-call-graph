@@ -9,8 +9,13 @@ import com.adrninistrator.jacg.common.enums.interfaces.MainConfigInterface;
  */
 public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_APP_NAME("app.name", "当前应用的调用关系写入数据库里的表名后缀", String.class),
+    DOMAIN_CODE("domain.code","业务域编码",String.class),
+
+    APP_VERSION_ID("app.version.id", "当前项目的版本号id", String.class),
     APP_VERSION_SUFFIX("app.version.suffix", "当前项目的版本号id", String.class),
+
     CKE_CALL_GRAPH_OUTPUT_DETAIL("call.graph.output.detail", "生成调用链时的详细程度，1: 最详细，2: 中等，3: 最简单", String.class),
+
     CKE_THREAD_NUM("thread.num", "并发处理线程数量/数据源连接池数量", Integer.class),
     CKE_IGNORE_DUP_CALLEE_IN_ONE_CALLER("ignore.dup.callee.in.one.caller", "生成向下的调用链时，在一个调用方法中出现多次的被调用方法（包含方法调用业务功能数据），是否需要忽略", Boolean.class),
     CKE_OUTPUT_ROOT_PATH("output.root.path", "生成调用链文件的根目录路径，以\"/\"或\"\\\\\"作为分隔符，末尾是否为分隔符不影响（默认为当前目录）", String.class),
@@ -19,10 +24,10 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     CKE_CHECK_JAR_FILE_UPDATED("check.jar.file.updated", "检查jar包文件是否有更新", Boolean.class),
     CROSS_SERVICE_BY_OPENFEIGN("call.graph.cs.openfeign", "基于OpenFeign的RPC框架是否跨微服务生成调用链路", Boolean.class),
     INCREMENT_UPDATE("increment.update","增量的更新数据库(非全删全插)",Boolean.class),
-    APP_VERSION_ID("app.version.id", "当前项目的版本号id", String.class),
     MAX_NODE_NUM("max.node.num","单颗树的最大节点数量",Integer.class),
     MDC_KEY("mdc.key","日志输出所用的MDC的键",String.class),
-    MDC_VALUE("mdc.value","日志输出所用的MDC的值",String.class)
+    MDC_VALUE("mdc.value","日志输出所用的MDC的值",String.class),
+
     ;
 
     // 参数key

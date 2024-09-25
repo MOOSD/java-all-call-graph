@@ -58,6 +58,9 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     private final ArrayList<String> showWarningMessage = new ArrayList<>();
     private final ArrayList<String> showErrorMessage = new ArrayList<>();
 
+    /**
+     * 入口方法
+     */
     public WriteDBResult runWithResult(ConfigureWrapper configureWrapper, RunnerController runnerController){
         boolean runResult = run(configureWrapper, runnerController);
         WriteDBResult writeDBResult = new WriteDBResult();

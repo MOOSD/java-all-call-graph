@@ -83,8 +83,8 @@ public class JACGSqlUtil {
         return sql.replace(JACGConstants.APP_NAME_IN_SQL, appName);
     }
 
-    public static String getTableSuffix(String appName, String versionId){
-        return appName+"_"+versionId;
+    public static String getTableSuffix(String appName, String domainCode, String versionId){
+        return appName+ "_" +domainCode + "_" + versionId;
     }
 
     private JACGSqlUtil() {

@@ -37,7 +37,7 @@ public abstract class AbstractPRunner extends AbstractRunner {
             if (handleDb()) {
                 // 需要操作数据库时执行的操作
                 // 指定项目名
-                appName = JACGSqlUtil.getTableSuffix(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME),
+                appName = JACGSqlUtil.getTableSuffix(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME), configureWrapper.getMainConfig(ConfigKeyEnum.DOMAIN_CODE),
                         configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID));
 
                 // 完成需要使用的基础配置的初始化

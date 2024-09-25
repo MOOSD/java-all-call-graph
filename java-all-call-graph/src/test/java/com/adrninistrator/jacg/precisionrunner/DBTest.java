@@ -14,6 +14,87 @@ import java.util.HashSet;
 
 public class DBTest {
     @Test
+    public void domainPrecisionTest(){
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        // 主配置文件信息 config.properties
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"testplatform");
+        configureWrapper.setMainConfig(ConfigKeyEnum.DOMAIN_CODE,"precision");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
+        // 设置所有业务域信息
+        HashSet<String> configSet = new HashSet<>();
+        configSet.add("precision");
+        configSet.add("bugkiller");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
+
+
+        // 写入数据库信息 config_db.propertis
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&connectTimeout=60000&socketTimeout=60000&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+
+
+        //设置jar扫描路径
+        ArrayList<String> otherConfigList = new ArrayList<>();
+        otherConfigList.add("D:\\work\\jar\\testplatform\\precision\\dev");
+
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
+        //allow
+        HashSet<String> otherConfigSet= new HashSet<>();
+        otherConfigSet.add("cn.newgrand");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, otherConfigSet);
+
+
+        // 启动
+        WriteDBResult writeDBResult = new WriteDbPRunner().runWithResult(configureWrapper, null);
+        System.out.println(JSON.toJSONString(writeDBResult));
+    }
+
+
+    @Test
+    public void domainBugKillTest(){
+        ConfigureWrapper configureWrapper = new ConfigureWrapper();
+        // 主配置文件信息 config.properties
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"testplatform");
+        configureWrapper.setMainConfig(ConfigKeyEnum.DOMAIN_CODE,"bugkiller");
+        configureWrapper.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
+        // 设置所有业务域信息
+        HashSet<String> configSet = new HashSet<>();
+        configSet.add("precision");
+        configSet.add("bugkiller");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
+
+
+        // 写入数据库信息 config_db.propertis
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&connectTimeout=60000&socketTimeout=60000&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+
+
+        //设置jar扫描路径
+        ArrayList<String> otherConfigList = new ArrayList<>();
+        otherConfigList.add("D:\\work\\jar\\testplatform\\bugkiller\\dev");
+        configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
+        // 允许的类前缀
+        HashSet<String> otherConfigSet= new HashSet<>();
+        otherConfigSet.add("cn.newgrand");
+        otherConfigSet.add("io.metersphere");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, otherConfigSet);
+
+        // 启动
+        WriteDBResult writeDBResult = new WriteDbPRunner().runWithResult(configureWrapper, null);
+        System.out.println(JSON.toJSONString(writeDBResult));
+
+
+    }
+
+
+    @Test
     public void mysqlTest(){
         ConfigureWrapper configureWrapper = new ConfigureWrapper();
         //config.properties
@@ -24,7 +105,7 @@ public class DBTest {
 
         //config_db.propertis
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
-        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&connectTimeout=60000&socketTimeout=60000&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.133:3306/test_db?autoReconnect=false&connectTimeout=60000&socketTimeout=60000&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
 
@@ -35,8 +116,8 @@ public class DBTest {
         configureWrapper.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_JAR_DIR,otherConfigList);
         //allow
         HashSet<String> otherConfigSet= new HashSet<>();
-        otherConfigSet.add("abc");
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,otherConfigSet);
+        otherConfigSet.add("cn.newgrand");
+        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX, otherConfigSet);
         WriteDbPRunner writeDbPRunner = new WriteDbPRunner();
         long beginTime = System.currentTimeMillis();
         WriteDBResult writeDBResult = writeDbPRunner.runWithResult(configureWrapper, null);

@@ -88,7 +88,7 @@ public class DbOperator {
         jdbcTemplate = new JdbcTemplateQuiet(dataSource);
 
 
-        appName = JACGSqlUtil.getTableSuffix(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME),
+        appName = JACGSqlUtil.getTableSuffix(configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME),configureWrapper.getMainConfig(ConfigKeyEnum.DOMAIN_CODE),
                 configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID));
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
         logger.info("[{}] 创建数据库操作对象 {}", objSeq, entrySimpleClassName);

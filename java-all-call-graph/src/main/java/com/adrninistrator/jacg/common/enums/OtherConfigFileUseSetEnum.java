@@ -26,6 +26,8 @@ public enum OtherConfigFileUseSetEnum implements ConfigInterface {
             "生成向上的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据"),
     OCFULE_BUSINESS_DATA_TYPE_SHOW_4ER(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_data_type_show_4er.properties",
             "生成向下的完整方法调用链时，需要显示的业务功能数据类型。若不指定则不显示业务功能数据"),
+    OCFULE_PROJECT_DOMAINS(InputDirEnum.IDE_BUSINESS_DATA_TYPE.getDirName() + "/business_domain.properties",
+            "当前项目下所有的业务域信息"),
     ;
 
     // 参数配置文件名
