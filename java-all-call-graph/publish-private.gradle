@@ -11,7 +11,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId group
             artifactId artifact
-            version "1.0.15-private-1.2.4-SNAPSHOT"
+            version "1.0.15-private-1.2.5-SNAPSHOT"
             from components.java
 
 
