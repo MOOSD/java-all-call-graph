@@ -312,6 +312,9 @@ public enum DbTableInfoEnum {
         return tableNameKeyword + "_" + JACGConstants.APP_NAME_IN_SQL;
     }
 
+    public String getTableNameByAppName(String appName){
+        return tableNameKeyword + "_" + appName;
+    }
     /**
      * 获取数据库表对应的sql文件名
      *

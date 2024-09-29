@@ -11,46 +11,111 @@ import org.junit.Test;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GenGraphCalleePRunnerNewTest {
     /**
      * 添加业务域后生成向上调用树
      */
-    public void getCallTreeDomain(){
+    @Test
+    public void getCallTreeDomainBugkiller(){
         GenGraphCalleePRunner genGraphCalleePRunner = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
-        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"precision");
-        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0.0.0.3 version");
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"testplatform");
+        runConfig.setMainConfig(ConfigKeyEnum.DOMAIN_CODE,"bugkiller");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
-        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"50");
+        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"1000");
+
         //config_db.properties
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
-        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/precision_dev?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
-        //allow_class_prefix.properties
-        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_ALLOWED_CLASS_PREFIX,"cn.newgrand");
 
-        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                "cn.newgrand.pm.crm.zb.service.impl.TendReceiptServiceImpl:sendUIC"
-        );
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
         );
 
+        // 设置所有业务域信息
+        HashSet<String> configSet = new HashSet<>();
+        configSet.add("precision");
+        configSet.add("bugkiller");
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
 
         runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
                 "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
                 "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
 
+        // 调用链路的追踪
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                "cn.newgrand.ck.gateway.controller.SystemController#nextId",
+                "io.metersphere.api.service.ApiDefinitionService#getApiDefinitionByProjectIdAndPath"
+        );
+
         long begin = System.currentTimeMillis();
         CallTrees<CalleeNode> tree = genGraphCalleePRunner.getLink(runConfig);
         System.out.println("执行时间: " + (System.currentTimeMillis() - begin));
         System.out.println(JACGJsonUtil.getJsonStr(tree));
+        List<CalleeNode> trees = tree.getTrees();
+        for (CalleeNode calleeNode : trees) {
+            System.out.println("调用树：" + calleeNode.getMethodName());
+            TreeVistor.printPrettyTree(calleeNode,"",true);
+        }
+    }
+
+    @Test
+    public void getCallTreeDomainPrecision(){
+        GenGraphCalleePRunner genGraphCalleePRunner = new GenGraphCalleePRunner();
+        RunConfig runConfig = new RunConfig();
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"testplatform");
+        runConfig.setMainConfig(ConfigKeyEnum.DOMAIN_CODE,"precision");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"dev");
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
+        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"1000");
+
+        //config_db.properties
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
+        );
+
+        // 设置所有业务域信息
+        HashSet<String> configSet = new HashSet<>();
+        configSet.add("precision");
+        configSet.add("bugkiller");
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
+
+        runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+                "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
+
+        // 调用链路的追踪
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                "cn.newgrand.ck.service.impl.ApiDocServiceImpl#addOperationToPathItem"
+        );
+
+        long begin = System.currentTimeMillis();
+        CallTrees<CalleeNode> tree = genGraphCalleePRunner.getLink(runConfig);
+        System.out.println("执行时间: " + (System.currentTimeMillis() - begin));
+        System.out.println(JACGJsonUtil.getJsonStr(tree));
+        List<CalleeNode> trees = tree.getTrees();
+        for (CalleeNode calleeNode : trees) {
+            System.out.println("调用树：" + calleeNode.getMethodName());
+            TreeVistor.printPrettyTree(calleeNode,"",true);
+        }
     }
 
 

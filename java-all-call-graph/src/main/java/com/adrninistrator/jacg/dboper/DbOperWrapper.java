@@ -80,7 +80,9 @@ public class DbOperWrapper {
     }
 
     private String getCachedSql(String sqlKey, int num) {
-        return sqlCacheMap.get(genSqlKey(sqlKey, num));
+        // 取消sql的缓存机制
+        return null;
+//        return sqlCacheMap.get(genSqlKey(sqlKey, num));
     }
 
     /**
@@ -110,15 +112,14 @@ public class DbOperWrapper {
 
     private String cacheSql(String sqlKey, String sql, String sqlKey4Print, int num) {
         // 根据sql语句的key与参数数量，生成最终的key
-        String finalSqlKey = genSqlKey(sqlKey, num);
+//        String finalSqlKey = genSqlKey(sqlKey, num);
 
         // 替换sql语句中的appName
-        String finalSql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
-        if (sqlCacheMap.putIfAbsent(finalSqlKey, finalSql) == null) {
-            // 假如有指定用于在日志中打印的key，则在日志中打印出来
-            logger.info("[{}] cache sql: [{} {}] [{}]", objSeq, finalSqlKey, sqlKey4Print, finalSql);
-        }
-        return finalSql;
+        //        if (sqlCacheMap.putIfAbsent(finalSqlKey, finalSql) == null) {
+//            // 假如有指定用于在日志中打印的key，则在日志中打印出来
+//            logger.info("[{}] cache sql: [{} {}] [{}]", objSeq, finalSqlKey, sqlKey4Print, finalSql);
+//        }
+        return JACGSqlUtil.replaceAppNameInSql(sql, appName);
     }
 
     /**

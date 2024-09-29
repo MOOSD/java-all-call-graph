@@ -111,8 +111,11 @@ List spring_test = ['org.springframework:spring-test:5.3.26']
 
 dependencies {
     compile apache_common, druid, mysql, h2database, slf4j, java_callgraph, mybatis_parser, jackson, jdom, spring_jdbc
-    testImplementation log4j, junit, spring_for_test, javax_inject, spring_test , 'javax.annotation:javax.annotation-api:1.3.2' ,
-    'com.alibaba:transmittable-thread-local:2.14.5'
+    testImplementation log4j, junit, spring_for_test, javax_inject, spring_test , 'javax.annotation:javax.annotation-api:1.3.2'
+}
+
+dependencies {
+    implementation group: 'com.alibaba', name: 'transmittable-thread-local', version: '2.14.5'
 }
 
 compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"

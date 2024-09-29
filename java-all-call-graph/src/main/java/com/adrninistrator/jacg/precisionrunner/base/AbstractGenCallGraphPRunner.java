@@ -11,6 +11,7 @@ import com.adrninistrator.jacg.dto.method_call.ObjArgsInfoInMethodCall;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4LambdaMethodInfo;
 import com.adrninistrator.jacg.handler.dto.business_data.BaseBusinessData;
 import com.adrninistrator.jacg.handler.dto.generics_type.MethodArgGenericsTypeInfo;
+import com.adrninistrator.jacg.handler.dto.spring.SpringControllerComplexInfo;
 import com.adrninistrator.jacg.util.JACGCallGraphFileUtil;
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
@@ -488,5 +489,25 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
             sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
         }
         return dbOperator.queryList(sql,ControllerInfo.class,fullMethod);
+    }
+
+    /**
+     * 根据方法Hash，查询对应Controller信息
+     * 这里是可能查出来多条数据的，post get分开展示
+     */
+    public List<SpringControllerComplexInfo> getSpringInfoByMethodHash(String methodHash){
+        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.SPC_QUERY_INFO_BY_METHOD_HASH;
+        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+        if(sql == null){
+            sql = "select " + DC.SPC_METHOD_HASH + "," +
+                    DC.SPC_SHOW_URI + "," +
+                    DC.SPC_FULL_METHOD + "," +
+                    DC.SPC_REQUEST_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_SPRING_CONTROLLER.getTableName() +
+                    " where " + DC.SPC_METHOD_HASH + " = ? ";
+            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }
+
+        return dbOperator.queryList(sql, SpringControllerComplexInfo.class, methodHash);
     }
 }

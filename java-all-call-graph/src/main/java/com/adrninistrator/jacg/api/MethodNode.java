@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MethodNode {
 
+    protected String domainCode;
     protected String id;
 
     @JsonIgnore
@@ -148,6 +149,14 @@ public class MethodNode {
             genMessage = new ArrayList<>();
         }
         genMessage.add(message);
+    }
+
+    public String getDomainCode() {
+        return domainCode;
+    }
+
+    public void setDomainCode(String domainCode) {
+        this.domainCode = domainCode;
     }
 
     public String getMethodName() {

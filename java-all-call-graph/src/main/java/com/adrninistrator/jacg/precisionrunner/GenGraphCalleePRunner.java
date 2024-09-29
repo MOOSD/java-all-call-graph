@@ -8,19 +8,20 @@ import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.call_graph.CallGraphNode4Callee;
 import com.adrninistrator.jacg.dto.call_graph.SuperCallChildInfo;
+import com.adrninistrator.jacg.dto.feign.FeignClientInfo;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
 import com.adrninistrator.jacg.dto.method.MethodFullInfo;
 import com.adrninistrator.jacg.dto.method.SimpleMethodCallDTO;
 import com.adrninistrator.jacg.dto.task.CalleeTaskInfo;
 import com.adrninistrator.jacg.dto.write_db.WriteDbData4MethodCall;
 import com.adrninistrator.jacg.exception.RunnerBreakException;
+import com.adrninistrator.jacg.handler.dto.spring.SpringControllerComplexInfo;
 import com.adrninistrator.jacg.precisionrunner.base.AbstractGenCallGraphPRunner;
 import com.adrninistrator.jacg.runner.RunnerGenAllGraph4Callee;
 import com.adrninistrator.jacg.util.*;
 import com.adrninistrator.jacg.util.spring.SpringMvcRequestMappingUtil;
 import com.adrninistrator.javacg.common.JavaCGCommonNameConstants;
 import com.adrninistrator.javacg.common.JavaCGConstants;
-import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.dto.stack.ListAsStack;
 import com.adrninistrator.javacg.util.JavaCGMethodUtil;
@@ -30,6 +31,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -291,7 +293,9 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         // 创建根节点，调用关系使用默认值
         CalleeNode root = genCalleeNode(entryCalleeFullMethod, JACGConstants.UNKNOWN_CALL_ID, JACGConstants.UNKNOWN_CALL_FLAGS,
                 JACGConstants.UNKNOWN_CALL_TYPE, 0, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START,
-                entryCalleeMethodHash, JACGConstants.NO_CYCLE_CALL_FLAG, null, null, origTaskText,true);
+                entryCalleeMethodHash, JACGConstants.NO_CYCLE_CALL_FLAG, null, null, origTaskText,
+                true,getDomain());
+
         calleeTrees.addTree(root);
 
         // 根据指定的调用者方法HASH，生成调用树
@@ -311,9 +315,11 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         // 记录父类方法调用子类方法对应信息的栈
         ListAsStack<SuperCallChildInfo> superCallChildInfoStack = new ListAsStack<>();
 
-        // 初始加入最下层节点，callerMethodHash设为null
-        CallGraphNode4Callee callGraphNode4CalleeHead = new CallGraphNode4Callee(entryCalleeMethodHash, null, entryCalleeFullMethod);
+        // 初始加入最下层节点，callerMethodHash设为null，默认业务域是开启时的业务域
+        CallGraphNode4Callee callGraphNode4CalleeHead = new CallGraphNode4Callee(entryCalleeMethodHash, null,
+                entryCalleeFullMethod, getDomain());
         callGraphNode4CalleeStack.push(callGraphNode4CalleeHead);
+
 
         // 输出结果数量
         int genNodeNum = 0;
@@ -322,13 +328,13 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             CallGraphNode4Callee callGraphNode4Callee = callGraphNode4CalleeStack.peek();
 
             // 查询当前节点的一个上层调用方法
-            WriteDbData4MethodCall callerMethod = queryOneByCalleeMethod(callGraphNode4Callee,methodNode.getCallInfo().getCallType());
+            WriteDbData4MethodCall callerMethod = queryOneByCalleeMethod(callGraphNode4Callee, methodNode.getCallInfo().getCallType());
             String serviceName = null;
             if (Objects.isNull(callerMethod)) {
-                //如果开启跨微服务生成,且当前为方法是一个controller
+                // 如果开启跨微服务生成,且当前为方法是一个controller
                 if(crossServiceByOpenFeign && Objects.nonNull(methodNode.getAnnotation()) && isControllerMethod(methodNode.getAnnotation())){
                     //找到此controller对应的openfeign,将feignClient作为此Controller的调用者继续生成调用链路,即伪造一次调用
-                    FeignAndControllerInfo feignAndControllerInfo = getFeignInfoByControllerMethodHash(callGraphNode4Callee);
+                    FeignAndControllerInfo feignAndControllerInfo = getFeignInfoByControllerCrossDomain(callGraphNode4Callee);
                     if (Objects.nonNull(feignAndControllerInfo)){
                         serviceName = feignAndControllerInfo.getServiceName();
                         callerMethod = getFeignCallByControllerMethodHash(feignAndControllerInfo);
@@ -342,9 +348,16 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                     }
                     //若未遍历到初始节点，则节点向上遍历,回到上一层回到上一层时，只可能是单个节点，因此取第一个元素，即当前方法的调用者。
                     methodNode = methodNode.getCaller();
+                    tryChangeAppDomain(methodNode.getDomainCode());
                     continue;
                 }
             }
+
+            // 尝试切换业务域
+
+            tryChangeAppDomain(callerMethod.getDomainCode());
+
+
 
             String calleeFullMethod = callGraphNode4Callee.getCalleeFullMethod();
             String callerFullMethod = callerMethod.getCallerFullMethod();
@@ -354,8 +367,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             String callType =  callerMethod.getCallType();
 
             // 处理父类方法调用子类方法的相关信息，更新调用者
-            MethodAndHash callerMethodAndHash = handleSuperCallChildInfo(superCallChildInfoStack, callGraphNode4CalleeStack.getHead(), calleeFullMethod, callerFullMethod,
-                    callType, origCallerMethodHash);
+            MethodAndHash callerMethodAndHash = handleSuperCallChildInfo(superCallChildInfoStack, callGraphNode4CalleeStack.getHead(),
+                    calleeFullMethod, callerFullMethod, callType, origCallerMethodHash);
             if (callerMethodAndHash == null) {
                 // 处理失败
                 return false;
@@ -375,8 +388,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
             // 获取此方法调用者信息，处理注解泛型信息等
             CalleeNode callee = genCalleeNode(callerFullMethod, methodCallId, callerMethod.getCallFlags(), callType,
-                    callerMethod.getCallerLineNumber(), callGraphNode4CalleeStack.getHead()+1, callerMethodHash, back2Level,
-                    serviceName, methodNode,null ,false);
+                    callerMethod.getCallerLineNumber(), callGraphNode4CalleeStack.getHead()+1,
+                    callerMethodHash, back2Level, serviceName, methodNode,null ,false, getDomain());
             // 未生成节点，节点向上遍历
             if(Objects.isNull(callee)){
                 if (handleCallerEmptyResult(callGraphNode4CalleeStack, superCallChildInfoStack ,methodNode)) {
@@ -406,7 +419,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             }
 
             // 继续上一层处理
-            CallGraphNode4Callee nextCallGraphNode4Callee = new CallGraphNode4Callee(callerMethodHash, null, callerFullMethod);
+            CallGraphNode4Callee nextCallGraphNode4Callee = new CallGraphNode4Callee(callerMethodHash,
+                    null, callerFullMethod, getDomain());
             callGraphNode4CalleeStack.push(nextCallGraphNode4Callee);
             methodNode = callee;
         }
@@ -421,6 +435,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
     /**
      * 获取作为controller的调用者的FeignClient
      * 相当于是Controller被一个Feign调用了。根据controller信息构造一个feign的调用信息
+     * 查询的表是所有业务域的表
      * @return 组装成的一个条调用记录
      */
     private WriteDbData4MethodCall getFeignCallByControllerMethodHash(FeignAndControllerInfo feignAndControllerInfo){
@@ -441,6 +456,8 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         callerMethodCall.setCallFlags(MethodCallFlagsEnum.MCFE_EE_METHOD_ANNOTATION.setFlag(0));
         //调用行设置为0
         callerMethodCall.setCallerLineNumber(0);
+        // todo feign 调用client，那么feign节点算作当前业务域
+        callerMethodCall.setDomainCode(getDomain());
 
         return callerMethodCall;
     }
@@ -459,13 +476,15 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                                        String serviceName,
                                        CalleeNode callee,
                                        String originText,
-                                       boolean isRoot) {
+                                       boolean isRoot,
+                                       String domainCode) {
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
 
         // 实例化一个新节点（子节点）
         CalleeNode caller = CalleeNode.instantiate();
         caller.setId(getIdNum());
+        caller.setDomainCode(domainCode);
         caller.setFullMethod(callerFullMethod);
         caller.setMethodHash(callerMethodHash);
         caller.setDepth(currentNodeLevel);
@@ -539,7 +558,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         }
 
         // 使用原始的调用方法
-        if (JavaCGCallTypeEnum.CTE_SUPER_CALL_CHILD.getType().equals(callType)) {
+        if (CTE_SUPER_CALL_CHILD.getType().equals(callType)) {
             // 当前方法调用类型是父类调用子类方法，记录父类方法调用子类方法对应信息的栈入栈
             String calleeClassName = JACGClassMethodUtil.getClassNameFromMethod(calleeFullMethod);
             String calleeSimpleClassName = dbOperWrapper.getSimpleClassName(calleeClassName);
@@ -642,21 +661,17 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
     // 查询当前节点的一个上层调用方法
     private WriteDbData4MethodCall queryOneByCalleeMethod(CallGraphNode4Callee callGraphNode4Callee,String callType) {
-        // 计算排除的方法
-        String excludeCallType = excludeCallType(callType);
+        // 调用类型进行转换
+        callType = transCallType(callType);
         // 确定通过调用方法进行查询使用的SQL语句
-        String sql = chooseQueryByCalleeMethodSql(callGraphNode4Callee.getCallerMethodHash(), excludeCallType);
-        ArrayList<Object> arguments = new ArrayList<>();
-        arguments.add(callGraphNode4Callee.getCalleeMethodHash());
-        // 不是第一次查询
-        if (callGraphNode4Callee.getCallerMethodHash() != null) {
-            arguments.add( callGraphNode4Callee.getCallerMethodHash());
+        Pair<String, List<Object>> sqlAndParamPair = chooseQueryByCalleeMethodSql(callGraphNode4Callee, callType);
+
+        WriteDbData4MethodCall writeDbData4MethodCall = dbOperator.queryObject(sqlAndParamPair.getLeft(), WriteDbData4MethodCall.class, sqlAndParamPair.getRight().toArray());
+        // 结果处理
+        if (Objects.nonNull(writeDbData4MethodCall) && Objects.isNull(writeDbData4MethodCall.getDomainCode())) {
+            writeDbData4MethodCall.setDomainCode(getDomain());
         }
-        // 有排除的调用类型
-        if(excludeCallType != null){
-            arguments.add(excludeCallType);
-        }
-        return dbOperator.queryObject(sql, WriteDbData4MethodCall.class, arguments.toArray());
+        return writeDbData4MethodCall;
     }
 
 
@@ -670,6 +685,79 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         }
         calleeNode.setEntrance(Boolean.TRUE);
     }
+
+    /**
+     * 去所有业务域查询Feign信息
+     * @return
+     */
+    private FeignAndControllerInfo getFeignInfoByControllerCrossDomain(CallGraphNode4Callee callGraphNode4Callee){
+        if (Objects.nonNull(callGraphNode4Callee.getCallerMethodHash())){
+            // 如果调用者信息已经生成,则表示此次的rpc调用被查询过不是第一次被查询，那么直接返回null，表示没有额外的rpc调用
+            return null;
+        }
+        String controllerHash = callGraphNode4Callee.getCalleeMethodHash();
+        // 获取本方法节点对应的Controller信息
+        List<SpringControllerComplexInfo> springInfoList = getSpringInfoByMethodHash(callGraphNode4Callee.getCalleeMethodHash());
+        if (CollectionUtils.isEmpty(springInfoList)){
+            return null;
+        }
+        if (springInfoList.size() > 1) {
+            logger.warn("此控制器方法对应复数个接口");
+        }
+        // todo 默认一个控制器方法对应一个接口,一个控制器方法对应多个接口的情况暂时忽略
+        SpringControllerComplexInfo springInfo = springInfoList.get(0);
+        logger.warn("此控制器的接口信息：{}:{}",springInfo.getRequestMethod(),springInfo.getShowUri());
+
+        String selectFeignSql = "";
+        ArrayList<Object> paramList = new ArrayList<>();
+        for (int i = 0; i < this.domainList.size(); i++) {
+            String domain = this.domainList.get(i);
+            // 去全局整个项目的FeignClient表中查询对应的Feign信息
+            selectFeignSql += "select " +
+                    DC.FC_FULL_METHOD + "," +
+                    DC.FC_METHOD_HASH + "," +
+                    DC.FC_SERVICE_NAME + "," +
+                    DC.FC_CONTEXT_ID + "," +
+                    DC.FC_SHOW_URI + "," +
+                    DC.FC_REQUEST_METHOD +
+                    " from " + DbTableInfoEnum.DTIE_FEIGN_CLIENT.getTableNameByAppName(getAppNameByDomain(domain)) +
+                    " where " + DC.FC_SHOW_URI + " = ? " +
+                    " and " + DC.FC_REQUEST_METHOD + " = ? ";
+            paramList.add(springInfo.getShowUri());
+            paramList.add(springInfo.getRequestMethod());
+            if (i < this.domainList.size() - 1 ) {
+                selectFeignSql += " union ";
+            }
+        }
+
+        List<FeignClientInfo> feignList = dbOperator.queryList(selectFeignSql, FeignClientInfo.class, paramList.toArray());
+
+        //假设一个feignClient对应多个接口的情况不存在。
+        if(CollectionUtils.isEmpty(feignList)){
+            logger.info("接口 {} 不是一个rpc接口",springInfo.getShowUri());
+            return null;
+        }
+        // 结果集的校验
+        StringBuilder warnMessage = new StringBuilder();
+        if(feignList.size() > 1){
+            warnMessage.append("controller和feign的对应大于一条,controllerHash: ").append(controllerHash);
+            addWarningMessage(warnMessage.toString());
+        }
+
+        //todo 假设一个feignClient对应多个接口的情况不存在。
+        FeignClientInfo feignClientInfo = feignList.get(0);
+        FeignAndControllerInfo feignAndControllerInfo = new FeignAndControllerInfo();
+        feignAndControllerInfo.setFeignMethodHash(feignClientInfo.getMethodHash());
+        feignAndControllerInfo.setFeignShowUri(feignClientInfo.getShowUri());
+        feignAndControllerInfo.setFeignFullMethod(feignClientInfo.getFullMethod());
+
+        feignAndControllerInfo.setControllerFullMethod(springInfo.getFullMethod());
+        feignAndControllerInfo.setControllerShowUri(springInfo.getShowUri());
+        feignAndControllerInfo.setControllerFullMethod(springInfo.getFullMethod());
+        return feignAndControllerInfo;
+    }
+
+
 
     /**
      * 根据controller的methodhash 获取feign相关信息
@@ -838,78 +926,135 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
 
     // 确定通过调用方法进行查询使用的SQL语句,查询结果和调用者的调用类型有关
-    protected String chooseQueryByCalleeMethodSql(String callerMethodHash,String excludeCallType) {
+    protected Pair<String,List<Object>> chooseQueryByCalleeMethodSql(CallGraphNode4Callee callGraphNode4Callee, String callType) {
+        ArrayList<Object> arguments = new ArrayList<>();
+        String calleeMethodHash = callGraphNode4Callee.getCalleeMethodHash();
+        String callerMethodHash = callGraphNode4Callee.getCallerMethodHash();
+
         // 根据被调用方法的调用类型，过滤掉一部分调用关系，确定要排除的调用关系
         // 第一次查询
         if (callerMethodHash == null) {
-            if(excludeCallType == null){
+            if (CTE_SUPER_CALL_CHILD_INTERFACE_OVERRIDE.getType().equals(callType) ||
+                    CTE_CHILD_CALL_SUPER_INTERFACE.getType().equals(callType)
+            ){
+                // 若排除的sql不空
+                SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_EXCLUDED_CALLER1;
+                String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+                if (sql == null) {
+                    // 确定查询被调用关系时所需字段
+                    sql = "select " + chooseCallerColumns() +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
+                            " where " + DC.MC_CALLEE_METHOD_HASH + " = ? " +
+                            " and " + DC.MC_CALL_TYPE + " != ? " +
+                            " order by " + DC.MC_CALLER_METHOD_HASH +
+                            " limit 1";
+                    sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+                }
+                arguments.add(calleeMethodHash);
+                arguments.add(callType);
+                return new ImmutablePair<>(sql,arguments);
+            // 如果是RPC调用，那么表示此节点是一个feign节点。需要去整个业务域的表中查询
+            }else if(ExtendCallTypeEnum.RPC.getType().equals(callType)){
+                String sql = "";
+                for (int i = 0; i < domainList.size(); i++) {
+                    String domain = domainList.get(i);
+                    sql += " select '" + domain + "' as domain_code ," + chooseCallerColumns() +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppNameByDomain(domain)) +
+                            " where " + DC.MC_CALLEE_METHOD_HASH + " = ? ";
+                    if (i < domainList.size() -1 ){
+                        sql += " union ";
+                    }else {
+                        sql += " order by domain_code , " + DC.MC_CALLER_METHOD_HASH +
+                               " limit 1 ";
+                    }
+                    arguments.add(calleeMethodHash);
+                }
+
+                return new ImmutablePair<>(sql,arguments);
+            }else {
                 SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_CALLER1;
                 String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
                 if (sql == null) {
                     // 确定查询被调用关系时所需字段
                     sql = "select " + chooseCallerColumns() +
-                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ? " +
                             " order by " + DC.MC_CALLER_METHOD_HASH +
                             " limit 1";
                     sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
                 }
-                return sql;
+                arguments.add(calleeMethodHash);
+                return new ImmutablePair<>(sql,arguments);
+                // 这是需要排除的调用类型
             }
-            // 若排除的sql不空
-            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_EXCLUDED_CALLER1;
-            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-            if (sql == null) {
-                // 确定查询被调用关系时所需字段
-                sql = "select " + chooseCallerColumns() +
-                        " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                        " where " + DC.MC_CALLEE_METHOD_HASH + " = ? " +
-                        " and " + DC.MC_CALL_TYPE + " != ? " +
-                        " order by " + DC.MC_CALLER_METHOD_HASH +
-                        " limit 1";
-                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-            }
-            return sql;
-        }
 
-        // 不是第一次查询
-        if(excludeCallType == null){
-            SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_CALLER2;
-            String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-            if (sql == null) {
-                // 确定查询被调用关系时所需字段
-                sql = "select " + chooseCallerColumns() +
-                        " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                        " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
-                        " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
-                        " order by " + DC.MC_CALLER_METHOD_HASH +
-                        " limit 1";
-                sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+        }else{
+            if (CTE_SUPER_CALL_CHILD_INTERFACE_OVERRIDE.getType().equals(callType) ||
+                    CTE_CHILD_CALL_SUPER_INTERFACE.getType().equals(callType)
+            ) {
+                SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_EXCLUDE_CALLER2;
+                String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+                if (sql == null) {
+                    // 确定查询被调用关系时所需字段
+                    sql = "select " + chooseCallerColumns() +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
+                            " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
+                            " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
+                            " and " + DC.MC_CALL_TYPE + " != ? " +
+                            " order by " + DC.MC_CALLER_METHOD_HASH +
+                            " limit 1";
+                    sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+                }
+                arguments.add(calleeMethodHash);
+                arguments.add(callerMethodHash);
+                arguments.add(callType);
+                return  new ImmutablePair<>(sql,arguments);
+            } else if (ExtendCallTypeEnum.RPC.getType().equals(callType)) {
+                String sql = " select * from  ( ";
+                for (int i = 0; i < domainList.size(); i++) {
+                    String domain = domainList.get(i);
+                    sql += " select '" + domain + "' as domain_code ," + chooseCallerColumns() +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppNameByDomain(domain)) +
+                            " where " + DC.MC_CALLEE_METHOD_HASH + " = ? ";
+                    if (i < domainList.size() -1 ){
+                        sql += " union ";
+                    }
+                    arguments.add(calleeMethodHash);
+                }
+                sql += " order by domain_code , " + DC.MC_CALLER_METHOD_HASH + " )  as tamp " +
+                        "where " +  DC.MC_CALLER_METHOD_HASH + " > ? limit 1 ";
+                arguments.add(callerMethodHash);
+                return new ImmutablePair<>(sql,arguments);
+            } else {
+                SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_CALLER2;
+                String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
+                if (sql == null) {
+                    // 确定查询被调用关系时所需字段
+                    sql = "select " + chooseCallerColumns() +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
+                            " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
+                            " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
+                            " order by " + DC.MC_CALLER_METHOD_HASH +
+                            " limit 1";
+                    sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
+                }
+                arguments.add(calleeMethodHash);
+                arguments.add(callerMethodHash);
+                return new ImmutablePair<>(sql,arguments);
             }
-            return sql;
         }
-
-        SqlKeyEnum sqlKeyEnum = SqlKeyEnum.MC_QUERY_ONE_EXCLUDE_CALLER2;
-        String sql = dbOperWrapper.getCachedSql(sqlKeyEnum);
-        if (sql == null) {
-            // 确定查询被调用关系时所需字段
-            sql = "select " + chooseCallerColumns() +
-                    " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
-                    " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
-                    " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
-                    " and " + DC.MC_CALL_TYPE + " != ? " +
-                    " order by " + DC.MC_CALLER_METHOD_HASH +
-                    " limit 1";
-            sql = dbOperWrapper.cacheSql(sqlKeyEnum, sql);
-        }
-        return sql;
     }
-    private String excludeCallType(String calleeCallType){
+
+
+    private String transCallType(String calleeCallType){
         if (CTE_SUPER_CALL_CHILD_INTERFACE_OVERRIDE.getType().equals(calleeCallType)) {
             return CTE_CHILD_CALL_SUPER_INTERFACE.getType();
         }
         if (CTE_CHILD_CALL_SUPER_INTERFACE.getType().equals(calleeCallType)) {
             return CTE_SUPER_CALL_CHILD_INTERFACE_OVERRIDE.getType();
+        }
+        if (ExtendCallTypeEnum.RPC.getType().equals(calleeCallType)){
+            return ExtendCallTypeEnum.RPC.getType();
         }
         return null;
     }

@@ -2,7 +2,6 @@ package com.adrninistrator.jacg.dto.write_db;
 
 import com.adrninistrator.jacg.util.JACGClassMethodUtil;
 import com.adrninistrator.jacg.util.JACGUtil;
-import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 
 /**
  * @author adrninistrator
@@ -10,6 +9,7 @@ import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
  * @description: 用于写入数据库的数据，方法调用
  */
 public class WriteDbData4MethodCall extends AbstractWriteDbData {
+    private String domainCode;
     private int callId;
     private String callType;
     private String calleeObjType;
@@ -90,6 +90,13 @@ public class WriteDbData4MethodCall extends AbstractWriteDbData {
         return writeDbData4MethodCall;
     }
 
+    public String getDomainCode() {
+        return domainCode;
+    }
+
+    public void setDomainCode(String domainCode) {
+        this.domainCode = domainCode;
+    }
     //
     public int getCallId() {
         return callId;

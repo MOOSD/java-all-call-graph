@@ -72,6 +72,9 @@ public class JACGSqlUtil {
         return StringUtils.join(columns, JACGConstants.FLAG_COMMA_WITH_SPACE);
     }
 
+    public static String getAppName(){
+        return null;
+    }
     /**
      * 替换sql语句中的appName
      *

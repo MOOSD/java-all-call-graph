@@ -355,7 +355,7 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
     private String transformCreateTableSql(String sql, boolean useH2Db) {
         if (sql.startsWith(JACGConstants.SQL_CREATE_TABLE_HEAD)) {
             // CREATE TABLE if not exists开头
-            return JACGSqlUtil.replaceAppNameInSql(sql, appName);
+            return JACGSqlUtil.replaceAppNameInSql(sql, getAppName());
         }
 
         if (sql.contains(JACGConstants.SQL_ENGINE_INNODB)) {
@@ -371,10 +371,10 @@ public class WriteDbPRunner extends WriteCallGraphFilePRunner {
         if (StringUtils.startsWithAny(trimSql, "PRIMARY KEY", "INDEX", "UNIQUE INDEX")) {
             // PRIMARY KEY、INDEX、UNIQUE INDEX开头
             if (useH2Db) {
-                return JACGSqlUtil.replaceAppNameInSql(sql, appName)
+                return JACGSqlUtil.replaceAppNameInSql(sql, getAppName())
                         .replaceAll("\\([0-9]+\\)", "");
             }
-            return JACGSqlUtil.replaceAppNameInSql(sql, appName);
+            return JACGSqlUtil.replaceAppNameInSql(sql, getAppName());
         }
 
         // 其他情况
