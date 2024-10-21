@@ -377,6 +377,8 @@ public class DbOperator {
         }
     }
 
+
+
     /**
      * 查询一行且只有一列的记录，返回类型为基本类型
      *
@@ -446,5 +448,9 @@ public class DbOperator {
 
     public boolean isClosed() {
         return closed;
+    }
+
+    public JdbcTemplateQuiet getJdbcTemplate() {
+        return jdbcTemplate;
     }
 }

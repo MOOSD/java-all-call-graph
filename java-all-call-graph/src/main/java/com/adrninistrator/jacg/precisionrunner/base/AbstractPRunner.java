@@ -1,7 +1,7 @@
 package com.adrninistrator.jacg.precisionrunner.base;
 
 import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
-import com.adrninistrator.jacg.common.enums.OtherConfigFileUseSetEnum;
+import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
 import com.adrninistrator.jacg.exception.RunnerBreakException;
@@ -9,12 +9,14 @@ import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
 import com.alibaba.ttl.TransmittableThreadLocal;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 精准化流程中用到的Runner的抽象类
@@ -50,14 +52,7 @@ public abstract class AbstractPRunner extends AbstractRunner {
                 this.projectCode = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
                 this.versionCode = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID);
                 // 从数据库表中读取，而非从配置中获取
-                this.domainList = new ArrayList(configureWrapper.getOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, true));
                 String domain = configureWrapper.getMainConfig(ConfigKeyEnum.DOMAIN_CODE);
-                // 校验业务域信息
-                if (CollectionUtils.isEmpty(domainList) || !domainList.contains(domain)){
-                    logger.warn("项目全业务域信息异常");
-                    return;
-                }
-
                 this.domain =  new TransmittableThreadLocal<String>(){
                     @Override
                     protected String initialValue() {
@@ -76,7 +71,18 @@ public abstract class AbstractPRunner extends AbstractRunner {
                 dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);
                 dbOperator = dbOperWrapper.getDbOperator();
                 jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
+
+                // 初始化所有业务域信息
+                domainList = getAllDomainName();
+                // 校验业务域信息
+                if (CollectionUtils.isEmpty(domainList) || !domainList.contains(domain)){
+                    logger.warn("业务域不存在");
+                    return;
+                }
+
             }
+
+
             inited = true;
         }
     }
@@ -165,5 +171,21 @@ public abstract class AbstractPRunner extends AbstractRunner {
     @Override
     protected void printAllConfigInfo() {
         // 暂时设置空实现
+    }
+
+    /**
+     * 获取所有表中已有的业务域的名称
+     */
+    protected List<String> getAllDomainName(){
+        String tableNameSuffix = StringUtils.joinWith("_",DbTableInfoEnum.DTIE_METHOD_CALL.getSqlKey4Print(), this.projectCode);
+        String sql = "show tables like '"+tableNameSuffix + "%'";
+        List<String> tableNames = dbOperator.getJdbcTemplate().queryForList(sql, String.class);
+        return tableNames.stream().map(domainName -> {
+            String[] split = StringUtils.split(domainName, '_');
+            if (split.length != 5) {
+                return null;
+            }
+            return split[split.length - 2];
+        }).filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
 }
