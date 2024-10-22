@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 @JsonSubTypes({@JsonSubTypes.Type(value = CallerNode.class),@JsonSubTypes.Type(value = CalleeNode.class)})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MethodNode {
-
+    protected String domainName;
     protected String domainCode;
     protected String id;
 

@@ -54,7 +54,7 @@ public class GenGraphCalleePRunnerNewTest {
 
         // 调用链路的追踪
         runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
-                "cn.newgrand.ck.gateway.controller.SystemController#nextId");
+                "cn.newgrand.ck.gateway.controller.SystemController:15");
 
         long begin = System.currentTimeMillis();
         CallTrees<CalleeNode> tree = genGraphCalleePRunner.getLink(runConfig);
