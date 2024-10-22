@@ -4,17 +4,22 @@ import com.adrninistrator.jacg.common.enums.ConfigKeyEnum;
 import com.adrninistrator.jacg.common.enums.DbTableInfoEnum;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dboper.DbOperWrapper;
+import com.adrninistrator.jacg.dto.call_graph.DomainInfo;
 import com.adrninistrator.jacg.exception.RunnerBreakException;
 import com.adrninistrator.jacg.handler.extends_impl.JACGExtendsImplHandler;
 import com.adrninistrator.jacg.runner.base.AbstractRunner;
 import com.adrninistrator.jacg.util.JACGSqlUtil;
+import com.adrninistrator.jacg.util.JSON;
 import com.alibaba.ttl.TransmittableThreadLocal;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -25,9 +30,9 @@ public abstract class AbstractPRunner extends AbstractRunner {
     private static final Logger logger = LoggerFactory.getLogger(AbstractPRunner.class);
 
     protected TransmittableThreadLocal<String> appName;
-    protected TransmittableThreadLocal<String> domain;
+    protected TransmittableThreadLocal<DomainInfo> domain;
     protected  String currentSimpleClassName;
-    protected List<String> domainList;
+    protected Map<String, DomainInfo> domainInfoMap;
     protected String projectCode;
     protected String versionCode;
 
@@ -53,10 +58,10 @@ public abstract class AbstractPRunner extends AbstractRunner {
                 this.versionCode = configureWrapper.getMainConfig(ConfigKeyEnum.APP_VERSION_ID);
                 // 从数据库表中读取，而非从配置中获取
                 String domain = configureWrapper.getMainConfig(ConfigKeyEnum.DOMAIN_CODE);
-                this.domain =  new TransmittableThreadLocal<String>(){
+                this.domain =  new TransmittableThreadLocal<DomainInfo>(){
                     @Override
-                    protected String initialValue() {
-                        return domain;
+                    protected DomainInfo initialValue() {
+                        return domainInfoMap.get(domain);
                     }
                 };
                 // 创建项目名
@@ -73,9 +78,9 @@ public abstract class AbstractPRunner extends AbstractRunner {
                 jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
 
                 // 初始化所有业务域信息
-                domainList = getAllDomainName();
+                domainInfoMap = getAllDomainName();
                 // 校验业务域信息
-                if (CollectionUtils.isEmpty(domainList) || !domainList.contains(domain)){
+                if (CollectionUtils.isEmpty(domainInfoMap) || !domainInfoMap.containsKey(domain)){
                     logger.warn("业务域不存在");
                     return;
                 }
@@ -91,19 +96,24 @@ public abstract class AbstractPRunner extends AbstractRunner {
         return appName.get();
     }
 
-    public String getDomain(){
+    public String getDomainCode(){
+        return domain.get().getDomainCode();
+    }
+
+    public DomainInfo getDomain(){
         return domain.get();
     }
     /**
      * 修改APP名称中的业务域
      */
     public void tryChangeAppDomain(String doMainCode){
-        if (getDomain().equals(doMainCode)) {
+        if (getDomainCode().equals(doMainCode)) {
             logger.debug("处于相同业务域下无需切换");
             return;
         }
-        logger.info("切换业务域:[{}], [{}]",getDomain() ,doMainCode);
-        this.domain.set(doMainCode);
+        logger.info("切换业务域:[{}], [{}]", getDomainCode() ,doMainCode);
+        DomainInfo domainInfo = domainInfoMap.get(doMainCode);
+        this.domain.set(domainInfo);
         this.appName.set(getAppNameByDomain(doMainCode));
     }
 
@@ -176,16 +186,40 @@ public abstract class AbstractPRunner extends AbstractRunner {
     /**
      * 获取所有表中已有的业务域的名称
      */
-    protected List<String> getAllDomainName(){
+    protected Map<String, DomainInfo> getAllDomainName(){
+        Map<String, DomainInfo> allDomainCode = new HashMap<>();
+        // 处理配置文件中的domains
+
+        String mainConfigStr = configureWrapper.getMainConfig(ConfigKeyEnum.DOMAIN_CODES, true);
+        if(StringUtils.isNotBlank(mainConfigStr)){
+            List<DomainInfo> domainInfos = JSON.parseArray(mainConfigStr, new TypeReference<DomainInfo>() {});
+            for (DomainInfo domainInfo : domainInfos) {
+                allDomainCode.put(domainInfo.getDomainCode(), domainInfo);
+            }
+        }
+
+        // 读取数据库中实际存在的业务域信息
         String tableNameSuffix = StringUtils.joinWith("_",DbTableInfoEnum.DTIE_METHOD_CALL.getSqlKey4Print(), this.projectCode);
         String sql = "show tables like '"+tableNameSuffix + "%'";
         List<String> tableNames = dbOperator.getJdbcTemplate().queryForList(sql, String.class);
-        return tableNames.stream().map(domainName -> {
-            String[] split = StringUtils.split(domainName, '_');
-            if (split.length != 5) {
-                return null;
-            }
-            return split[split.length - 2];
-        }).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        return tableNames.stream()
+                .map(domainName -> {
+                    String[] split = StringUtils.split(domainName, '_');
+                    if (split.length != 5) {
+                        return null;
+                    }
+                    return split[split.length - 2];
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toMap(domainCode -> domainCode, domainCode -> {
+                    DomainInfo domainInfo = allDomainCode.get(domainCode);
+                    if(Objects.isNull(domainInfo)){
+                        return new DomainInfo(domainCode,domainCode);
+                    }
+                    return domainInfo;
+                }));
+
+
     }
 }

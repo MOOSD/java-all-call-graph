@@ -23,11 +23,6 @@ public class DBTest {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
         // 设置所有业务域信息
-        HashSet<String> configSet = new HashSet<>();
-        configSet.add("precision");
-        configSet.add("bugkiller");
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
-
 
         // 写入数据库信息 config_db.propertis
         configureWrapper.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
@@ -63,10 +58,6 @@ public class DBTest {
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
         configureWrapper.setMainConfig(ConfigKeyEnum.CKE_DB_INSERT_BATCH_SIZE,"1000");
         // 设置所有业务域信息
-        HashSet<String> configSet = new HashSet<>();
-        configSet.add("precision");
-        configSet.add("bugkiller");
-        configureWrapper.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
 
 
         // 写入数据库信息 config_db.propertis

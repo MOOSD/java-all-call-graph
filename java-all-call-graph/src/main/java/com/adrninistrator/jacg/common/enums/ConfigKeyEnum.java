@@ -28,7 +28,7 @@ public enum ConfigKeyEnum implements MainConfigInterface {
     MDC_KEY("mdc.key","日志输出所用的MDC的键",String.class),
     MDC_VALUE("mdc.value","日志输出所用的MDC的值",String.class),
 
-    ;
+    DOMAIN_CODES("domain.codes","业务域编码信息，对应的序列化字符串",String.class );
 
     // 参数key
     private final String key;

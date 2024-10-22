@@ -7,6 +7,7 @@ import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.ConfigureWrapper;
 import com.adrninistrator.jacg.dto.annotation.BaseAnnotationAttribute;
 import com.adrninistrator.jacg.dto.call_graph.CallGraphNode4Callee;
+import com.adrninistrator.jacg.dto.call_graph.DomainInfo;
 import com.adrninistrator.jacg.dto.call_graph.SuperCallChildInfo;
 import com.adrninistrator.jacg.dto.feign.FeignClientInfo;
 import com.adrninistrator.jacg.dto.method.MethodAndHash;
@@ -294,7 +295,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         CalleeNode root = genCalleeNode(entryCalleeFullMethod, JACGConstants.UNKNOWN_CALL_ID, JACGConstants.UNKNOWN_CALL_FLAGS,
                 JACGConstants.UNKNOWN_CALL_TYPE, 0, JACGConstants.CALL_GRAPH_METHOD_LEVEL_START,
                 entryCalleeMethodHash, JACGConstants.NO_CYCLE_CALL_FLAG, null, null, origTaskText,
-                true,getDomain());
+                true, getDomain());
 
         calleeTrees.addTree(root);
 
@@ -317,7 +318,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
         // 初始加入最下层节点，callerMethodHash设为null，默认业务域是开启时的业务域
         CallGraphNode4Callee callGraphNode4CalleeHead = new CallGraphNode4Callee(entryCalleeMethodHash, null,
-                entryCalleeFullMethod, getDomain());
+                entryCalleeFullMethod, getDomainCode());
         callGraphNode4CalleeStack.push(callGraphNode4CalleeHead);
 
 
@@ -420,7 +421,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
             // 继续上一层处理
             CallGraphNode4Callee nextCallGraphNode4Callee = new CallGraphNode4Callee(callerMethodHash,
-                    null, callerFullMethod, getDomain());
+                    null, callerFullMethod, getDomainCode());
             callGraphNode4CalleeStack.push(nextCallGraphNode4Callee);
             methodNode = callee;
         }
@@ -457,7 +458,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         //调用行设置为0
         callerMethodCall.setCallerLineNumber(0);
         // todo feign 调用client，那么feign节点算作当前业务域
-        callerMethodCall.setDomainCode(getDomain());
+        callerMethodCall.setDomainCode(getDomainCode());
 
         return callerMethodCall;
     }
@@ -477,14 +478,15 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                                        CalleeNode callee,
                                        String originText,
                                        boolean isRoot,
-                                       String domainCode) {
+                                       DomainInfo domainCode) {
         String callerClassName = JACGClassMethodUtil.getClassNameFromMethod(callerFullMethod);
         String callerSimpleClassName = dbOperWrapper.getSimpleClassName(callerClassName);
 
         // 实例化一个新节点（子节点）
         CalleeNode caller = CalleeNode.instantiate();
         caller.setId(getIdNum());
-        caller.setDomainCode(domainCode);
+        caller.setDomainCode(domainCode.getDomainCode());
+        caller.setDomainName(domainCode.getDomainName());
         caller.setFullMethod(callerFullMethod);
         caller.setMethodHash(callerMethodHash);
         caller.setDepth(currentNodeLevel);
@@ -669,7 +671,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
         WriteDbData4MethodCall writeDbData4MethodCall = dbOperator.queryObject(sqlAndParamPair.getLeft(), WriteDbData4MethodCall.class, sqlAndParamPair.getRight().toArray());
         // 结果处理
         if (Objects.nonNull(writeDbData4MethodCall) && Objects.isNull(writeDbData4MethodCall.getDomainCode())) {
-            writeDbData4MethodCall.setDomainCode(getDomain());
+            writeDbData4MethodCall.setDomainCode(getDomainCode());
         }
         return writeDbData4MethodCall;
     }
@@ -710,8 +712,10 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
 
         String selectFeignSql = "";
         ArrayList<Object> paramList = new ArrayList<>();
-        for (int i = 0; i < this.domainList.size(); i++) {
-            String domain = this.domainList.get(i);
+        Set<String> domainCodeSet = this.domainInfoMap.keySet();
+        Iterator<String> iterator = domainCodeSet.iterator();
+        while (iterator.hasNext()){
+            String domain = iterator.next();
             // 去全局整个项目的FeignClient表中查询对应的Feign信息
             selectFeignSql += "select " +
                     DC.FC_FULL_METHOD + "," +
@@ -725,7 +729,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                     " and " + DC.FC_REQUEST_METHOD + " = ? ";
             paramList.add(springInfo.getShowUri());
             paramList.add(springInfo.getRequestMethod());
-            if (i < this.domainList.size() - 1 ) {
+            if (iterator.hasNext()) {
                 selectFeignSql += " union ";
             }
         }
@@ -956,19 +960,21 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
             // 如果是RPC调用，那么表示此节点是一个feign节点。需要去整个业务域的表中查询
             }else if(ExtendCallTypeEnum.RPC.getType().equals(callType)){
                 String sql = "";
-                for (int i = 0; i < domainList.size(); i++) {
-                    String domain = domainList.get(i);
+                Iterator<String> iterator = domainInfoMap.keySet().iterator();
+                while (iterator.hasNext()){
+                    String domain = iterator.next();
                     sql += " select '" + domain + "' as domain_code ," + chooseCallerColumns() +
                             " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppNameByDomain(domain)) +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ? ";
-                    if (i < domainList.size() -1 ){
+                    if (iterator.hasNext()){
                         sql += " union ";
                     }else {
                         sql += " order by domain_code , " + DC.MC_CALLER_METHOD_HASH +
-                               " limit 1 ";
+                                " limit 1 ";
                     }
                     arguments.add(calleeMethodHash);
                 }
+
 
                 return new ImmutablePair<>(sql,arguments);
             }else {
@@ -1011,16 +1017,18 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 return  new ImmutablePair<>(sql,arguments);
             } else if (ExtendCallTypeEnum.RPC.getType().equals(callType)) {
                 String sql = " select * from  ( ";
-                for (int i = 0; i < domainList.size(); i++) {
-                    String domain = domainList.get(i);
+                Iterator<String> iterator = domainInfoMap.keySet().iterator();
+                while (iterator.hasNext()){
+                    String domain = iterator.next();
                     sql += " select '" + domain + "' as domain_code ," + chooseCallerColumns() +
                             " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppNameByDomain(domain)) +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ? ";
-                    if (i < domainList.size() -1 ){
+                    if (iterator.hasNext()){
                         sql += " union ";
                     }
                     arguments.add(calleeMethodHash);
                 }
+
                 sql += " order by domain_code , " + DC.MC_CALLER_METHOD_HASH + " )  as tamp " +
                         "where " +  DC.MC_CALLER_METHOD_HASH + " > ? limit 1 ";
                 arguments.add(callerMethodHash);

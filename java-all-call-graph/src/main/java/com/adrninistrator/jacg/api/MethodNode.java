@@ -151,6 +151,14 @@ public class MethodNode {
         genMessage.add(message);
     }
 
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
     public String getDomainCode() {
         return domainCode;
     }

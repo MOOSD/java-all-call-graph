@@ -4,6 +4,7 @@ import com.adrninistrator.jacg.api.CallTrees;
 import com.adrninistrator.jacg.api.CalleeNode;
 import com.adrninistrator.jacg.common.enums.*;
 import com.adrninistrator.jacg.conf.RunConfig;
+import com.adrninistrator.jacg.dto.call_graph.DomainInfo;
 import com.adrninistrator.jacg.util.JACGJsonUtil;
 import com.adrninistrator.jacg.util.JSON;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.junit.Test;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,11 +43,7 @@ public class GenGraphCalleePRunnerNewTest {
                 DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
         );
 
-        // 设置所有业务域信息
-        HashSet<String> domains = new HashSet<>();
-        domains.add("hawkeye");
-        domains.add("bugkiller");
-        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, domains);
+
 
         runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
@@ -81,6 +79,12 @@ public class GenGraphCalleePRunnerNewTest {
         runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
         runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"1000");
 
+        // 设置所有业务域信息
+        List<DomainInfo> domains = new ArrayList<>();
+        domains.add(new DomainInfo("precision","鹰眼业务域"));
+        domains.add(new DomainInfo("bugkiller","灭霸业务域"));
+        runConfig.setMainConfig(ConfigKeyEnum.DOMAIN_CODES, JSON.toJSONString(domains));
+
         //config_db.properties
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
         runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/test_db?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
@@ -93,11 +97,6 @@ public class GenGraphCalleePRunnerNewTest {
         );
 
         // 设置所有业务域信息
-        HashSet<String> configSet = new HashSet<>();
-        configSet.add("precision");
-        configSet.add("bugkiller");
-        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
-
         runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
                 "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
@@ -144,9 +143,7 @@ public class GenGraphCalleePRunnerNewTest {
 
         // 设置所有业务域信息
         HashSet<String> configSet = new HashSet<>();
-        configSet.add("precision");
-        configSet.add("bugkiller");
-        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_PROJECT_DOMAINS, configSet);
+
 
         runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
                 "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
