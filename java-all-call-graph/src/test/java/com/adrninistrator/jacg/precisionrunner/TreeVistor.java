@@ -1,6 +1,7 @@
 package com.adrninistrator.jacg.precisionrunner;
 
 import com.adrninistrator.jacg.api.MethodNode;
+import org.springframework.util.CollectionUtils;
 
 public class TreeVistor {
 
@@ -15,7 +16,8 @@ public class TreeVistor {
     public static void printPrettyTree(MethodNode node, String prefix, boolean isLast){
         System.out.print(prefix);
         System.out.print(isLast ? "└── " : "├── ");
-        String strInfo = node.getDomainCode() + " : " + node.getClassName() + "#" + node.getMethodName()  +"  "+ node.getCallInfo().getCallType();
+        String strInfo = node.getDomainName() + " : " + node.getClassName() + "#" + node.getMethodName()  +"  "+
+                ((CollectionUtils.isEmpty(node.getControllerInfo())? "" :node.getControllerInfo().get(0).getShowUri()) ) + "  " + node.getMethodHash();
         System.out.println(strInfo);
 
         prefix += isLast ? "    " : "│   ";

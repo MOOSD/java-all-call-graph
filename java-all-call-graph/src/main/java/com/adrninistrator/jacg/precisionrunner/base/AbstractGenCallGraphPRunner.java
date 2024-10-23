@@ -351,7 +351,7 @@ public abstract class AbstractGenCallGraphPRunner extends AbstractGenCallGraphBa
             List<String> methodAnnotations = new ArrayList<>();
             // 添加方法注解信息
             methodAnnotationMap = getMethodAnnotationInfo(methodNode.getFullMethod(), methodNode.getMethodHash(), methodAnnotations);
-            if (methodAnnotations.size() > 0) {
+            if (!methodAnnotations.isEmpty()) {
                 methodNode.setAnnotation(methodAnnotations);
             }
         }
