@@ -26,6 +26,50 @@ public class GenGraphCalleePRunnerNewTest {
         GenGraphCalleePRunner genGraphCalleePRunner = new GenGraphCalleePRunner();
         RunConfig runConfig = new RunConfig();
         runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"hawkeye");
+        runConfig.setMainConfig(ConfigKeyEnum.DOMAIN_CODE,"bugkiller");
+        runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0");
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
+        runConfig.setMainConfig(ConfigKeyEnum.CROSS_SERVICE_BY_OPENFEIGN,"true");
+        runConfig.setMainConfig(ConfigKeyEnum.MAX_NODE_NUM,"1000");
+
+        //config_db.properties
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_DRIVER_NAME,"com.mysql.cj.jdbc.Driver");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_URL,"jdbc:mysql://192.168.8.162:3306/bytecode_dev?autoReconnect=false&useUnicode=true&characterEncoding=UTF-8&characterSetResults=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&rewriteBatchedStatements=true");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_USERNAME,"root");
+        runConfig.setMainConfig(ConfigDbKeyEnum.CDKE_DB_PASSWORD,"123456");
+
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFULE_BUSINESS_DATA_TYPE_SHOW_4EE,
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_CALL_INFO.getType(),
+                DefaultBusinessDataTypeEnum.BDTE_METHOD_ARG_GENERICS_TYPE.getType()
+        );
+
+
+
+        runConfig.setOtherConfigList(OtherConfigFileUseListEnum.OCFULE_EXTENSIONS_METHOD_ANNOTATION_FORMATTER,
+                "com.adrninistrator.jacg.annotation.formatter.SpringMvcRequestMappingFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.SpringTransactionalFormatter",
+                "com.adrninistrator.jacg.annotation.formatter.DefaultAnnotationFormatter");
+
+        // 调用链路的追踪
+        runConfig.setOtherConfigSet(OtherConfigFileUseSetEnum.OCFUSE_METHOD_CLASS_4CALLEE,
+                "io.metersphere.api.service.ApiDefinitionService:3884");
+
+        long begin = System.currentTimeMillis();
+        CallTrees<CalleeNode> tree = genGraphCalleePRunner.getLink(runConfig);
+        System.out.println("执行时间: " + (System.currentTimeMillis() - begin));
+        System.out.println(JACGJsonUtil.getJsonStr(tree));
+        List<CalleeNode> trees = tree.getTrees();
+        for (CalleeNode calleeNode : trees) {
+            System.out.println("调用树：" + calleeNode.getMethodName());
+            TreeVistor.printPrettyTree(calleeNode,"",true);
+        }
+    }
+
+    @Test
+    public void getCallTreeDomainHawkeyeIn172(){
+        GenGraphCalleePRunner genGraphCalleePRunner = new GenGraphCalleePRunner();
+        RunConfig runConfig = new RunConfig();
+        runConfig.setMainConfig(ConfigKeyEnum.CKE_APP_NAME,"hawkeye");
         runConfig.setMainConfig(ConfigKeyEnum.DOMAIN_CODE,"hawkeye");
         runConfig.setMainConfig(ConfigKeyEnum.APP_VERSION_ID,"0");
         runConfig.setMainConfig(ConfigKeyEnum.CKE_THREAD_NUM,"16");
