@@ -95,7 +95,7 @@ public abstract class BaseExtractor {
         }
 
         // 对需要使用的基础配置进行初始化
-        dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);
+        dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName, null);
         dbOperator = dbOperWrapper.getDbOperator();
     }
 

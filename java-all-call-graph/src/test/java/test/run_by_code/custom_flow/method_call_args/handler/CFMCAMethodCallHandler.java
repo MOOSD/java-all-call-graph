@@ -52,7 +52,7 @@ public class CFMCAMethodCallHandler extends BaseHandler {
                 continue;
             }
             // 查询方法调用中被调用对象与参数使用的信息
-            ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(callerInfo.getCallId(),null);
+            ObjArgsInfoInMethodCall objArgsInfoInMethodCall = methodCallInfoHandler.queryObjArgsInfoInMethodCall(callerInfo.getCallId());
             // 获取第1个参数对应的参数信息
             List<MethodCallInfo> methodCallInfoList = objArgsInfoInMethodCall.getArgMethodCallInfo(1);
             if (JavaCGUtil.isCollectionEmpty(methodCallInfoList)) {

@@ -16,13 +16,7 @@ import test.run_by_code.base.TestRunByCodeBase;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.DoublePredicate;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.function.ToDoubleFunction;
+import java.util.function.*;
 
 /**
  * @author adrninistrator
@@ -33,7 +27,7 @@ public class TestRunAllClasses extends TestRunByCodeBase {
 
     @Test
     public void testCaller() {
-        DbOperWrapper dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, this.getClass().getSimpleName());
+        DbOperWrapper dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, this.getClass().getSimpleName(),null);
         DbOperator dbOperator = dbOperWrapper.getDbOperator();
         try {
             String sql = "select distinct(" + DC.MC_CALLER_SIMPLE_CLASS_NAME + ")" +
@@ -52,7 +46,7 @@ public class TestRunAllClasses extends TestRunByCodeBase {
 
     @Test
     public void testCallee() {
-        DbOperWrapper dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, this.getClass().getSimpleName());
+        DbOperWrapper dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, this.getClass().getSimpleName(), null);
         DbOperator dbOperator = dbOperWrapper.getDbOperator();
         try {
             String sql = "select distinct(" + DC.MC_CALLEE_SIMPLE_CLASS_NAME + ")" +

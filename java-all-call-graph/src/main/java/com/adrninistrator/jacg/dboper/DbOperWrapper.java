@@ -15,6 +15,7 @@ import com.adrninistrator.javacg.common.JavaCGConstants;
 import com.adrninistrator.javacg.common.enums.JavaCGCallTypeEnum;
 import com.adrninistrator.javacg.common.enums.JavaCGYesNoEnum;
 import com.adrninistrator.javacg.exceptions.JavaCGRuntimeException;
+import com.alibaba.ttl.TransmittableThreadLocal;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,14 +42,25 @@ public class DbOperWrapper {
     private Set<String> duplicateSimpleClassNameSet = null;
 
     private final DbOperator dbOperator;
-
-    private final String appName;
+//  取消Spring类型的AppName
+//    private final String appName;
 
     private final String objSeq;
 
-    public DbOperWrapper(DbOperator dbOperator) {
+    protected TransmittableThreadLocal<String> appName;
+
+    public DbOperWrapper(DbOperator dbOperator, TransmittableThreadLocal<String> appName) {
         this.dbOperator = dbOperator;
-        this.appName = dbOperator.getAppName();
+        if(appName!= null){
+            this.appName = appName;
+        }else {
+            this.appName = new TransmittableThreadLocal<String>(){
+                @Override
+                protected String initialValue() {
+                    return dbOperator.getAppName();
+                }
+            };
+        }
 
         objSeq = String.valueOf(ATOMIC_INTEGER.incrementAndGet());
         logger.info("objSeq [{}]", objSeq);
@@ -62,14 +74,16 @@ public class DbOperWrapper {
      *
      * @param configureWrapper
      * @param currentSimpleName 当前对应的简单类名
+     * @param appName
      * @return
      */
-    public static DbOperWrapper genInstance(ConfigureWrapper configureWrapper, String currentSimpleName) {
+    public static DbOperWrapper genInstance(ConfigureWrapper configureWrapper, String currentSimpleName,
+                                            TransmittableThreadLocal<String> appName) {
         DbOperator dbOperator = DbOperator.genInstance(configureWrapper, currentSimpleName);
         if (dbOperator == null) {
             throw new JavaCGRuntimeException("数据库初始化失败");
         }
-        return new DbOperWrapper(dbOperator);
+        return new DbOperWrapper(dbOperator,appName);
     }
 
     private String genSqlKey(String sqlKey, int num) {
@@ -80,9 +94,13 @@ public class DbOperWrapper {
     }
 
     private String getCachedSql(String sqlKey, int num) {
-        // 取消sql的缓存机制
+        String sql = sqlCacheMap.get(genSqlKey(sqlKey, num));
+        if (StringUtils.isNotBlank(sql)){
+            // 做一个表名替换
+            return JACGSqlUtil.replaceAppNameInSql(sql, appName.get());
+        }
         return null;
-//        return sqlCacheMap.get(genSqlKey(sqlKey, num));
+
     }
 
     /**
@@ -112,14 +130,14 @@ public class DbOperWrapper {
 
     private String cacheSql(String sqlKey, String sql, String sqlKey4Print, int num) {
         // 根据sql语句的key与参数数量，生成最终的key
-//        String finalSqlKey = genSqlKey(sqlKey, num);
+        String finalSqlKey = genSqlKey(sqlKey, num);
 
         // 替换sql语句中的appName
-        //        if (sqlCacheMap.putIfAbsent(finalSqlKey, finalSql) == null) {
-//            // 假如有指定用于在日志中打印的key，则在日志中打印出来
-//            logger.info("[{}] cache sql: [{} {}] [{}]", objSeq, finalSqlKey, sqlKey4Print, finalSql);
-//        }
-        return JACGSqlUtil.replaceAppNameInSql(sql, appName);
+        if (sqlCacheMap.putIfAbsent(finalSqlKey, sql) == null) {
+            // 假如有指定用于在日志中打印的key，则在日志中打印出来
+            logger.info("[{}] cache sql: [{} {}] [{}]", objSeq, finalSqlKey, sqlKey4Print, sql);
+        }
+        return JACGSqlUtil.replaceAppNameInSql(sql, appName.get());
     }
 
     /**
@@ -155,7 +173,7 @@ public class DbOperWrapper {
      */
     public String formatSql(String sql) {
         // 替换sql语句中的appName
-        String finalSql = JACGSqlUtil.replaceAppNameInSql(sql, appName);
+        String finalSql = JACGSqlUtil.replaceAppNameInSql(sql, getAppName());
         logger.info("[{}] format sql: [{}]", objSeq, finalSql);
         return finalSql;
     }
@@ -645,7 +663,7 @@ public class DbOperWrapper {
     }
 
     public String getAppName() {
-        return appName;
+        return appName.get();
     }
 
     public DbOperator getDbOperator() {

@@ -73,7 +73,7 @@ public abstract class AbstractPRunner extends AbstractRunner {
                 };
 
                 // 完成需要使用的基础配置的初始化
-                dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);
+                dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName, appName);
                 dbOperator = dbOperWrapper.getDbOperator();
                 jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
 
@@ -108,10 +108,10 @@ public abstract class AbstractPRunner extends AbstractRunner {
      */
     public void tryChangeAppDomain(String doMainCode){
         if (getDomainCode().equals(doMainCode)) {
-            logger.debug("处于相同业务域下无需切换");
+            logger.debug("处于相同业务域下无需切换:{}",doMainCode);
             return;
         }
-        logger.info("切换业务域:[{}], [{}]", getDomainCode() ,doMainCode);
+        logger.info("切换业务域:source:[{}], target:[{}]", getDomainCode() ,doMainCode);
         DomainInfo domainInfo = domainInfoMap.get(doMainCode);
         this.domain.set(domainInfo);
         this.appName.set(getAppNameByDomain(doMainCode));

@@ -117,7 +117,7 @@ public abstract class AbstractRunner {
                 // 需要操作数据库时执行的操作
                 appName = configureWrapper.getMainConfig(ConfigKeyEnum.CKE_APP_NAME);
                 // 完成需要使用的基础配置的初始化
-                dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName);
+                dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, currentSimpleClassName, null);
                 dbOperator = dbOperWrapper.getDbOperator();
                 jacgExtendsImplHandler = new JACGExtendsImplHandler(dbOperWrapper);
             }

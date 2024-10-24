@@ -36,7 +36,7 @@ public abstract class BaseHandler implements Closeable {
         }
 
         // 完成需要使用的基础配置的初始化
-        dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, this.getClass().getSimpleName());
+        dbOperWrapper = DbOperWrapper.genInstance(configureWrapper, this.getClass().getSimpleName(), null);
         dbOperator = dbOperWrapper.getDbOperator();
 
         logger.warn("调用该构造函数时，结束前[需要]关闭数据库操作对象");

@@ -947,7 +947,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 if (sql == null) {
                     // 确定查询被调用关系时所需字段
                     sql = "select " + chooseCallerColumns() +
-                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ? " +
                             " and " + DC.MC_CALL_TYPE + " != ? " +
                             " order by " + DC.MC_CALLER_METHOD_HASH +
@@ -964,6 +964,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 while (iterator.hasNext()){
                     String domain = iterator.next();
                     sql += " select '" + domain + "' as domain_code ," + chooseCallerColumns() +
+
                             " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppNameByDomain(domain)) +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ? ";
                     if (iterator.hasNext()){
@@ -983,7 +984,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 if (sql == null) {
                     // 确定查询被调用关系时所需字段
                     sql = "select " + chooseCallerColumns() +
-                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ? " +
                             " order by " + DC.MC_CALLER_METHOD_HASH +
                             " limit 1";
@@ -1003,7 +1004,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 if (sql == null) {
                     // 确定查询被调用关系时所需字段
                     sql = "select " + chooseCallerColumns() +
-                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
                             " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
                             " and " + DC.MC_CALL_TYPE + " != ? " +
@@ -1039,7 +1040,7 @@ public class GenGraphCalleePRunner extends AbstractGenCallGraphPRunner {
                 if (sql == null) {
                     // 确定查询被调用关系时所需字段
                     sql = "select " + chooseCallerColumns() +
-                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableNameByAppName(getAppName()) +
+                            " from " + DbTableInfoEnum.DTIE_METHOD_CALL.getTableName() +
                             " where " + DC.MC_CALLEE_METHOD_HASH + " = ?" +
                             " and " + DC.MC_CALLER_METHOD_HASH + " > ?" +
                             " order by " + DC.MC_CALLER_METHOD_HASH +
